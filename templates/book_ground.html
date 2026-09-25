@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Book {{ ground['name'] }} | Futsal Booking
+    </title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f7fb;
+            color: #222;
+            min-height: 100vh;
+        }
+
+        /* ==============================
+           NAVBAR
+        ============================== */
+
+        nav {
+            background: #111827;
+            color: white;
+            padding: 18px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: white;
+            text-decoration: none;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .nav-links a:hover {
+            color: #a78bfa;
+        }
+
+        /* ==============================
+           CONTAINER
+        ============================== */
+
+        .container {
+            width: 90%;
+            max-width: 950px;
+            margin: 40px auto;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .page-title p {
+            color: #6b7280;
+        }
+
+        /* ==============================
+           FLASH
+        ============================== */
+
+        .flash-container {
+            margin-bottom: 25px;
+        }
+
+        .flash-message {
+            padding: 15px 18px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .flash-message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .flash-message.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        /* ==============================
+           MAIN CARD
+        ============================== */
+
+        .booking-card {
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        }
+
+        /* ==============================
+           GROUND INFO
+        ============================== */
+
+        .ground-info {
+            background: #f5f3ff;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 28px;
+        }
+
+        .ground-info h2 {
+            color: #4c1d95;
+            margin-bottom: 10px;
+        }
+
+        .ground-info p {
+            color: #555;
+            margin: 6px 0;
+        }
+
+        .price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #6d28d9 !important;
+            margin-top: 12px !important;
+        }
+
+        /* ==============================
+           FORM
+        ============================== */
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 9px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+        }
+
+        /* ==============================
+           SLOT SECTION
+        ============================== */
+
+        .slots-title {
+            font-size: 19px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        #slotMessage {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .slots {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .time-slot {
+            padding: 13px 8px;
+            border: 1px solid #c4b5fd;
+            background: #faf5ff;
+            color: #5b21b6;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .time-slot:hover {
+            background: #ede9fe;
+            transform: translateY(-1px);
+        }
+
+        .time-slot.selected {
+            background: #7c3aed;
+            color: white;
+            border-color: #7c3aed;
+        }
+
+        .time-slot.unavailable {
+            background: #f3f4f6;
+            color: #9ca3af;
+            border-color: #e5e7eb;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        .time-slot.unavailable:hover {
+            background: #f3f4f6;
+            transform: none;
+        }
+
+        /* ==============================
+           LEGEND
+        ============================== */
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-bottom: 25px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .legend-box {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            border: 1px solid;
+        }
+
+        .legend-available {
+            background: #faf5ff;
+            border-color: #c4b5fd;
+        }
+
+        .legend-selected {
+            background: #7c3aed;
+            border-color: #7c3aed;
+        }
+
+        .legend-unavailable {
+            background: #f3f4f6;
+            border-color: #e5e7eb;
+        }
+
+        /* ==============================
+           BOOKING SUMMARY
+        ============================== */
+
+        .summary {
+            display: none;
+            margin-top: 25px;
+            margin-bottom: 25px;
+            border: 1px solid #ddd6fe;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .summary.show {
+            display: block;
+        }
+
+        .summary-header {
+            background: #7c3aed;
+            color: white;
+            padding: 17px 20px;
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+        .summary-body {
+            padding: 20px;
+            background: #fafafa;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 11px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            color: #6b7280;
+        }
+
+        .summary-value {
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .summary-total {
+            font-size: 21px;
+            color: #6d28d9;
+        }
+
+        /* ==============================
+           CONFIRMATION
+        ============================== */
+
+        .confirmation {
+            display: none;
+            background: #f5f3ff;
+            border: 1px solid #ddd6fe;
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .confirmation.show {
+            display: block;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        .checkbox-row input {
+            margin-top: 4px;
+            width: 17px;
+            height: 17px;
+            cursor: pointer;
+        }
+
+        /* ==============================
+           BUTTON
+        ============================== */
+
+        .book-button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #7c3aed;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .book-button:hover:not(:disabled) {
+            background: #6d28d9;
+        }
+
+        .book-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* ==============================
+           BACK
+        ============================== */
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #6d28d9;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* ==============================
+           RESPONSIVE
+        ============================== */
+
+        @media (max-width: 700px) {
+
+            nav {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+            }
+
+            .booking-card {
+                padding: 20px;
+            }
+
+            .page-title h1 {
+                font-size: 26px;
+            }
+
+            .slots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .summary-row {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .summary-value {
+                text-align: left;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<!-- ==========================================
+     NAVBAR
+========================================== -->
+
+<nav>
+
+    <a
+        href="{{ url_for('index') }}"
+        class="logo"
+    >
+        Futsal Booking
+    </a>
+
+    <div class="nav-links">
+
+        <a href="{{ url_for('index') }}">
+            Home
+        </a>
+
+        <a href="{{ url_for('grounds') }}">
+            Grounds
+        </a>
+
+        <a href="{{ url_for('dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('my_bookings') }}">
+            My Bookings
+        </a>
+
+    </div>
+
+</nav>
+
+
+<!-- ==========================================
+     MAIN
+========================================== -->
+
+<div class="container">
+
+    <div class="page-title">
+
+        <h1>
+            Book Your Ground
+        </h1>
+
+        <p>
+            Choose your date, duration and starting time.
+        </p>
+
+    </div>
+
+
+    <!-- FLASH MESSAGES -->
+
+    {% with messages = get_flashed_messages(
+        with_categories=true
+    ) %}
+
+        {% if messages %}
+
+            <div class="flash-container">
+
+                {% for category, message in messages %}
+
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- BOOKING CARD -->
+
+    <div class="booking-card">
+
+
+        <!-- GROUND INFORMATION -->
+
+        <div class="ground-info">
+
+            <h2>
+                {{ ground['name'] }}
+            </h2>
+
+            <p>
+                📍 {{ ground['location'] }}
+            </p>
+
+            <p>
+                🕐
+                {{ ground['opening_time'] }}
+                -
+                {{ ground['closing_time'] }}
+            </p>
+
+            <p class="price">
+                Rs. {{ ground['price'] }} / hour
+            </p>
+
+        </div>
+
+
+        <!-- BOOKING FORM -->
+
+        <form
+            method="POST"
+            action="{{ url_for(
+                'book_ground',
+                ground_id=ground['id']
+            ) }}"
+            id="bookingForm"
+        >
+
+
+            <!-- DATE -->
+
+            <div class="form-group">
+
+                <label for="booking_date">
+                    Select Date
+                </label>
+
+                <input
+                    type="date"
+                    id="booking_date"
+                    name="booking_date"
+                    required
+                >
+
+            </div>
+
+
+            <!-- DURATION -->
+
+            <div class="form-group">
+
+                <label for="duration">
+                    Select Duration
+                </label>
+
+                <select
+                    id="duration"
+                    name="duration"
+                    required
+                >
+
+                    <option value="">
+                        Select duration
+                    </option>
+
+                    <option value="1">
+                        1 Hour
+                    </option>
+
+                    <option value="1.5">
+                        1.5 Hours
+                    </option>
+
+                    <option value="2">
+                        2 Hours
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- TIME -->
+
+            <div class="slots-title">
+                Select Starting Time
+            </div>
+
+            <div id="slotMessage">
+                Please select a date first.
+            </div>
+
+            <div
+                class="slots"
+                id="timeSlots"
+            ></div>
+
+
+            <!-- LEGEND -->
+
+            <div class="legend">
+
+                <div class="legend-item">
+
+                    <span
+                        class="legend-box legend-available"
+                    ></span>
+
+                    Available
+
+                </div>
+
+                <div class="legend-item">
+
+                    <span
+                        class="legend-box legend-selected"
+                    ></span>
+
+                    Selected
+
+                </div>
+
+                <div class="legend-item">
+
+                    <span
+                        class="legend-box legend-unavailable"
+                    ></span>
+
+                    Unavailable
+
+                </div>
+
+            </div>
+
+
+            <!-- HIDDEN TIME -->
+
+            <input
+                type="hidden"
+                name="booking_time"
+                id="booking_time"
+            >
+
+
+            <!-- ======================================
+                 BOOKING SUMMARY
+            ======================================= -->
+
+            <div
+                class="summary"
+                id="bookingSummary"
+            >
+
+                <div class="summary-header">
+                    Booking Summary
+                </div>
+
+                <div class="summary-body">
+
+                    <div class="summary-row">
+
+                        <span class="summary-label">
+                            Ground
+                        </span>
+
+                        <span
+                            class="summary-value"
+                            id="summaryGround"
+                        >
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span class="summary-label">
+                            Date
+                        </span>
+
+                        <span
+                            class="summary-value"
+                            id="summaryDate"
+                        >
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span class="summary-label">
+                            Starting Time
+                        </span>
+
+                        <span
+                            class="summary-value"
+                            id="summaryStart"
+                        >
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span class="summary-label">
+                            Ending Time
+                        </span>
+
+                        <span
+                            class="summary-value"
+                            id="summaryEnd"
+                        >
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span class="summary-label">
+                            Duration
+                        </span>
+
+                        <span
+                            class="summary-value"
+                            id="summaryDuration"
+                        >
+                            -
+                        </span>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span class="summary-label">
+                            Price / Hour
+                        </span>
+
+                        <span
+                            class="summary-value"
+                        >
+                            Rs. {{ ground['price'] }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span class="summary-label">
+                            Total Price
+                        </span>
+
+                        <span
+                            class="summary-value summary-total"
+                            id="summaryTotal"
+                        >
+                            Rs. 0
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ======================================
+                 CONFIRMATION CHECKBOX
+            ======================================= -->
+
+            <div
+                class="confirmation"
+                id="confirmationBox"
+            >
+
+                <label class="checkbox-row">
+
+                    <input
+                        type="checkbox"
+                        id="confirmBooking"
+                    >
+
+                    <span>
+                        I have checked the booking details
+                        and confirm that the selected date,
+                        time and duration are correct.
+                    </span>
+
+                </label>
+
+            </div>
+
+
+            <!-- ======================================
+                 BOOK BUTTON
+            ======================================= -->
+
+            <button
+                type="submit"
+                class="book-button"
+                id="bookButton"
+                disabled
+            >
+                Select Date & Time
+            </button>
+
+
+        </form>
+
+
+        <a
+            href="{{ url_for(
+                'ground_details',
+                ground_id=ground['id']
+            ) }}"
+            class="back-link"
+        >
+            ← Back to Ground Details
+        </a>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // ==============================================
+    // ELEMENTS
+    // ==============================================
+
+    const dateInput =
+        document.getElementById(
+            "booking_date"
+        );
+
+    const durationInput =
+        document.getElementById(
+            "duration"
+        );
+
+    const timeSlots =
+        document.getElementById(
+            "timeSlots"
+        );
+
+    const slotMessage =
+        document.getElementById(
+            "slotMessage"
+        );
+
+    const bookingTimeInput =
+        document.getElementById(
+            "booking_time"
+        );
+
+    const bookingSummary =
+        document.getElementById(
+            "bookingSummary"
+        );
+
+    const confirmationBox =
+        document.getElementById(
+            "confirmationBox"
+        );
+
+    const confirmBooking =
+        document.getElementById(
+            "confirmBooking"
+        );
+
+    const bookButton =
+        document.getElementById(
+            "bookButton"
+        );
+
+
+    // ==============================================
+    // SUMMARY ELEMENTS
+    // ==============================================
+
+    const summaryGround =
+        document.getElementById(
+            "summaryGround"
+        );
+
+    const summaryDate =
+        document.getElementById(
+            "summaryDate"
+        );
+
+    const summaryStart =
+        document.getElementById(
+            "summaryStart"
+        );
+
+    const summaryEnd =
+        document.getElementById(
+            "summaryEnd"
+        );
+
+    const summaryDuration =
+        document.getElementById(
+            "summaryDuration"
+        );
+
+    const summaryTotal =
+        document.getElementById(
+            "summaryTotal"
+        );
+
+
+    // ==============================================
+    // PRICE
+    // ==============================================
+
+    const groundPrice =
+        {{ ground['price'] }};
+
+
+    // ==============================================
+    // GROUND NAME
+    // ==============================================
+
+    const groundName =
+        {{ ground['name']|tojson }};
+
+
+    // ==============================================
+    // TODAY
+    // ==============================================
+
+    const today =
+        new Date();
+
+    const year =
+        today.getFullYear();
+
+    const month =
+        String(
+            today.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+    const day =
+        String(
+            today.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+    const todayString =
+        `${year}-${month}-${day}`;
+
+    dateInput.min =
+        todayString;
+
+
+    // ==============================================
+    // TIME TO MINUTES
+    // ==============================================
+
+    function timeToMinutes(time) {
+
+        const parts =
+            time.split(":");
+
+        return (
+            parseInt(parts[0]) * 60
+            +
+            parseInt(parts[1])
+        );
+    }
+
+
+    // ==============================================
+    // MINUTES TO TIME
+    // ==============================================
+
+    function minutesToTime(totalMinutes) {
+
+        let hours =
+            Math.floor(
+                totalMinutes / 60
+            );
+
+        let minutes =
+            totalMinutes % 60;
+
+        let period =
+            hours >= 12
+                ? "PM"
+                : "AM";
+
+        let displayHours =
+            hours % 12;
+
+        if (displayHours === 0) {
+            displayHours = 12;
+        }
+
+        return (
+            String(displayHours).padStart(2, "0")
+            +
+            ":"
+            +
+            String(minutes).padStart(2, "0")
+            +
+            " "
+            +
+            period
+        );
+    }
+
+
+    // ==============================================
+    // CALCULATE END TIME
+    // ==============================================
+
+    function calculateEndTime(
+        startTime,
+        duration
+    ) {
+
+        if (!startTime || !duration) {
+            return "-";
+        }
+
+        const startMinutes =
+            timeToMinutes(startTime);
+
+        const durationMinutes =
+            parseFloat(duration) * 60;
+
+        const endMinutes =
+            startMinutes + durationMinutes;
+
+        return minutesToTime(
+            endMinutes
+        );
+    }
+
+
+    // ==============================================
+    // FORMAT DATE
+    // ==============================================
+
+    function formatDate(dateValue) {
+
+        if (!dateValue) {
+            return "-";
+        }
+
+        const date =
+            new Date(
+                dateValue + "T00:00:00"
+            );
+
+        return date.toLocaleDateString(
+            "en-US",
+            {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric"
+            }
+        );
+    }
+
+
+    // ==============================================
+    // UPDATE SUMMARY
+    // ==============================================
+
+    function updateSummary() {
+
+        const selectedDate =
+            dateInput.value;
+
+        const duration =
+            durationInput.value;
+
+        const startTime =
+            bookingTimeInput.value;
+
+
+        if (
+            !selectedDate ||
+            !duration ||
+            !startTime
+        ) {
+
+            bookingSummary.classList.remove(
+                "show"
+            );
+
+            confirmationBox.classList.remove(
+                "show"
+            );
+
+            confirmBooking.checked =
+                false;
+
+            bookButton.disabled =
+                true;
+
+            bookButton.textContent =
+                "Select Date & Time";
+
+            return;
+        }
+
+
+        const endTime =
+            calculateEndTime(
+                startTime,
+                duration
+            );
+
+
+        const total =
+            groundPrice *
+            parseFloat(duration);
+
+
+        summaryGround.textContent =
+            groundName;
+
+        summaryDate.textContent =
+            formatDate(
+                selectedDate
+            );
+
+        summaryStart.textContent =
+            minutesToTime(
+                timeToMinutes(startTime)
+            );
+
+        summaryEnd.textContent =
+            endTime;
+
+        summaryDuration.textContent =
+            duration + " Hours";
+
+        summaryTotal.textContent =
+            "Rs. " +
+            total.toLocaleString();
+
+
+        bookingSummary.classList.add(
+            "show"
+        );
+
+        confirmationBox.classList.add(
+            "show"
+        );
+
+
+        updateButton();
+
+    }
+
+
+    // ==============================================
+    // UPDATE BUTTON
+    // ==============================================
+
+    function updateButton() {
+
+        if (
+            dateInput.value &&
+            durationInput.value &&
+            bookingTimeInput.value &&
+            confirmBooking.checked
+        ) {
+
+            bookButton.disabled =
+                false;
+
+            bookButton.textContent =
+                "Confirm Booking";
+
+        } else {
+
+            bookButton.disabled =
+                true;
+
+            if (
+                bookingTimeInput.value
+            ) {
+
+                bookButton.textContent =
+                    "Confirm Booking Details";
+
+            } else {
+
+                bookButton.textContent =
+                    "Select Date & Time";
+
+            }
+
+        }
+
+    }
+
+
+    // ==============================================
+    // CLEAR SELECTION
+    // ==============================================
+
+    function clearSelection() {
+
+        bookingTimeInput.value =
+            "";
+
+        confirmBooking.checked =
+            false;
+
+        bookingSummary.classList.remove(
+            "show"
+        );
+
+        confirmationBox.classList.remove(
+            "show"
+        );
+
+        bookButton.disabled =
+            true;
+
+        bookButton.textContent =
+            "Select Date & Time";
+
+
+        document
+            .querySelectorAll(
+                ".time-slot.selected"
+            )
+            .forEach(
+                function(slot) {
+
+                    slot.classList.remove(
+                        "selected"
+                    );
+
+                }
+            );
+
+    }
+
+
+    // ==============================================
+    // CHECK SLOT
+    // ==============================================
+
+    function slotAvailableForDuration(
+        slot,
+        duration
+    ) {
+
+        if (!duration) {
+            return false;
+        }
+
+        if (
+            duration === 1 &&
+            slot.available_1
+        ) {
+            return true;
+        }
+
+        if (
+            duration === 1.5 &&
+            slot.available_1_5
+        ) {
+            return true;
+        }
+
+        if (
+            duration === 2 &&
+            slot.available_2
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    // ==============================================
+    // LOAD SLOTS
+    // ==============================================
+
+    async function loadAvailableSlots() {
+
+        const selectedDate =
+            dateInput.value;
+
+        timeSlots.innerHTML =
+            "";
+
+        clearSelection();
+
+
+        if (!selectedDate) {
+
+            slotMessage.textContent =
+                "Please select a date first.";
+
+            return;
+        }
+
+
+        const duration =
+            parseFloat(
+                durationInput.value
+            );
+
+
+        if (!duration) {
+
+            slotMessage.textContent =
+                "Please select a duration first.";
+
+            return;
+        }
+
+
+        slotMessage.textContent =
+            "Loading available time slots...";
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `/available-slots/{{ ground['id'] }}?date=${selectedDate}`
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                slotMessage.textContent =
+                    data.error ||
+                    "Unable to load time slots.";
+
+                return;
+            }
+
+
+            const slots =
+                data.slots || [];
+
+
+            if (slots.length === 0) {
+
+                slotMessage.textContent =
+                    "No time slots are available.";
+
+                return;
+            }
+
+
+            let availableCount =
+                0;
+
+
+            slots.forEach(
+                function(slotData) {
+
+                    const slot =
+                        document.createElement(
+                            "div"
+                        );
+
+                    slot.className =
+                        "time-slot";
+
+                    slot.textContent =
+                        slotData.time;
+
+
+                    const canBook =
+                        slotAvailableForDuration(
+                            slotData,
+                            duration
+                        );
+
+
+                    if (!canBook) {
+
+                        slot.classList.add(
+                            "unavailable"
+                        );
+
+                        slot.textContent =
+                            slotData.time
+                            +
+                            " - Unavailable";
+
+                    } else {
+
+                        availableCount++;
+
+
+                        slot.addEventListener(
+                            "click",
+                            function() {
+
+                                document
+                                    .querySelectorAll(
+                                        ".time-slot.selected"
+                                    )
+                                    .forEach(
+                                        function(item) {
+
+                                            item.classList.remove(
+                                                "selected"
+                                            );
+
+                                        }
+                                    );
+
+
+                                slot.classList.add(
+                                    "selected"
+                                );
+
+
+                                bookingTimeInput.value =
+                                    slotData.time;
+
+
+                                updateSummary();
+
+
+                                slotMessage.textContent =
+                                    "Time selected. Please review your booking summary below.";
+
+                            }
+                        );
+
+                    }
+
+
+                    timeSlots.appendChild(
+                        slot
+                    );
+
+                }
+            );
+
+
+            if (
+                availableCount === 0
+            ) {
+
+                slotMessage.textContent =
+                    "No starting times are available for the selected duration.";
+
+                return;
+            }
+
+
+            slotMessage.textContent =
+                "Select an available starting time.";
+
+        }
+        catch (error) {
+
+            console.error(
+                "SLOT ERROR:",
+                error
+            );
+
+            slotMessage.textContent =
+                "Unable to load available time slots.";
+
+        }
+
+    }
+
+
+    // ==============================================
+    // DATE CHANGE
+    // ==============================================
+
+    dateInput.addEventListener(
+        "change",
+        function() {
+
+            loadAvailableSlots();
+
+        }
+    );
+
+
+    // ==============================================
+    // DURATION CHANGE
+    // ==============================================
+
+    durationInput.addEventListener(
+        "change",
+        function() {
+
+            loadAvailableSlots();
+
+        }
+    );
+
+
+    // ==============================================
+    // CHECKBOX CHANGE
+    // ==============================================
+
+    confirmBooking.addEventListener(
+        "change",
+        function() {
+
+            updateButton();
+
+        }
+    );
+
+
+    // ==============================================
+    // FORM SUBMIT
+    // ==============================================
+
+    document
+        .getElementById(
+            "bookingForm"
+        )
+        .addEventListener(
+            "submit",
+            function(event) {
+
+                if (
+                    !dateInput.value
+                ) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Please select a booking date."
+                    );
+
+                    return;
+                }
+
+
+                if (
+                    !durationInput.value
+                ) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Please select booking duration."
+                    );
+
+                    return;
+                }
+
+
+                if (
+                    !bookingTimeInput.value
+                ) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Please select an available starting time."
+                    );
+
+                    return;
+                }
+
+
+                if (
+                    !confirmBooking.checked
+                ) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Please confirm that your booking details are correct."
+                    );
+
+                    return;
+                }
+
+            }
+        );
+
+</script>
+
+</body>
+
+</html>

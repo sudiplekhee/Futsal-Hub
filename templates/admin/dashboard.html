@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard - Futsal</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        .navbar {
+            background: #111827;
+            color: white;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 9px 13px;
+            border-radius: 7px;
+            background: #1f2937;
+            font-size: 14px;
+        }
+
+        .nav-links a:hover {
+            background: #374151;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            color: #111827;
+        }
+
+        .header p {
+            margin-top: 7px;
+            color: #6b7280;
+        }
+
+        .flash {
+            padding: 13px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .flash.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .flash.danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .flash.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+        }
+
+        .stat-icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .stat-title {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 7px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #111827;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .section-header h2 {
+            font-size: 21px;
+        }
+
+        .view-btn {
+            text-decoration: none;
+            background: #2563eb;
+            color: white;
+            padding: 9px 14px;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+        .view-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 13px 10px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #f9fafb;
+            color: #374151;
+            font-size: 13px;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .confirmed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .paid {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .action-btn {
+            text-decoration: none;
+            background: #111827;
+            color: white;
+            padding: 7px 11px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .action-btn:hover {
+            background: #374151;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .quick-action {
+            text-decoration: none;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #111827;
+            transition: 0.2s;
+        }
+
+        .quick-action:hover {
+            background: #f3f4f6;
+            transform: translateY(-2px);
+        }
+
+        .quick-action .icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .quick-action strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .quick-action span {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #6b7280;
+        }
+
+        @media (max-width: 900px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0 12px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        ⚽ Futsal Admin
+    </div>
+
+    <div class="nav-links">
+
+        <a href="{{ url_for('admin_dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('admin_users') }}">
+            Users
+        </a>
+
+        <a href="{{ url_for('admin_grounds') }}">
+            Grounds
+        </a>
+
+        <a href="{{ url_for('admin_bookings') }}">
+            Bookings
+        </a>
+
+        <a href="{{ url_for('admin_calendar') }}">
+            Calendar
+        </a>
+
+        <a href="{{ url_for('admin_logout') }}">
+            Logout
+        </a>
+
+    </div>
+
+</nav>
+
+
+<div class="container">
+
+    <div class="header">
+
+        <h1>
+            Admin Dashboard
+        </h1>
+
+        <p>
+            Manage your futsal booking system from one place.
+        </p>
+
+    </div>
+
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            {% for category, message in messages %}
+
+                <div class="flash {{ category }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- STATISTICS -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                👥
+            </div>
+
+            <div class="stat-title">
+                Total Users
+            </div>
+
+            <div class="stat-value">
+                {{ total_users }}
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ⚽
+            </div>
+
+            <div class="stat-title">
+                Total Grounds
+            </div>
+
+            <div class="stat-value">
+                {{ total_grounds }}
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📅
+            </div>
+
+            <div class="stat-title">
+                Total Bookings
+            </div>
+
+            <div class="stat-value">
+                {{ total_bookings }}
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                💰
+            </div>
+
+            <div class="stat-title">
+                Revenue
+            </div>
+
+            <div class="stat-value">
+                Rs. {{ "%.2f"|format(total_revenue|float) }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SECONDARY STATISTICS -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ✅
+            </div>
+
+            <div class="stat-title">
+                Confirmed Bookings
+            </div>
+
+            <div class="stat-value">
+                {{ confirmed_bookings }}
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ❌
+            </div>
+
+            <div class="stat-title">
+                Cancelled Bookings
+            </div>
+
+            <div class="stat-value">
+                {{ cancelled_bookings }}
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📆
+            </div>
+
+            <div class="stat-title">
+                Today's Bookings
+            </div>
+
+            <div class="stat-value">
+                {{ today_bookings }}
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                🟢
+            </div>
+
+            <div class="stat-title">
+                Today's Confirmed
+            </div>
+
+            <div class="stat-value">
+                {{ today_confirmed }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- QUICK ACTIONS -->
+
+    <div class="section">
+
+        <div class="section-header">
+
+            <h2>
+                Quick Actions
+            </h2>
+
+        </div>
+
+
+        <div class="quick-actions">
+
+            <a
+                href="{{ url_for('admin_grounds') }}"
+                class="quick-action"
+            >
+
+                <div class="icon">
+                    ⚽
+                </div>
+
+                <strong>
+                    Manage Grounds
+                </strong>
+
+                <span>
+                    Add or edit futsal grounds
+                </span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('admin_users') }}"
+                class="quick-action"
+            >
+
+                <div class="icon">
+                    👥
+                </div>
+
+                <strong>
+                    Manage Users
+                </strong>
+
+                <span>
+                    View registered users
+                </span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('admin_bookings') }}"
+                class="quick-action"
+            >
+
+                <div class="icon">
+                    📅
+                </div>
+
+                <strong>
+                    Manage Bookings
+                </strong>
+
+                <span>
+                    View and manage bookings
+                </span>
+
+            </a>
+
+
+            <a
+                href="{{ url_for('admin_calendar') }}"
+                class="quick-action"
+            >
+
+                <div class="icon">
+                    🗓️
+                </div>
+
+                <strong>
+                    Booking Calendar
+                </strong>
+
+                <span>
+                    View bookings by date
+                </span>
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- RECENT BOOKINGS -->
+
+    <div class="section">
+
+        <div class="section-header">
+
+            <h2>
+                Recent Bookings
+            </h2>
+
+            <a
+                href="{{ url_for('admin_bookings') }}"
+                class="view-btn"
+            >
+                View All
+            </a>
+
+        </div>
+
+
+        {% if recent_bookings %}
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Customer
+                            </th>
+
+                            <th>
+                                Ground
+                            </th>
+
+                            <th>
+                                Date
+                            </th>
+
+                            <th>
+                                Time
+                            </th>
+
+                            <th>
+                                Duration
+                            </th>
+
+                            <th>
+                                Booking
+                            </th>
+
+                            <th>
+                                Payment
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for booking in recent_bookings %}
+
+                            <tr>
+
+                                <td>
+                                    {{ booking['user_name'] }}
+                                </td>
+
+                                <td>
+                                    {{ booking['ground_name'] }}
+                                </td>
+
+                                <td>
+                                    {{ booking['booking_date'] }}
+                                </td>
+
+                                <td>
+                                    {{ booking['booking_time'] }}
+                                </td>
+
+                                <td>
+                                    {{ booking['duration'] }} hr
+                                </td>
+
+
+                                <td>
+
+                                    {% if booking['status'] == 'confirmed' %}
+
+                                        <span class="badge confirmed">
+                                            Confirmed
+                                        </span>
+
+                                    {% elif booking['status'] == 'cancelled' %}
+
+                                        <span class="badge cancelled">
+                                            Cancelled
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge pending">
+                                            {{ booking['status']|title }}
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if booking['payment_status'] == 'paid' %}
+
+                                        <span class="badge paid">
+                                            Paid
+                                        </span>
+
+                                    {% elif booking['payment_status'] == 'rejected' %}
+
+                                        <span class="badge rejected">
+                                            Rejected
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge pending">
+                                            {{ booking['payment_status']|title }}
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    <a
+                                        href="{{ url_for('admin_booking_details', booking_id=booking['id']) }}"
+                                        class="action-btn"
+                                    >
+                                        View
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="empty">
+                No bookings found.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- SYSTEM INFORMATION -->
+
+    <div class="section">
+
+        <div class="section-header">
+
+            <h2>
+                System Overview
+            </h2>
+
+        </div>
+
+        <p style="line-height: 1.8; color: #6b7280;">
+
+            Use the navigation menu to manage users, futsal grounds,
+            bookings, payments and the booking calendar.
+
+            The dashboard provides a quick overview of the current
+            booking system.
+
+        </p>
+
+    </div>
+
+</div>
+
+</body>
+</html>

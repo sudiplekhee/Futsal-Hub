@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Booking Details - Admin</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        .navbar {
+            background: #111827;
+            color: white;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 9px 13px;
+            border-radius: 7px;
+            background: #1f2937;
+            font-size: 14px;
+        }
+
+        .nav-links a:hover {
+            background: #374151;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            color: #111827;
+        }
+
+        .header p {
+            color: #6b7280;
+            margin-top: 7px;
+        }
+
+        .flash {
+            padding: 13px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .flash.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .flash.danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .flash.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+        }
+
+        .card h2 {
+            font-size: 19px;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 11px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            color: #6b7280;
+        }
+
+        .value {
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .confirmed,
+        .paid {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .pending,
+        .submitted {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .cancelled,
+        .rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .unpaid {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .total {
+            margin-top: 15px;
+            padding: 18px;
+            background: #f9fafb;
+            border-radius: 9px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total strong {
+            font-size: 22px;
+        }
+
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            padding: 11px 16px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .btn-success {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #15803d;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        .note {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            padding: 15px;
+            border-radius: 6px;
+            color: #1e40af;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 750px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: auto;
+            }
+
+            .container {
+                padding: 0 12px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        ⚽ Futsal Admin
+    </div>
+
+    <div class="nav-links">
+
+        <a href="{{ url_for('admin_dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('admin_users') }}">
+            Users
+        </a>
+
+        <a href="{{ url_for('admin_grounds') }}">
+            Grounds
+        </a>
+
+        <a href="{{ url_for('admin_bookings') }}">
+            Bookings
+        </a>
+
+        <a href="{{ url_for('admin_calendar') }}">
+            Calendar
+        </a>
+
+        <a href="{{ url_for('admin_logout') }}">
+            Logout
+        </a>
+
+    </div>
+
+</nav>
+
+
+<div class="container">
+
+    <a
+        href="{{ url_for('admin_bookings') }}"
+        class="back"
+    >
+        ← Back to Bookings
+    </a>
+
+
+    <div class="header">
+
+        <h1>
+            Booking #{{ booking['id'] }}
+        </h1>
+
+        <p>
+            Complete information about this booking.
+        </p>
+
+    </div>
+
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            {% for category, message in messages %}
+
+                <div class="flash {{ category }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <div class="grid">
+
+
+        <!-- BOOKING INFORMATION -->
+
+        <div class="card">
+
+            <h2>
+                📅 Booking Information
+            </h2>
+
+            <div class="info-row">
+
+                <span class="label">
+                    Booking ID
+                </span>
+
+                <span class="value">
+                    #{{ booking['id'] }}
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="label">
+                    Date
+                </span>
+
+                <span class="value">
+                    {{ booking['booking_date'] }}
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="label">
+                    Time
+                </span>
+
+                <span class="value">
+                    {{ booking['booking_time'] }}
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="label">
+                    Duration
+                </span>
+
+                <span class="value">
+                    {{ booking['duration'] }} hour(s)
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="label">
+                    Booking Status
+                </span>
+
+                <span class="value">
+
+                    {% if booking['status'] == 'confirmed' %}
+
+                        <span class="badge confirmed">
+                            Confirmed
+                        </span>
+
+                    {% elif booking['status'] == 'cancelled' %}
+
+                        <span class="badge cancelled">
+                            Cancelled
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge pending">
+                            {{ booking['status']|title }}
+                        </span>
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- CUSTOMER -->
+
+        <div class="card">
+
+            <h2>
+                👤 Customer
+            </h2>
+
+            <div class="info-row">
+
+                <span class="label">
+                    Name
+                </span>
+
+                <span class="value">
+                    {{ booking['user_name'] }}
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="label">
+                    Email
+                </span>
+
+                <span class="value">
+                    {{ booking['user_email'] }}
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="label">
+                    User ID
+                </span>
+
+                <span class="value">
+                    #{{ booking['user_id'] }}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- GROUND -->
+
+        <div class="card">
+
+            <h2>
+                ⚽ Ground Information
+            </h2>
+
+            <div class="info-row">
+
+                <span class="label">
+                    Ground
+                </span>
+
+                <span class="value">
+                    {{ booking['ground_name'] }}
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="label">
+                    Location
+                </span>
+
+                <span class="value">
+                    {{ booking['ground_location'] }}
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="label">
+                    Contact
+                </span>
+
+                <span class="value">
+                    {{ booking['ground_contact'] or 'Not provided' }}
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="label">
+                    Opening Time
+                </span>
+
+                <span class="value">
+                    {{ booking['opening_time'] or 'Not provided' }}
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="label">
+                    Closing Time
+                </span>
+
+                <span class="value">
+                    {{ booking['closing_time'] or 'Not provided' }}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- PAYMENT -->
+
+        <div class="card">
+
+            <h2>
+                💳 Payment Information
+            </h2>
+
+
+            <div class="info-row">
+
+                <span class="label">
+                    Payment Method
+                </span>
+
+                <span class="value">
+
+                    {{ booking['payment_method'] or 'Not selected' }}
+
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="label">
+                    Payment Status
+                </span>
+
+                <span class="value">
+
+                    {% if booking['payment_status'] == 'paid' %}
+
+                        <span class="badge paid">
+                            Paid
+                        </span>
+
+                    {% elif booking['payment_status'] == 'submitted' %}
+
+                        <span class="badge submitted">
+                            Submitted
+                        </span>
+
+                    {% elif booking['payment_status'] == 'rejected' %}
+
+                        <span class="badge rejected">
+                            Rejected
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge unpaid">
+                            {{ booking['payment_status']|title }}
+                        </span>
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="label">
+                    Reference
+                </span>
+
+                <span class="value">
+
+                    {{ booking['payment_reference'] or 'Not provided' }}
+
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="label">
+                    eSewa Transaction
+                </span>
+
+                <span class="value">
+
+                    {{ booking['esewa_transaction_code'] or 'N/A' }}
+
+                </span>
+
+            </div>
+
+
+            <div class="total">
+
+                <span>
+                    Total Amount
+                </span>
+
+                <strong>
+
+                    Rs.
+                    {{
+                        (
+                            booking['ground_price']|float
+                            *
+                            booking['duration']|float
+                        )|round(2)
+                    }}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- ACTIONS -->
+
+        <div class="card full">
+
+            <h2>
+                ⚙️ Manage Booking
+            </h2>
+
+
+            <div class="note">
+
+                Use the buttons below to manage the booking.
+
+                Payment should only be confirmed after checking
+                the customer's payment information.
+
+            </div>
+
+
+            <div class="actions">
+
+
+                {% if booking['payment_status'] == 'submitted' %}
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'admin_confirm_payment',
+                            booking_id=booking['id']
+                        ) }}"
+                    >
+
+                        <button
+                            type="submit"
+                            class="btn btn-success"
+                            onclick="return confirm(
+                                'Confirm this payment?'
+                            );"
+                        >
+                            ✓ Confirm Payment
+                        </button>
+
+                    </form>
+
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'admin_reject_payment',
+                            booking_id=booking['id']
+                        ) }}"
+                    >
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger"
+                            onclick="return confirm(
+                                'Reject this payment?'
+                            );"
+                        >
+                            ✕ Reject Payment
+                        </button>
+
+                    </form>
+
+                {% endif %}
+
+
+                {% if booking['status'] != 'cancelled' %}
+
+                    <form
+                        method="POST"
+                        action="{{ url_for(
+                            'admin_cancel_booking',
+                            booking_id=booking['id']
+                        ) }}"
+                    >
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger"
+                            onclick="return confirm(
+                                'Are you sure you want to cancel this booking?'
+                            );"
+                        >
+                            Cancel Booking
+                        </button>
+
+                    </form>
+
+                {% endif %}
+
+
+                <a
+                    href="{{ url_for('admin_bookings') }}"
+                    class="btn btn-secondary"
+                >
+                    Back to Bookings
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

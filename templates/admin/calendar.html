@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Booking Calendar - Admin</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        .navbar {
+            background: #111827;
+            color: white;
+            padding: 18px 35px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .navbar h2 {
+            margin: 0;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 18px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 35px auto;
+            padding: 20px;
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #6b7280;
+        }
+
+        .calendar-card {
+            background: white;
+            border-radius: 15px;
+
+            padding: 25px;
+
+            box-shadow:
+                0 5px 20px
+                rgba(0, 0, 0, 0.07);
+        }
+
+        .calendar-top {
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 25px;
+
+            gap: 15px;
+        }
+
+        .month-title {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .month-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .month-btn {
+            border: none;
+
+            background: #4f46e5;
+            color: white;
+
+            padding: 10px 16px;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+        }
+
+        .month-btn:hover {
+            background: #4338ca;
+        }
+
+        .weekdays {
+            display: grid;
+
+            grid-template-columns:
+                repeat(7, 1fr);
+
+            gap: 8px;
+
+            margin-bottom: 8px;
+        }
+
+        .weekday {
+            text-align: center;
+
+            font-weight: bold;
+
+            padding: 12px;
+
+            color: #6b7280;
+        }
+
+        .calendar {
+            display: grid;
+
+            grid-template-columns:
+                repeat(7, 1fr);
+
+            gap: 8px;
+        }
+
+        .day {
+            min-height: 100px;
+
+            border:
+                1px solid #e5e7eb;
+
+            border-radius: 10px;
+
+            padding: 10px;
+
+            background: #fff;
+        }
+
+        .day.empty {
+            background: #f9fafb;
+
+            border-color: transparent;
+        }
+
+        .day-number {
+            font-weight: bold;
+
+            margin-bottom: 8px;
+        }
+
+        .today {
+            border:
+                2px solid #4f46e5;
+        }
+
+        .has-bookings {
+            background: #eef2ff;
+        }
+
+        .booking-count {
+            display: inline-block;
+
+            background: #4f46e5;
+
+            color: white;
+
+            padding: 5px 8px;
+
+            border-radius: 20px;
+
+            font-size: 11px;
+
+            font-weight: bold;
+        }
+
+        .view-day {
+            display: block;
+
+            margin-top: 8px;
+
+            font-size: 11px;
+
+            color: #4f46e5;
+
+            text-decoration: none;
+        }
+
+        .view-day:hover {
+            text-decoration: underline;
+        }
+
+        .legend {
+            display: flex;
+
+            gap: 20px;
+
+            margin-top: 25px;
+
+            flex-wrap: wrap;
+
+            color: #6b7280;
+
+            font-size: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+
+            align-items: center;
+
+            gap: 7px;
+        }
+
+        .legend-box {
+            width: 15px;
+            height: 15px;
+
+            border-radius: 4px;
+
+            border: 1px solid #ddd;
+        }
+
+        .legend-booked {
+            background: #eef2ff;
+        }
+
+        .legend-today {
+            border: 2px solid #4f46e5;
+        }
+
+        @media (max-width: 700px) {
+
+            .container {
+                padding: 10px;
+            }
+
+            .calendar-card {
+                padding: 12px;
+            }
+
+            .day {
+                min-height: 75px;
+
+                padding: 6px;
+            }
+
+            .weekday {
+                padding: 7px 2px;
+
+                font-size: 12px;
+            }
+
+            .day-number {
+                font-size: 13px;
+            }
+
+            .month-title {
+                font-size: 19px;
+            }
+
+            .calendar-top {
+                flex-direction: column;
+
+                align-items: flex-start;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- NAVBAR -->
+
+<div class="navbar">
+
+    <h2>
+        ⚽ Futsal Admin
+    </h2>
+
+    <div>
+
+        <a href="{{ url_for('admin_dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ url_for('admin_users') }}">
+            Users
+        </a>
+
+        <a href="{{ url_for('admin_grounds') }}">
+            Grounds
+        </a>
+
+        <a href="{{ url_for('admin_bookings') }}">
+            Bookings
+        </a>
+
+        <a href="{{ url_for('admin_logout') }}">
+            Logout
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="container">
+
+
+    <div class="header">
+
+        <h1>
+            📅 Booking Calendar
+        </h1>
+
+        <p>
+            View booking activity by date.
+        </p>
+
+    </div>
+
+
+    <div class="calendar-card">
+
+
+        <div class="calendar-top">
+
+            <div class="month-title">
+                {{ month_name }} {{ year }}
+            </div>
+
+            <div class="month-buttons">
+
+                <a
+                    href="{{ url_for(
+                        'admin_calendar',
+                        month=previous_month,
+                        year=previous_year
+                    ) }}"
+                >
+                    <button
+                        type="button"
+                        class="month-btn"
+                    >
+                        ← Previous
+                    </button>
+                </a>
+
+                <a
+                    href="{{ url_for(
+                        'admin_calendar',
+                        month=next_month,
+                        year=next_year
+                    ) }}"
+                >
+                    <button
+                        type="button"
+                        class="month-btn"
+                    >
+                        Next →
+                    </button>
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- WEEK DAYS -->
+
+        <div class="weekdays">
+
+            <div class="weekday">Sun</div>
+            <div class="weekday">Mon</div>
+            <div class="weekday">Tue</div>
+            <div class="weekday">Wed</div>
+            <div class="weekday">Thu</div>
+            <div class="weekday">Fri</div>
+            <div class="weekday">Sat</div>
+
+        </div>
+
+
+        <!-- CALENDAR -->
+
+        <div class="calendar">
+
+            {% for day in calendar_days %}
+
+                {% if day is none %}
+
+                    <div class="day empty"></div>
+
+                {% else %}
+
+                    <div
+                        class="
+                            day
+                            {% if day.is_today %}
+                                today
+                            {% endif %}
+
+                            {% if day.booking_count > 0 %}
+                                has-bookings
+                            {% endif %}
+                        "
+                    >
+
+                        <div class="day-number">
+                            {{ day.day }}
+                        </div>
+
+
+                        {% if day.booking_count > 0 %}
+
+                            <span class="booking-count">
+
+                                {{ day.booking_count }}
+
+                                booking{% if day.booking_count != 1 %}s{% endif %}
+
+                            </span>
+
+
+                            <a
+                                class="view-day"
+                                href="{{ url_for(
+                                    'admin_bookings',
+                                    search=day.date
+                                ) }}"
+                            >
+                                View bookings →
+                            </a>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endif %}
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- LEGEND -->
+
+        <div class="legend">
+
+            <div class="legend-item">
+
+                <div
+                    class="
+                        legend-box
+                        legend-booked
+                    "
+                ></div>
+
+                Has bookings
+
+            </div>
+
+
+            <div class="legend-item">
+
+                <div
+                    class="
+                        legend-box
+                        legend-today
+                    "
+                ></div>
+
+                Today
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

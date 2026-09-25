@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>eSewa Payment - Futsal</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+
+            min-height: 100vh;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f5f7ff,
+                    #eef1ff
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 20px;
+
+            color: #2d3436;
+        }
+
+        .container {
+            width: 100%;
+
+            max-width: 520px;
+        }
+
+        .card {
+            background: white;
+
+            border-radius: 20px;
+
+            padding: 35px;
+
+            box-shadow:
+                0 12px 40px
+                rgba(0, 0, 0, 0.10);
+
+            text-align: center;
+        }
+
+        .logo {
+            width: 75px;
+
+            height: 75px;
+
+            margin: 0 auto 20px;
+
+            border-radius: 50%;
+
+            background: #00b894;
+
+            color: white;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 35px;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+
+            color: #2d3436;
+        }
+
+        .subtitle {
+            color: #636e72;
+
+            line-height: 1.5;
+
+            margin-bottom: 25px;
+        }
+
+        .amount-box {
+            background: #f5f3ff;
+
+            border:
+                1px solid #ddd7ff;
+
+            border-radius: 12px;
+
+            padding: 20px;
+
+            margin-bottom: 25px;
+        }
+
+        .amount-label {
+            color: #636e72;
+
+            font-size: 14px;
+
+            margin-bottom: 5px;
+        }
+
+        .amount {
+            color: #6c5ce7;
+
+            font-size: 30px;
+
+            font-weight: 800;
+        }
+
+        .info {
+            text-align: left;
+
+            background: #f8f9fa;
+
+            border-radius: 10px;
+
+            padding: 15px;
+
+            margin-bottom: 25px;
+
+            font-size: 14px;
+
+            line-height: 1.8;
+        }
+
+        .info strong {
+            color: #2d3436;
+        }
+
+        .pay-button {
+            width: 100%;
+
+            border: none;
+
+            background: #00b894;
+
+            color: white;
+
+            padding: 15px;
+
+            border-radius: 9px;
+
+            font-size: 16px;
+
+            font-weight: 800;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+        .pay-button:hover {
+            opacity: 0.9;
+
+            transform: translateY(-1px);
+        }
+
+        .cancel-link {
+            display: block;
+
+            margin-top: 18px;
+
+            color: #636e72;
+
+            text-decoration: none;
+
+            font-weight: 600;
+        }
+
+        .cancel-link:hover {
+            color: #6c5ce7;
+        }
+
+        .security {
+            margin-top: 20px;
+
+            color: #636e72;
+
+            font-size: 12px;
+
+            line-height: 1.5;
+        }
+
+        .loading {
+            margin-top: 15px;
+
+            color: #636e72;
+
+            font-size: 13px;
+        }
+
+        @media (max-width: 500px) {
+
+            .card {
+                padding: 25px 18px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+
+            .amount {
+                font-size: 26px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <div class="logo">
+            💚
+        </div>
+
+
+        <h1>
+            eSewa Payment
+        </h1>
+
+
+        <p class="subtitle">
+            Review your payment information
+            and continue to eSewa.
+        </p>
+
+
+        <!-- =========================
+             AMOUNT
+        ========================== -->
+
+        <div class="amount-box">
+
+            <div class="amount-label">
+                Amount to Pay
+            </div>
+
+            <div class="amount">
+
+                Rs.
+                {{ "%.2f"|format(
+                    total_amount|default(0)|float
+                ) }}
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             BOOKING INFORMATION
+        ========================== -->
+
+        {% if booking %}
+
+        <div class="info">
+
+            <div>
+
+                <strong>
+                    Booking ID:
+                </strong>
+
+                #{{ booking["id"] }}
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    Ground:
+                </strong>
+
+                {{ booking["ground_name"] }}
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    Date:
+                </strong>
+
+                {{ booking["booking_date"] }}
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    Time:
+                </strong>
+
+                {{ booking["booking_time"] }}
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    Duration:
+                </strong>
+
+                {{ booking["duration"] }} hour(s)
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- =========================
+             ESEWA FORM
+             
+             IMPORTANT:
+             Use esewa_payment_url
+             because app.py passes
+             esewa_payment_url.
+        ========================== -->
+
+        <form
+            method="POST"
+            action="{{ esewa_payment_url }}"
+            id="esewaForm"
+        >
+
+
+            <input
+                type="hidden"
+                name="amount"
+                value="{{ amount }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="tax_amount"
+                value="{{ tax_amount }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="total_amount"
+                value="{{ total_amount }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="transaction_uuid"
+                value="{{ transaction_uuid }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="product_code"
+                value="{{ product_code }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="product_service_charge"
+                value="{{ product_service_charge }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="product_delivery_charge"
+                value="{{ product_delivery_charge }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="success_url"
+                value="{{ success_url }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="failure_url"
+                value="{{ failure_url }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="signed_field_names"
+                value="{{ signed_field_names }}"
+            >
+
+
+            <input
+                type="hidden"
+                name="signature"
+                value="{{ signature }}"
+            >
+
+
+            <button
+                type="submit"
+                class="pay-button"
+            >
+                💳 Continue to eSewa
+            </button>
+
+
+        </form>
+
+
+        <div class="loading">
+
+            You will be redirected to
+            the eSewa test payment page.
+
+        </div>
+
+
+        <a
+            href="{{ url_for(
+                'booking_details',
+                booking_id=booking['id']
+            ) }}"
+            class="cancel-link"
+        >
+            ← Cancel and return to booking
+        </a>
+
+
+        <div class="security">
+
+            🔒 Payment is processed through
+            the eSewa payment gateway.
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    /*
+     * Automatically submit the form
+     * after a short delay.
+     *
+     * The user can still click the button
+     * if automatic submission fails.
+     */
+
+    window.addEventListener(
+        "load",
+        function() {
+
+            setTimeout(
+                function() {
+
+                    const form =
+                        document.getElementById(
+                            "esewaForm"
+                        );
+
+                    if (form) {
+
+                        form.submit();
+
+                    }
+
+                },
+                1000
+            );
+
+        }
+    );
+
+</script>
+
+
+</body>
+
+</html>

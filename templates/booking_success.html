@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Booking Successful - Futsal</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            min-height: 100vh;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f5f7ff,
+                    #eef1ff
+                );
+
+            color: #2d3436;
+        }
+
+        .navbar {
+            background: #6c5ce7;
+
+            color: white;
+
+            padding: 16px 30px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            box-shadow:
+                0 3px 12px
+                rgba(0, 0, 0, 0.12);
+        }
+
+        .navbar h2 {
+            font-size: 24px;
+        }
+
+        .nav-links {
+            display: flex;
+
+            gap: 20px;
+
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+
+            text-decoration: none;
+
+            font-weight: 600;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .container {
+            width: 100%;
+
+            max-width: 850px;
+
+            margin: 45px auto;
+
+            padding: 0 20px;
+        }
+
+        .success-card {
+            background: white;
+
+            border-radius: 20px;
+
+            padding: 40px;
+
+            box-shadow:
+                0 12px 40px
+                rgba(0, 0, 0, 0.10);
+
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 80px;
+
+            height: 80px;
+
+            margin: 0 auto 20px;
+
+            border-radius: 50%;
+
+            background: #00b894;
+
+            color: white;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            font-size: 42px;
+
+            font-weight: bold;
+
+            box-shadow:
+                0 8px 20px
+                rgba(0, 184, 148, 0.25);
+        }
+
+        .success-card h1 {
+            color: #00b894;
+
+            font-size: 30px;
+
+            margin-bottom: 10px;
+        }
+
+        .success-card > p {
+            color: #636e72;
+
+            margin-bottom: 30px;
+        }
+
+        .booking-number {
+            background: #f5f3ff;
+
+            border: 1px solid #ddd7ff;
+
+            border-radius: 10px;
+
+            padding: 15px;
+
+            margin-bottom: 25px;
+        }
+
+        .booking-number span {
+            display: block;
+
+            color: #636e72;
+
+            font-size: 13px;
+
+            margin-bottom: 5px;
+        }
+
+        .booking-number strong {
+            color: #6c5ce7;
+
+            font-size: 20px;
+        }
+
+        .details {
+            text-align: left;
+
+            border:
+                1px solid #e6e6e6;
+
+            border-radius: 12px;
+
+            overflow: hidden;
+
+            margin-bottom: 25px;
+        }
+
+        .detail-row {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: 15px 18px;
+
+            border-bottom:
+                1px solid #eeeeee;
+
+            gap: 20px;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #636e72;
+
+            font-weight: 600;
+        }
+
+        .detail-value {
+            color: #2d3436;
+
+            font-weight: 700;
+
+            text-align: right;
+        }
+
+        .total-row {
+            background: #f5f3ff;
+        }
+
+        .total-row .detail-value {
+            color: #6c5ce7;
+
+            font-size: 21px;
+        }
+
+        .status {
+            display: inline-block;
+
+            padding: 6px 12px;
+
+            border-radius: 20px;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+            text-transform: capitalize;
+        }
+
+        .status-pending {
+            background: #fff4d6;
+
+            color: #9c7600;
+        }
+
+        .status-paid {
+            background: #e5fff7;
+
+            color: #008f6c;
+        }
+
+        .status-submitted {
+            background: #e8f0ff;
+
+            color: #3867d6;
+        }
+
+        .status-confirmed {
+            background: #e5fff7;
+
+            color: #008f6c;
+        }
+
+        .status-cancelled {
+            background: #ffecec;
+
+            color: #c0392b;
+        }
+
+        .notice {
+            background: #fff8df;
+
+            border-left:
+                4px solid #fdcb6e;
+
+            color: #6d5a00;
+
+            padding: 15px;
+
+            border-radius: 8px;
+
+            text-align: left;
+
+            margin-bottom: 25px;
+
+            line-height: 1.5;
+        }
+
+        .button-row {
+            display: flex;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+
+            min-width: 180px;
+
+            padding: 14px 20px;
+
+            border: none;
+
+            border-radius: 9px;
+
+            font-size: 15px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            text-decoration: none;
+
+            text-align: center;
+
+            transition:
+                transform 0.2s,
+                opacity 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+
+            opacity: 0.92;
+        }
+
+        .btn-primary {
+            background: #6c5ce7;
+
+            color: white;
+        }
+
+        .btn-success {
+            background: #00b894;
+
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #dfe6e9;
+
+            color: #2d3436;
+        }
+
+        @media (max-width: 650px) {
+
+            .navbar {
+                padding: 14px 18px;
+
+                flex-direction: column;
+
+                gap: 10px;
+            }
+
+            .nav-links {
+                gap: 12px;
+
+                font-size: 14px;
+            }
+
+            .container {
+                margin: 25px auto;
+
+                padding: 0 12px;
+            }
+
+            .success-card {
+                padding: 25px 18px;
+            }
+
+            .success-card h1 {
+                font-size: 25px;
+            }
+
+            .detail-row {
+                flex-direction: column;
+
+                align-items: flex-start;
+
+                gap: 5px;
+            }
+
+            .detail-value {
+                text-align: left;
+            }
+
+            .button-row {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- =========================
+         NAVIGATION
+    ========================== -->
+
+    <nav class="navbar">
+
+        <h2>⚽ Futsal</h2>
+
+        <div class="nav-links">
+
+            <a href="{{ url_for('index') }}">
+                Home
+            </a>
+
+            <a href="{{ url_for('grounds') }}">
+                Grounds
+            </a>
+
+            <a href="{{ url_for('my_bookings') }}">
+                My Bookings
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <div class="container">
+
+        <div class="success-card">
+
+            <!-- Success Icon -->
+
+            <div class="success-icon">
+                ✓
+            </div>
+
+
+            <!-- Heading -->
+
+            <h1>
+                Booking Successful!
+            </h1>
+
+            <p>
+                Your futsal booking has been created successfully.
+            </p>
+
+
+            <!-- Booking ID -->
+
+            {% if booking %}
+
+                <div class="booking-number">
+
+                    <span>
+                        Booking ID
+                    </span>
+
+                    <strong>
+                        #{{ booking["id"] }}
+                    </strong>
+
+                </div>
+
+
+                <!-- =========================
+                     BOOKING DETAILS
+                ========================== -->
+
+                <div class="details">
+
+                    <!-- Ground -->
+
+                    <div class="detail-row">
+
+                        <span class="detail-label">
+                            ⚽ Futsal Ground
+                        </span>
+
+                        <span class="detail-value">
+                            {{ booking["ground_name"] }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- Location -->
+
+                    {% if booking["ground_location"] %}
+
+                        <div class="detail-row">
+
+                            <span class="detail-label">
+                                📍 Location
+                            </span>
+
+                            <span class="detail-value">
+                                {{ booking["ground_location"] }}
+                            </span>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <!-- Date -->
+
+                    <div class="detail-row">
+
+                        <span class="detail-label">
+                            📅 Date
+                        </span>
+
+                        <span class="detail-value">
+                            {{ booking["booking_date"] }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- Time -->
+
+                    <div class="detail-row">
+
+                        <span class="detail-label">
+                            🕐 Time
+                        </span>
+
+                        <span class="detail-value">
+                            {{ booking["booking_time"] }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- Duration -->
+
+                    <div class="detail-row">
+
+                        <span class="detail-label">
+                            ⏱️ Duration
+                        </span>
+
+                        <span class="detail-value">
+
+                            {% if booking["duration"] == 1 %}
+                                1 Hour
+                            {% elif booking["duration"] == 1.5 %}
+                                1.5 Hours
+                            {% elif booking["duration"] == 2 %}
+                                2 Hours
+                            {% else %}
+                                {{ booking["duration"] }} Hours
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- Booking Status -->
+
+                    <div class="detail-row">
+
+                        <span class="detail-label">
+                            📋 Booking Status
+                        </span>
+
+                        <span class="detail-value">
+
+                            <span
+                                class="status
+                                {% if booking['status'] == 'confirmed' %}
+                                    status-confirmed
+                                {% elif booking['status'] == 'cancelled' %}
+                                    status-cancelled
+                                {% else %}
+                                    status-pending
+                                {% endif %}"
+                            >
+                                {{ booking["status"] }}
+                            </span>
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- Payment Status -->
+
+                    <div class="detail-row">
+
+                        <span class="detail-label">
+                            💳 Payment Status
+                        </span>
+
+                        <span class="detail-value">
+
+                            <span
+                                class="status
+                                {% if booking['payment_status'] == 'paid' %}
+                                    status-paid
+                                {% elif booking['payment_status'] == 'submitted' %}
+                                    status-submitted
+                                {% elif booking['payment_status'] == 'rejected' %}
+                                    status-cancelled
+                                {% else %}
+                                    status-pending
+                                {% endif %}"
+                            >
+                                {{ booking["payment_status"] }}
+                            </span>
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- Total -->
+
+                    {% set price =
+                        booking["price"]|default(0)|float
+                    %}
+
+                    {% set duration =
+                        booking["duration"]|default(1)|float
+                    %}
+
+                    {% set total =
+                        price * duration
+                    %}
+
+                    <div
+                        class="detail-row total-row"
+                    >
+
+                        <span class="detail-label">
+                            💰 Total Amount
+                        </span>
+
+                        <span class="detail-value">
+                            Rs. {{ "%.2f"|format(total) }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                     PAYMENT NOTICE
+                ========================== -->
+
+                {% if booking["payment_status"] != "paid"
+                      and booking["status"] != "cancelled" %}
+
+                    <div class="notice">
+
+                        <strong>
+                            💳 Payment Required
+                        </strong>
+
+                        <br>
+
+                        Your booking is currently waiting
+                        for payment. Please complete your
+                        payment to confirm your reservation.
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- =========================
+                     BUTTONS
+                ========================== -->
+
+                <div class="button-row">
+
+                    {% if booking["payment_status"] != "paid"
+                          and booking["status"] != "cancelled" %}
+
+                        <a
+                            href="{{ url_for(
+                                'payment',
+                                booking_id=booking['id']
+                            ) }}"
+                            class="btn btn-success"
+                        >
+                            💳 Pay Now
+                        </a>
+
+                    {% endif %}
+
+
+                    <a
+                        href="{{ url_for(
+                            'booking_details',
+                            booking_id=booking['id']
+                        ) }}"
+                        class="btn btn-primary"
+                    >
+                        👁️ View Booking
+                    </a>
+
+
+                    <a
+                        href="{{ url_for('my_bookings') }}"
+                        class="btn btn-secondary"
+                    >
+                        📋 My Bookings
+                    </a>
+
+                </div>
+
+            {% else %}
+
+                <div class="notice">
+
+                    Your booking was created, but booking
+                    details could not be loaded.
+
+                    Please check your
+                    <strong>My Bookings</strong>
+                    page.
+
+                </div>
+
+                <div class="button-row">
+
+                    <a
+                        href="{{ url_for('my_bookings') }}"
+                        class="btn btn-primary"
+                    >
+                        📋 My Bookings
+                    </a>
+
+                    <a
+                        href="{{ url_for('index') }}"
+                        class="btn btn-secondary"
+                    >
+                        🏠 Home
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</body>
+</html>

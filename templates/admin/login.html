@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Login - Futsal Booking</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            min-height: 100vh;
+        }
+
+        .login-box {
+            width: 400px;
+            max-width: 92%;
+
+            background: white;
+
+            padding: 35px;
+
+            border-radius: 15px;
+
+            box-shadow:
+                0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            text-align: center;
+
+            font-size: 32px;
+
+            font-weight: bold;
+
+            color: #2563eb;
+
+            margin-bottom: 10px;
+        }
+
+        .title {
+            text-align: center;
+
+            font-size: 24px;
+
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+
+            padding: 13px;
+
+            margin-bottom: 18px;
+
+            border: 1px solid #d1d5db;
+
+            border-radius: 8px;
+
+            font-size: 15px;
+        }
+
+        input:focus {
+            outline: none;
+
+            border-color: #2563eb;
+        }
+
+        button {
+            width: 100%;
+
+            padding: 13px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #2563eb;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .back {
+            display: block;
+
+            text-align: center;
+
+            margin-top: 20px;
+
+            color: #2563eb;
+
+            text-decoration: none;
+        }
+
+        .alert {
+            padding: 12px;
+
+            border-radius: 8px;
+
+            margin-bottom: 15px;
+
+            background: #fee2e2;
+
+            color: #991b1b;
+        }
+
+        .admin-info {
+            margin-top: 20px;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            background: #eff6ff;
+
+            color: #1e40af;
+
+            font-size: 14px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="login-box">
+
+    <div class="logo">
+        ⚽ Futsal
+    </div>
+
+    <div class="title">
+        Admin Login
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% for category, message in messages %}
+
+            <div class="alert">
+                {{ message }}
+            </div>
+
+        {% endfor %}
+
+    {% endwith %}
+
+    <form method="POST">
+
+        <label>
+            Admin Email
+        </label>
+
+        <input
+            type="email"
+            name="email"
+            placeholder="Enter admin email"
+            required
+        >
+
+        <label>
+            Password
+        </label>
+
+        <input
+            type="password"
+            name="password"
+            placeholder="Enter admin password"
+            required
+        >
+
+        <button type="submit">
+            Login to Admin Panel
+        </button>
+
+    </form>
+
+    <div class="admin-info">
+
+        <strong>Default Admin</strong><br><br>
+
+        Email:
+        admin@futsal.com
+
+        <br>
+
+        Password:
+        admin123
+
+    </div>
+
+    <a
+        href="{{ url_for('index') }}"
+        class="back"
+    >
+        ← Back to Website
+    </a>
+
+</div>
+
+</body>
+
+</html>
