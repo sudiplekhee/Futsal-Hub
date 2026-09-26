@@ -1,342 +1,255 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Manage Users - Futsal Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Admin</title>
 
     <style>
-
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
 
         body {
+            margin: 0;
             font-family: Arial, sans-serif;
-            background: #f4f6f9;
+            background: #f5f7fb;
             color: #222;
         }
 
-        /* ==============================
-           HEADER
-        ============================== */
-
-        .header {
-            background: #111827;
+        .topbar {
+            background: #6c5ce7;
             color: white;
             padding: 18px 30px;
-
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .logo {
-            font-size: 24px;
+        .brand {
+            font-size: 22px;
             font-weight: bold;
         }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .header-right span {
-            font-size: 14px;
-            color: #d1d5db;
-        }
-
-        .logout {
-            background: #ef4444;
-            color: white;
-            text-decoration: none;
-            padding: 9px 15px;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .logout:hover {
-            background: #dc2626;
-        }
-
-        /* ==============================
-           LAYOUT
-        ============================== */
-
         .layout {
             display: flex;
-            min-height: calc(100vh - 70px);
+            min-height: calc(100vh - 65px);
         }
-
-        /* ==============================
-           SIDEBAR
-        ============================== */
 
         .sidebar {
-            width: 240px;
-            background: #1f2937;
-            padding: 25px 15px;
-        }
-
-        .sidebar h3 {
-            color: #9ca3af;
-            font-size: 12px;
-            text-transform: uppercase;
-            margin: 0 10px 15px;
+            width: 230px;
+            background: white;
+            padding: 22px 14px;
+            border-right: 1px solid #ddd;
         }
 
         .sidebar a {
             display: block;
-            color: #d1d5db;
+            padding: 13px 15px;
+            margin-bottom: 7px;
             text-decoration: none;
-            padding: 12px 15px;
-            border-radius: 7px;
-            margin-bottom: 5px;
+            color: #444;
+            border-radius: 9px;
+            font-weight: bold;
         }
 
         .sidebar a:hover {
-            background: #374151;
-            color: white;
+            background: #f0edff;
+            color: #6c5ce7;
         }
 
         .sidebar a.active {
-            background: #2563eb;
+            background: #6c5ce7;
             color: white;
         }
 
-        /* ==============================
-           CONTENT
-        ============================== */
+        .logout {
+            color: #d63031 !important;
+            margin-top: 25px;
+        }
 
         .content {
             flex: 1;
             padding: 30px;
-            overflow-x: auto;
+            min-width: 0;
         }
 
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        h1 {
+            margin-top: 0;
+            font-size: 30px;
+        }
+
+        .subtitle {
+            color: #777;
             margin-bottom: 25px;
         }
 
-        .page-header h1 {
-            font-size: 28px;
-            color: #111827;
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
         }
 
-        .page-header p {
-            color: #6b7280;
+        .stat-card {
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.05);
+        }
+
+        .stat-icon {
+            font-size: 28px;
+        }
+
+        .stat-title {
+            color: #777;
+            margin-top: 8px;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
             margin-top: 5px;
         }
 
-        /* ==============================
-           FLASH MESSAGES
-        ============================== */
-
-        .alert {
-            padding: 13px 16px;
-            border-radius: 7px;
-            margin-bottom: 20px;
-        }
-
-        .alert-success {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .alert-danger {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .alert-warning {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        /* ==============================
-           TABLE CARD
-        ============================== */
-
-        .card {
+        .table-card {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.05);
             overflow: hidden;
         }
 
-        .table-container {
+        .table-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .table-header h2 {
+            margin: 0;
+        }
+
+        .table-wrapper {
+            width: 100%;
             overflow-x: auto;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 750px;
-        }
-
-        thead {
-            background: #f9fafb;
+            min-width: 700px;
         }
 
         th {
+            background: #f8f9fc;
+            padding: 14px;
             text-align: left;
-            padding: 16px;
             font-size: 13px;
-            color: #6b7280;
-            text-transform: uppercase;
-            border-bottom: 1px solid #e5e7eb;
+            color: #666;
         }
 
         td {
-            padding: 16px;
-            border-bottom: 1px solid #e5e7eb;
+            padding: 15px 14px;
+            border-top: 1px solid #eee;
             vertical-align: middle;
         }
 
-        tbody tr:hover {
-            background: #f9fafb;
+        tr:hover td {
+            background: #fafaff;
         }
 
-        /* ==============================
-           USER
-        ============================== */
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: #2563eb;
-            color: white;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
+        .user-id {
             font-weight: bold;
-            font-size: 16px;
+            color: #6c5ce7;
         }
 
         .user-name {
-            font-weight: 600;
-            color: #111827;
+            font-weight: bold;
         }
 
-        .user-email {
-            font-size: 13px;
-            color: #6b7280;
-            margin-top: 3px;
+        .email {
+            color: #666;
         }
-
-        /* ==============================
-           BADGES
-        ============================== */
 
         .badge {
             display: inline-block;
-            padding: 5px 10px;
+            padding: 6px 10px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
         }
 
-        .badge-admin {
-            background: #ede9fe;
-            color: #6d28d9;
+        .admin-badge {
+            background: #eeeaff;
+            color: #6c5ce7;
         }
 
-        .badge-user {
-            background: #dbeafe;
-            color: #1d4ed8;
-        }
-
-        .badge-booking {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        /* ==============================
-           DELETE BUTTON
-        ============================== */
-
-        .delete-form {
-            display: inline;
+        .user-badge {
+            background: #e8f8f3;
+            color: #008f68;
         }
 
         .delete-btn {
+            display: inline-block;
             border: none;
-            background: #fee2e2;
-            color: #dc2626;
-
+            background: #ffe8e8;
+            color: #d63031;
             padding: 8px 12px;
-            border-radius: 6px;
-
+            border-radius: 7px;
             cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
+            font-weight: bold;
         }
 
         .delete-btn:hover {
-            background: #dc2626;
+            background: #d63031;
             color: white;
         }
 
         .protected {
-            color: #9ca3af;
+            color: #888;
             font-size: 13px;
+            font-weight: bold;
         }
-
-        /* ==============================
-           EMPTY STATE
-        ============================== */
 
         .empty {
             text-align: center;
-            padding: 60px 20px;
-            color: #6b7280;
+            padding: 50px;
+            color: #777;
         }
 
-        .empty-icon {
-            font-size: 50px;
-            margin-bottom: 15px;
+        .flash-container {
+            margin-bottom: 20px;
         }
 
-        .empty h3 {
-            color: #374151;
-            margin-bottom: 8px;
+        .flash {
+            padding: 13px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
         }
 
-        /* ==============================
-           MOBILE
-        ============================== */
+        .flash.success {
+            background: #e5f8f1;
+            color: #008f68;
+        }
 
-        @media (max-width: 768px) {
+        .flash.danger {
+            background: #ffe9e9;
+            color: #c62828;
+        }
 
-            .header {
-                padding: 15px;
-            }
+        .flash.warning {
+            background: #fff5dc;
+            color: #946200;
+        }
 
-            .header-right span {
-                display: none;
+        .flash.info {
+            background: #e8f0ff;
+            color: #3457b2;
+        }
+
+        @media (max-width: 900px) {
+            .stats {
+                grid-template-columns: 1fr;
             }
 
             .layout {
@@ -345,385 +258,292 @@
 
             .sidebar {
                 width: 100%;
-                padding: 10px;
-            }
-
-            .sidebar h3 {
-                display: none;
-            }
-
-            .sidebar a {
-                display: inline-block;
-                margin: 3px;
-                padding: 9px 12px;
-                font-size: 13px;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
             }
 
             .content {
-                padding: 15px;
+                padding: 20px;
             }
 
-            .page-header {
-                display: block;
-            }
-
-            .page-header h1 {
-                font-size: 24px;
+            .topbar {
+                padding: 15px 18px;
             }
         }
-
     </style>
-
 </head>
 
 <body>
 
-    <!-- ==========================================
-         HEADER
-    =========================================== -->
+<div class="topbar">
+    <div class="brand">
+        ⚽ Futsal Admin
+    </div>
 
-    <header class="header">
+    <div>
+        👥 Users
+    </div>
+</div>
 
-        <div class="logo">
-            ⚽ Futsal Admin
+
+<div class="layout">
+
+    <aside class="sidebar">
+
+        <a href="{{ url_for('admin_dashboard') }}">
+            🏠 Dashboard
+        </a>
+
+        <a href="{{ url_for('admin_bookings') }}">
+            📅 Bookings
+        </a>
+
+        <a href="{{ url_for('admin_users') }}" class="active">
+            👥 Users
+        </a>
+
+        <a href="{{ url_for('admin_grounds') }}">
+            ⚽ Grounds
+        </a>
+
+        <a href="{{ url_for('admin_calendar') }}">
+            🗓️ Calendar
+        </a>
+
+        <a href="{{ url_for('admin_logout') }}" class="logout">
+            🚪 Logout
+        </a>
+
+    </aside>
+
+
+    <main class="content">
+
+        <h1>👥 User Management</h1>
+
+        <div class="subtitle">
+            View and manage registered users.
         </div>
 
-        <div class="header-right">
 
-            <span>
-                Welcome, {{ session.get("user_name", "Admin") }}
-            </span>
+        {% with messages = get_flashed_messages(with_categories=true) %}
 
-            <a
-                href="{{ url_for('admin_logout') }}"
-                class="logout"
-            >
-                Logout
-            </a>
+            {% if messages %}
 
-        </div>
+                <div class="flash-container">
 
-    </header>
+                    {% for category, message in messages %}
 
+                        <div class="flash {{ category }}">
+                            {{ message }}
+                        </div>
 
-    <!-- ==========================================
-         MAIN LAYOUT
-    =========================================== -->
+                    {% endfor %}
 
-    <div class="layout">
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
 
 
-        <!-- ======================================
-             SIDEBAR
-        ======================================= -->
+        <div class="stats">
 
-        <aside class="sidebar">
+            <div class="stat-card">
 
-            <h3>Management</h3>
+                <div class="stat-icon">👥</div>
 
-            <a href="{{ url_for('admin_dashboard') }}">
-                📊 Dashboard
-            </a>
+                <div class="stat-title">
+                    Total Users
+                </div>
 
-            <a
-                href="{{ url_for('admin_users') }}"
-                class="active"
-            >
-                👥 Users
-            </a>
+                <div class="stat-number">
+                    {{ users|length }}
+                </div>
 
-            <a href="{{ url_for('admin_grounds') }}">
-                ⚽ Grounds
-            </a>
-
-            <a href="{{ url_for('admin_bookings') }}">
-                📅 Bookings
-            </a>
-
-            <h3 style="margin-top: 25px;">
-                Website
-            </h3>
-
-            <a href="{{ url_for('index') }}">
-                🏠 Visit Website
-            </a>
-
-        </aside>
+            </div>
 
 
-        <!-- ======================================
-             CONTENT
-        ======================================= -->
+            <div class="stat-card">
 
-        <main class="content">
+                <div class="stat-icon">🛡️</div>
 
-            <div class="page-header">
+                <div class="stat-title">
+                    Administrators
+                </div>
 
-                <div>
+                <div class="stat-number">
 
-                    <h1>
-                        Manage Users
-                    </h1>
+                    {% set admin_count = namespace(value=0) %}
 
-                    <p>
-                        View and manage registered users.
-                    </p>
+                    {% for user in users %}
+
+                        {% if user['is_admin'] == 1 %}
+                            {% set admin_count.value = admin_count.value + 1 %}
+                        {% endif %}
+
+                    {% endfor %}
+
+                    {{ admin_count.value }}
 
                 </div>
 
             </div>
 
 
-            <!-- ==================================
-                 FLASH MESSAGES
-            =================================== -->
+            <div class="stat-card">
 
-            {% with messages = get_flashed_messages(
-                with_categories=true
-            ) %}
+                <div class="stat-icon">👤</div>
 
-                {% if messages %}
+                <div class="stat-title">
+                    Normal Users
+                </div>
 
-                    {% for category, message in messages %}
-
-                        <div
-                            class="alert alert-{{ category }}"
-                        >
-                            {{ message }}
-                        </div>
-
-                    {% endfor %}
-
-                {% endif %}
-
-            {% endwith %}
-
-
-            <!-- ==================================
-                 USERS TABLE
-            =================================== -->
-
-            <div class="card">
-
-                {% if users %}
-
-                    <div class="table-container">
-
-                        <table>
-
-                            <thead>
-
-                                <tr>
-
-                                    <th>
-                                        User
-                                    </th>
-
-                                    <th>
-                                        ID
-                                    </th>
-
-                                    <th>
-                                        Account Type
-                                    </th>
-
-                                    <th>
-                                        Bookings
-                                    </th>
-
-                                    <th>
-                                        Action
-                                    </th>
-
-                                </tr>
-
-                            </thead>
-
-
-                            <tbody>
-
-                                {% for user in users %}
-
-                                    <tr>
-
-                                        <!-- USER -->
-
-                                        <td>
-
-                                            <div class="user-info">
-
-                                                <div class="avatar">
-
-                                                    {{
-                                                        user["name"][0]
-                                                        |upper
-                                                    }}
-
-                                                </div>
-
-                                                <div>
-
-                                                    <div class="user-name">
-
-                                                        {{
-                                                            user["name"]
-                                                        }}
-
-                                                    </div>
-
-                                                    <div class="user-email">
-
-                                                        {{
-                                                            user["email"]
-                                                        }}
-
-                                                    </div>
-
-                                                </div>
-
-                                            </div>
-
-                                        </td>
-
-
-                                        <!-- ID -->
-
-                                        <td>
-
-                                            #{{ user["id"] }}
-
-                                        </td>
-
-
-                                        <!-- ACCOUNT TYPE -->
-
-                                        <td>
-
-                                            {% if user["is_admin"] == 1 %}
-
-                                                <span
-                                                    class="badge badge-admin"
-                                                >
-                                                    Admin
-                                                </span>
-
-                                            {% else %}
-
-                                                <span
-                                                    class="badge badge-user"
-                                                >
-                                                    User
-                                                </span>
-
-                                            {% endif %}
-
-                                        </td>
-
-
-                                        <!-- BOOKINGS -->
-
-                                        <td>
-
-                                            <span
-                                                class="badge badge-booking"
-                                            >
-
-                                                {{
-                                                    user["booking_count"]
-                                                    or 0
-                                                }}
-
-                                                booking{% if
-                                                    user["booking_count"]
-                                                    != 1
-                                                %}s{% endif %}
-
-                                            </span>
-
-                                        </td>
-
-
-                                        <!-- ACTION -->
-
-                                        <td>
-
-                                            {% if
-                                                user["email"]
-                                                == "admin@futsal.com"
-                                            %}
-
-                                                <span class="protected">
-                                                    🔒 Protected
-                                                </span>
-
-                                            {% else %}
-
-                                                <form
-                                                    method="POST"
-                                                    action="{{
-                                                        url_for(
-                                                            'admin_delete_user',
-                                                            user_id=user['id']
-                                                        )
-                                                    }}"
-                                                    class="delete-form"
-                                                    onsubmit="
-                                                        return confirm(
-                                                            'Are you sure you want to delete this user? Their booking records will also be deleted.'
-                                                        );
-                                                    "
-                                                >
-
-                                                    <button
-                                                        type="submit"
-                                                        class="delete-btn"
-                                                    >
-                                                        🗑 Delete
-                                                    </button>
-
-                                                </form>
-
-                                            {% endif %}
-
-                                        </td>
-
-                                    </tr>
-
-                                {% endfor %}
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                {% else %}
-
-                    <div class="empty">
-
-                        <div class="empty-icon">
-                            👥
-                        </div>
-
-                        <h3>
-                            No Users Found
-                        </h3>
-
-                        <p>
-                            There are currently no registered users.
-                        </p>
-
-                    </div>
-
-                {% endif %}
+                <div class="stat-number">
+                    {{ users|length - admin_count.value }}
+                </div>
 
             </div>
 
-        </main>
+        </div>
 
-    </div>
+
+        <div class="table-card">
+
+            <div class="table-header">
+
+                <h2>
+                    Registered Users
+                </h2>
+
+            </div>
+
+
+            {% if users %}
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Account Type</th>
+                                <th>Action</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                        {% for user in users %}
+
+                            <tr>
+
+                                <td>
+                                    <span class="user-id">
+                                        #{{ user['id'] }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="user-name">
+                                        {{ user['name'] }}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="email">
+                                        {{ user['email'] }}
+                                    </div>
+                                </td>
+
+                                <td>
+
+                                    {% if user['is_admin'] == 1 %}
+
+                                        <span class="badge admin-badge">
+                                            🛡️ Administrator
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge user-badge">
+                                            👤 User
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+
+                                    {% if user['is_admin'] == 1 %}
+
+                                        <span class="protected">
+                                            🔒 Protected
+                                        </span>
+
+                                    {% else %}
+
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for('admin_delete_user', user_id=user['id']) }}"
+                                            onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');"
+                                        >
+
+                                            <button
+                                                type="submit"
+                                                class="delete-btn"
+                                            >
+                                                🗑️ Delete
+                                            </button>
+
+                                        </form>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="empty">
+
+                    <div style="font-size:40px;">
+                        👥
+                    </div>
+
+                    <h3>
+                        No users found
+                    </h3>
+
+                    <p>
+                        There are currently no registered users.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </main>
+
+</div>
 
 </body>
-
 </html>
-```

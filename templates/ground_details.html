@@ -1,45 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>{{ ground["name"] }} - Futsal</title>
+    <title>
+        {{ ground['name'] }} - Futsal
+    </title>
 
     <style>
 
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             font-family: Arial, sans-serif;
-            background: #f5f6fa;
-            color: #2d3436;
+            background: #f5f7fb;
+            color: #222;
         }
 
-        /* NAVBAR */
-
-        .navbar {
-            background: #6c5ce7;
+        nav {
+            background: #111827;
             color: white;
-            padding: 16px 30px;
-
+            padding: 16px 7%;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .logo {
-            color: white;
-            text-decoration: none;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: bold;
         }
 
@@ -52,285 +49,132 @@
         .nav-links a {
             color: white;
             text-decoration: none;
-            font-weight: bold;
         }
-
-        .nav-links a:hover {
-            text-decoration: underline;
-        }
-
-        /* CONTAINER */
 
         .container {
-            width: 92%;
+            width: 90%;
             max-width: 1100px;
-            margin: 35px auto;
+            margin: 40px auto;
         }
 
-        /* BACK */
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #6c5ce7;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-
-        /* MAIN CARD */
-
-        .ground-card {
+        .card {
             background: white;
             border-radius: 16px;
             overflow: hidden;
-
-            box-shadow:
-                0 6px 25px rgba(0,0,0,0.08);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
         }
-
-        /* IMAGE */
 
         .ground-image {
             width: 100%;
-            height: 400px;
+            height: 420px;
             object-fit: cover;
             display: block;
         }
-
-        .no-image {
-            width: 100%;
-            height: 400px;
-
-            background: #eee;
-
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            font-size: 80px;
-        }
-
-        /* CONTENT */
 
         .content {
             padding: 30px;
         }
 
-        .title {
+        h1 {
             font-size: 34px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .location {
-            color: #636e72;
+            color: #666;
             font-size: 17px;
             margin-bottom: 25px;
         }
 
-        /* PRICE */
-
-        .price-box {
-            background: #f0edff;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-
-        .price {
-            color: #6c5ce7;
-            font-size: 30px;
-            font-weight: bold;
-        }
-
-        .price span {
-            color: #636e72;
-            font-size: 15px;
-            font-weight: normal;
-        }
-
-        /* DETAILS */
-
-        .details {
+        .info-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+            margin: 25px 0;
         }
 
-        .detail {
-            background: #f8f9fa;
+        .info-box {
+            background: #f8fafc;
             padding: 18px;
             border-radius: 10px;
         }
 
-        .detail-icon {
+        .info-box strong {
+            display: block;
+            margin-bottom: 7px;
+            color: #555;
+        }
+
+        .price {
             font-size: 25px;
-            margin-bottom: 8px;
-        }
-
-        .detail-label {
-            color: #636e72;
-            font-size: 13px;
-            margin-bottom: 5px;
-        }
-
-        .detail-value {
             font-weight: bold;
-            font-size: 16px;
-        }
-
-        /* DESCRIPTION */
-
-        .section {
-            margin-top: 25px;
-        }
-
-        .section h2 {
-            margin-bottom: 12px;
-            font-size: 22px;
+            color: #6c5ce7;
+            margin: 20px 0;
         }
 
         .description {
-            color: #636e72;
             line-height: 1.7;
-            white-space: pre-line;
-        }
-
-        /* BOOK BUTTON */
-
-        .booking-section {
-            margin-top: 30px;
-            padding-top: 25px;
-            border-top: 1px solid #eee;
+            color: #555;
+            margin: 20px 0;
         }
 
         .book-btn {
             display: inline-block;
-
             background: #6c5ce7;
             color: white;
-
-            padding: 15px 30px;
-
-            border-radius: 9px;
-
             text-decoration: none;
-
+            padding: 15px 28px;
+            border-radius: 10px;
             font-size: 17px;
-
             font-weight: bold;
+            margin-top: 15px;
         }
 
         .book-btn:hover {
-            background: #5849d6;
+            background: #5848d6;
         }
 
         .login-message {
-            color: #636e72;
-            margin-bottom: 12px;
+            margin-top: 20px;
+            padding: 18px;
+            background: #fff7ed;
+            border-radius: 10px;
         }
 
-        .login-link {
+        .login-message a {
             color: #6c5ce7;
             font-weight: bold;
-            text-decoration: none;
         }
-
-        /* FLASH */
-
-        .flash {
-            padding: 14px 18px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        .flash-success {
-            background: #dff9ee;
-            color: #087f5b;
-        }
-
-        .flash-danger {
-            background: #ffe1e1;
-            color: #b71c1c;
-        }
-
-        .flash-warning {
-            background: #fff4cc;
-            color: #856404;
-        }
-
-        .flash-info {
-            background: #dfeaff;
-            color: #2456a6;
-        }
-
-        /* MOBILE */
 
         @media (max-width: 700px) {
 
-            .navbar {
-                flex-direction: column;
-                gap: 12px;
-            }
-
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .container {
-                width: 95%;
-                margin: 20px auto;
-            }
-
-            .ground-image,
-            .no-image {
-                height: 250px;
-            }
-
-            .content {
-                padding: 20px;
-            }
-
-            .title {
-                font-size: 27px;
-            }
-
-            .details {
+            .info-grid {
                 grid-template-columns: 1fr;
             }
 
-            .book-btn {
-                width: 100%;
-                text-align: center;
+            .ground-image {
+                height: 280px;
             }
 
+            h1 {
+                font-size: 27px;
+            }
+
+            .nav-links {
+                gap: 10px;
+            }
         }
 
     </style>
-
 </head>
-
 
 <body>
 
+<nav>
 
-<!-- NAVBAR -->
-
-<nav class="navbar">
-
-    <a
-        href="{{ url_for('index') }}"
-        class="logo"
-    >
+    <div class="logo">
         ⚽ Futsal
-    </a>
-
+    </div>
 
     <div class="nav-links">
 
@@ -342,15 +186,10 @@
             Grounds
         </a>
 
-
-        {% if session.get("user_id") %}
+        {% if session.get('user_id') %}
 
             <a href="{{ url_for('dashboard') }}">
                 Dashboard
-            </a>
-
-            <a href="{{ url_for('my_bookings') }}">
-                My Bookings
             </a>
 
             <a href="{{ url_for('logout') }}">
@@ -374,243 +213,130 @@
 </nav>
 
 
-<!-- MAIN -->
-
 <div class="container">
 
+    <div class="card">
 
-    <a
-        href="{{ url_for('grounds') }}"
-        class="back-link"
-    >
-        ← Back to Grounds
-    </a>
-
-
-    <!-- FLASH -->
-
-    {% with messages = get_flashed_messages(
-        with_categories=true
-    ) %}
-
-        {% if messages %}
-
-            {% for category, message in messages %}
-
-                <div class="flash flash-{{ category }}">
-                    {{ message }}
-                </div>
-
-            {% endfor %}
-
-        {% endif %}
-
-    {% endwith %}
-
-
-    <!-- GROUND -->
-
-    <div class="ground-card">
-
-
-        <!-- IMAGE -->
-
-        {% if ground["image"] %}
+        {% if ground['image'] %}
 
             <img
                 src="{{ url_for(
-                    'static',
-                    filename='uploads/' ~ ground['image']
+                    'uploaded_file',
+                    filename=ground['image']
                 ) }}"
                 alt="{{ ground['name'] }}"
                 class="ground-image"
             >
 
-        {% else %}
-
-            <div class="no-image">
-                ⚽
-            </div>
-
         {% endif %}
 
 
-        <!-- CONTENT -->
-
         <div class="content">
 
-
-            <h1 class="title">
-                {{ ground["name"] }}
+            <h1>
+                {{ ground['name'] }}
             </h1>
 
+            <div class="location">
+                📍 {{ ground['location'] }}
+            </div>
 
-            {% if ground["location"] %}
 
-                <div class="location">
-                    📍 {{ ground["location"] }}
+            <div class="info-grid">
+
+                <div class="info-box">
+
+                    <strong>
+                        💰 Price
+                    </strong>
+
+                    Rs. {{ ground['price'] }}
+                    / hour
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <strong>
+                        🕐 Opening Time
+                    </strong>
+
+                    {{ ground['opening_time'] }}
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <strong>
+                        🕐 Closing Time
+                    </strong>
+
+                    {{ ground['closing_time'] }}
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <strong>
+                        📞 Contact
+                    </strong>
+
+                    {{ ground['contact'] }}
+
+                </div>
+
+            </div>
+
+
+            <div class="price">
+
+                Rs. {{ ground['price'] }}
+                / hour
+
+            </div>
+
+
+            <div class="description">
+
+                <strong>
+                    About this ground
+                </strong>
+
+                <br><br>
+
+                {{ ground['description'] or
+                   'No description available.' }}
+
+            </div>
+
+
+            {% if session.get('user_id') %}
+
+                <!-- IMPORTANT BOOKING BUTTON -->
+
+                <a
+                    href="/book/{{ ground['id'] }}"
+                    class="book-btn"
+                >
+                    ⚽ Book This Ground
+                </a>
+
+            {% else %}
+
+                <div class="login-message">
+
+                    Please
+                    <a href="{{ url_for('login') }}">
+                        login
+                    </a>
+                    to book this ground.
+
                 </div>
 
             {% endif %}
-
-
-            <!-- PRICE -->
-
-            <div class="price-box">
-
-                <div class="price">
-
-                    Rs.
-                    {{ ground["price"]|default(0)|round|int }}
-
-                    <span>
-                        / hour
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <!-- DETAILS -->
-
-            <div class="details">
-
-
-                <div class="detail">
-
-                    <div class="detail-icon">
-                        🕐
-                    </div>
-
-                    <div class="detail-label">
-                        Opening Time
-                    </div>
-
-                    <div class="detail-value">
-
-                        {{ ground["opening_time"] or "Not available" }}
-
-                    </div>
-
-                </div>
-
-
-                <div class="detail">
-
-                    <div class="detail-icon">
-                        🕐
-                    </div>
-
-                    <div class="detail-label">
-                        Closing Time
-                    </div>
-
-                    <div class="detail-value">
-
-                        {{ ground["closing_time"] or "Not available" }}
-
-                    </div>
-
-                </div>
-
-
-                <div class="detail">
-
-                    <div class="detail-icon">
-                        📞
-                    </div>
-
-                    <div class="detail-label">
-                        Contact
-                    </div>
-
-                    <div class="detail-value">
-
-                        {{ ground["contact"] or "Not available" }}
-
-                    </div>
-
-                </div>
-
-
-            </div>
-
-
-            <!-- DESCRIPTION -->
-
-            <div class="section">
-
-                <h2>
-                    About This Ground
-                </h2>
-
-
-                {% if ground["description"] %}
-
-                    <div class="description">
-                        {{ ground["description"] }}
-                    </div>
-
-                {% else %}
-
-                    <div class="description">
-                        No description available.
-                    </div>
-
-                {% endif %}
-
-            </div>
-
-
-            <!-- BOOKING -->
-
-            <div class="booking-section">
-
-
-                {% if session.get("user_id") %}
-
-                    <a
-                        href="{{ url_for(
-                            'book_ground',
-                            ground_id=ground['id']
-                        ) }}"
-                        class="book-btn"
-                    >
-                        ⚽ Book This Ground
-                    </a>
-
-                {% else %}
-
-                    <div class="login-message">
-
-                        Please login or create an account
-                        before booking this ground.
-
-                    </div>
-
-
-                    <a
-                        href="{{ url_for('login') }}"
-                        class="book-btn"
-                    >
-                        🔐 Login to Book
-                    </a>
-
-                    <br><br>
-
-                    <a
-                        href="{{ url_for('register') }}"
-                        class="login-link"
-                    >
-                        Don't have an account? Register
-                    </a>
-
-                {% endif %}
-
-
-            </div>
-
 
         </div>
 
@@ -618,7 +344,5 @@
 
 </div>
 
-
 </body>
-
 </html>

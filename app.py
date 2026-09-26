@@ -17,7 +17,8 @@ from flask import (
     url_for,
     session,
     flash,
-    jsonify
+    jsonify,
+    send_from_directory
 )
 
 from werkzeug.security import (
@@ -83,6 +84,19 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = (
     10 * 1024 * 1024
 )
+
+
+# ============================================================
+# SERVE UPLOADED IMAGES
+# ============================================================
+
+@app.route("/uploads/<path:filename>")
+def uploaded_file(filename):
+
+    return send_from_directory(
+        UPLOAD_FOLDER,
+        filename
+    )
 
 
 # ============================================================
@@ -696,9 +710,13 @@ def generate_esewa_signature(
     product_code
 ):
 
-    # eSewa expects the signed fields in this order.
+    # eSewa signs the exact string values submitted in the form.
+    # Always format the amount to exactly two decimal places so the
+    # signed value and the submitted total_amount are identical.
+    formatted_amount = f"{float(total_amount):.2f}"
+
     message = (
-        f"total_amount={total_amount},"
+        f"total_amount={formatted_amount},"
         f"transaction_uuid={transaction_uuid},"
         f"product_code={product_code}"
     )
@@ -798,11 +816,11 @@ def esewa_pay(booking_id):
         SELECT
             bookings.*,
             grounds.name AS ground_name,
-            grounds.location AS location,
-            grounds.price AS price
+            grounds.location AS ground_location,
+            grounds.price AS price,
+            grounds.price AS ground_price
         FROM bookings
-        JOIN grounds
-            ON bookings.ground_id = grounds.id
+        JOIN grounds ON bookings.ground_id = grounds.id
         WHERE bookings.id = ?
         AND bookings.user_id = ?
         """,
@@ -833,7 +851,21 @@ def esewa_pay(booking_id):
         return redirect(url_for("booking_details", booking_id=booking_id))
 
     total_amount = round(price * duration, 2)
+
+    if total_amount <= 0:
+        conn.close()
+        flash("Invalid booking amount.", "danger")
+        return redirect(url_for("booking_details", booking_id=booking_id))
+
+    # Always create a NEW UUID for every new eSewa payment attempt.
     transaction_uuid = generate_transaction_uuid()
+
+    # Extra uniqueness check against our database.
+    while conn.execute(
+        "SELECT id FROM bookings WHERE transaction_uuid = ?",
+        (transaction_uuid,)
+    ).fetchone() is not None:
+        transaction_uuid = generate_transaction_uuid()
 
     conn.execute(
         """
@@ -845,23 +877,35 @@ def esewa_pay(booking_id):
             payment_status = 'pending',
             payment_method = 'esewa'
         WHERE id = ?
+        AND user_id = ?
         """,
-        (transaction_uuid, ESEWA_PRODUCT_CODE, total_amount, booking_id)
+        (
+            transaction_uuid,
+            ESEWA_PRODUCT_CODE,
+            total_amount,
+            booking_id,
+            session["user_id"]
+        )
     )
     conn.commit()
     conn.close()
 
+    # Use exactly the same string for the form and the signature.
+    formatted_amount = f"{total_amount:.2f}"
+
     signature = generate_esewa_signature(
-        total_amount,
+        formatted_amount,
         transaction_uuid,
         ESEWA_PRODUCT_CODE
     )
 
+    signed_field_names = "total_amount,transaction_uuid,product_code"
+
     return render_template(
         "esewa_payment.html",
         booking=booking,
-        amount=total_amount,
-        tax_amount=0,
+        amount=formatted_amount,
+        tax_amount="0",
         total_amount=total_amount,
         transaction_uuid=transaction_uuid,
         product_code=ESEWA_PRODUCT_CODE,
@@ -869,10 +913,12 @@ def esewa_pay(booking_id):
         product_delivery_charge=0,
         success_url=url_for("esewa_success", _external=True),
         failure_url=url_for("esewa_failure", _external=True),
-        signed_field_names="total_amount,transaction_uuid,product_code",
+        signed_field_names=signed_field_names,
         signature=signature,
         esewa_payment_url=ESEWA_PAYMENT_URL
     )
+
+
 
 
 # ============================================================
@@ -1754,285 +1800,225 @@ def ground_details(ground_id):
 )
 @login_required
 def available_slots(ground_id):
+    """Return booking start times in the format expected by book.html."""
 
-    requested_date = request.args.get(
-        "date",
-        ""
-    ).strip()
-
-    # --------------------------------------------------------
-    # Always return JSON from this endpoint.
-    # --------------------------------------------------------
+    requested_date = request.args.get("date", "").strip()
+    duration_text = request.args.get("duration", "1").strip()
 
     if not requested_date:
-
         return jsonify({
             "success": False,
-            "error": "Date is required.",
             "message": "Please select a date first.",
             "slots": [],
-            "available_slots": [],
-            "booked_times": []
+            "available_slots": []
         }), 400
 
-    # --------------------------------------------------------
-    # Validate date.
-    # --------------------------------------------------------
-
     try:
-
         selected_date = datetime.strptime(
             requested_date,
             "%Y-%m-%d"
         ).date()
-
-    except ValueError:
-
+    except (TypeError, ValueError):
         return jsonify({
             "success": False,
-            "error": "Invalid date format.",
-            "message": "Date must be YYYY-MM-DD.",
+            "message": "Invalid date format.",
             "slots": [],
-            "available_slots": [],
-            "booked_times": []
+            "available_slots": []
         }), 400
-
-    # --------------------------------------------------------
-    # Prevent past dates.
-    # --------------------------------------------------------
 
     if selected_date < date.today():
-
         return jsonify({
             "success": False,
-            "error": "Past date.",
             "message": "You cannot book a past date.",
             "slots": [],
-            "available_slots": [],
-            "booked_times": []
+            "available_slots": []
         }), 400
+
+    try:
+        requested_duration = float(duration_text or 1)
+    except (TypeError, ValueError):
+        requested_duration = 1.0
+
+    if requested_duration not in {1.0, 1.5, 2.0}:
+        requested_duration = 1.0
 
     conn = get_db()
 
     try:
-
-        # ----------------------------------------------------
-        # Get ground
-        # ----------------------------------------------------
-
         ground = conn.execute(
             """
-            SELECT
-                id,
-                name,
-                opening_time,
-                closing_time
+            SELECT id, name, opening_time, closing_time
             FROM grounds
             WHERE id = ?
             """,
-            (
-                ground_id,
-            )
+            (ground_id,)
         ).fetchone()
 
         if ground is None:
-
             return jsonify({
                 "success": False,
-                "error": "Ground not found.",
                 "message": "Ground not found.",
                 "slots": [],
-                "available_slots": [],
-                "booked_times": []
+                "available_slots": []
             }), 404
 
-        # ----------------------------------------------------
-        # Safe opening/closing defaults
-        # ----------------------------------------------------
-
-        opening_time = (
-            ground["opening_time"]
-            or "06:00"
+        opening_minutes = time_to_minutes(
+            ground["opening_time"] or "06:00"
+        )
+        closing_minutes = time_to_minutes(
+            ground["closing_time"] or "22:00"
         )
 
-        closing_time = (
-            ground["closing_time"]
-            or "22:00"
-        )
+        if opening_minutes is None:
+            opening_minutes = 6 * 60
+        if closing_minutes is None:
+            closing_minutes = 22 * 60
 
-        # ----------------------------------------------------
-        # Generate all hourly slots.
-        # ----------------------------------------------------
-
-        all_slots = generate_time_slots(
-            opening_time,
-            closing_time
-        )
-
-        # ----------------------------------------------------
-        # Get existing bookings.
-        # ----------------------------------------------------
+        if closing_minutes <= opening_minutes:
+            return jsonify({
+                "success": False,
+                "message": "Ground operating hours are invalid.",
+                "slots": [],
+                "available_slots": []
+            }), 400
 
         bookings = conn.execute(
             """
-            SELECT
-                booking_time,
-                duration,
-                status
+            SELECT booking_time, duration
             FROM bookings
             WHERE ground_id = ?
-            AND booking_date = ?
-            AND status != 'cancelled'
+              AND booking_date = ?
+              AND status != 'cancelled'
             """,
-            (
-                ground_id,
-                requested_date
-            )
+            (ground_id, requested_date)
         ).fetchall()
 
-        booked_times = []
+        # Store every existing booking as a minute range.
+        blocked_ranges = []
 
         for booking in bookings:
-
-            booking_time = normalize_time(
+            existing_start = time_to_minutes(
                 booking["booking_time"]
             )
 
-            if booking_time:
+            if existing_start is None:
+                continue
 
-                duration = booking["duration"]
-
-                try:
-                    duration = int(
-                        duration or 1
-                    )
-                except (TypeError, ValueError):
-                    duration = 1
-
-                start = time_to_minutes(
-                    booking_time
+            try:
+                existing_duration = float(
+                    booking["duration"] or 1
                 )
+            except (TypeError, ValueError):
+                existing_duration = 1.0
 
-                if start is not None:
-
-                    for hour_number in range(
-                        duration
-                    ):
-
-                        occupied = (
-                            start
-                            +
-                            hour_number * 60
-                        )
-
-                        hour = occupied // 60
-
-                        minute = occupied % 60
-
-                        occupied_time = (
-                            f"{hour:02d}:{minute:02d}"
-                        )
-
-                        booked_times.append(
-                            occupied_time
-                        )
-
-        # Remove duplicates
-        booked_times = sorted(
-            list(
-                set(booked_times)
+            existing_duration = max(
+                0.5,
+                existing_duration
             )
+
+            existing_end = existing_start + int(
+                existing_duration * 60
+            )
+
+            blocked_ranges.append(
+                (existing_start, existing_end)
+            )
+
+        # Generate 30-minute start times.
+        # Return simple strings in "slots" because the booking page
+        # expects strings such as "6:00 AM" rather than dictionaries.
+        slots = []
+        slot_details = []
+        now_minutes = (
+            datetime.now().hour * 60
+            + datetime.now().minute
         )
 
-        # ----------------------------------------------------
-        # Mark slots
-        # ----------------------------------------------------
+        step = 30
+        required_minutes = int(
+            requested_duration * 60
+        )
 
-        slot_results = []
+        current = opening_minutes
 
-        available_results = []
+        while current + required_minutes <= closing_minutes:
+            requested_end = current + required_minutes
 
-        for slot in all_slots:
+            # For today's date, do not offer a time that has already passed.
+            if selected_date == date.today() and current <= now_minutes:
+                current += step
+                continue
 
-            is_booked = (
-                slot["value"]
-                in booked_times
-            )
+            overlaps = False
 
-            slot_data = {
-                "value": slot["value"],
-                "time": slot["value"],
-                "label": slot["label"],
-                "display": slot["label"],
-                "booked": is_booked,
-                "available": not is_booked,
-                "status": (
-                    "booked"
-                    if is_booked
-                    else "available"
-                )
-            }
+            for blocked_start, blocked_end in blocked_ranges:
+                if (
+                    current < blocked_end
+                    and requested_end > blocked_start
+                ):
+                    overlaps = True
+                    break
 
-            slot_results.append(
-                slot_data
-            )
+            if not overlaps:
+                value = f"{current // 60:02d}:{current % 60:02d}"
+                label = format_time_display(value)
 
-            if not is_booked:
+                slots.append(label)
+                slot_details.append({
+                    "value": value,
+                    "time": value,
+                    "label": label,
+                    "display": label,
+                    "available": True,
+                    "booked": False,
+                    "status": "available"
+                })
 
-                available_results.append(
-                    slot_data
-                )
+            current += step
 
         return jsonify({
             "success": True,
-
             "ground_id": ground_id,
-
             "date": requested_date,
-
+            "duration": requested_duration,
             "opening_time": normalize_time(
-                opening_time
+                ground["opening_time"] or "06:00"
             ),
-
             "closing_time": normalize_time(
-                closing_time
+                ground["closing_time"] or "22:00"
             ),
-
-            # New format
-            "slots": slot_results,
-
-            # Compatible formats
-            "available_slots":
-                available_results,
-
-            "booked_times":
-                booked_times,
-
-            "booked":
-                booked_times,
-
-            "message":
-                "Available slots loaded successfully."
+            "slots": slots,
+            "available_slots": slots,
+            "slot_details": slot_details,
+            "booked_times": [
+                normalize_time(booking["booking_time"])
+                for booking in bookings
+                if normalize_time(booking["booking_time"]) is not None
+            ],
+            "message": "Available slots loaded successfully."
         })
 
-    except Exception as error:
-
-        print(
-            "AVAILABLE SLOTS ERROR:",
-            error
-        )
-
+    except sqlite3.Error as error:
+        print("AVAILABLE SLOTS DATABASE ERROR:", error)
         return jsonify({
             "success": False,
+            "message": "Database error while loading time slots.",
             "error": str(error),
-            "message": "Could not load available slots.",
             "slots": [],
-            "available_slots": [],
-            "booked_times": []
+            "available_slots": []
+        }), 500
+
+    except Exception as error:
+        print("AVAILABLE SLOTS ERROR:", error)
+        return jsonify({
+            "success": False,
+            "message": "Could not load available time slots.",
+            "error": str(error),
+            "slots": [],
+            "available_slots": []
         }), 500
 
     finally:
-
         conn.close()
 
 
@@ -2257,8 +2243,7 @@ def my_bookings():
 
 
 # ============================================================
-# ============================================================
-# CUSTOMER BOOKING DETAILS
+# BOOKING DETAILS
 # ============================================================
 
 @app.route("/booking/<int:booking_id>")
@@ -2271,73 +2256,39 @@ def booking_details(booking_id):
         """
         SELECT
             bookings.*,
-
             grounds.name AS ground_name,
             grounds.location AS ground_location,
-
             grounds.price AS price,
             grounds.price AS ground_price,
-
             grounds.contact AS ground_contact,
             grounds.opening_time AS opening_time,
             grounds.closing_time AS closing_time,
-
             grounds.image AS ground_image
-
         FROM bookings
-
-        JOIN grounds
-            ON bookings.ground_id = grounds.id
-
+        JOIN grounds ON bookings.ground_id = grounds.id
         WHERE bookings.id = ?
         AND bookings.user_id = ?
         """,
-        (
-            booking_id,
-            session["user_id"]
-        )
+        (booking_id, session["user_id"])
     ).fetchone()
 
     conn.close()
 
-    # --------------------------------------------------------
-    # Booking not found
-    # --------------------------------------------------------
-
     if booking is None:
-
-        flash(
-            "Booking not found.",
-            "danger"
-        )
-
-        return redirect(
-            url_for("my_bookings")
-        )
-
-    # --------------------------------------------------------
-    # Calculate total amount safely
-    # --------------------------------------------------------
+        flash("Booking not found.", "danger")
+        return redirect(url_for("my_bookings"))
 
     try:
-        price = float(
-            booking["price"] or 0
-        )
+        price = float(booking["price"] or 0)
     except (TypeError, ValueError):
-        price = 0
+        price = 0.0
 
     try:
-        duration = float(
-            booking["duration"] or 1
-        )
+        duration = float(booking["duration"] or 1)
     except (TypeError, ValueError):
-        duration = 1
+        duration = 1.0
 
-    total_amount = price * duration
-
-    # --------------------------------------------------------
-    # Show booking details
-    # --------------------------------------------------------
+    total_amount = round(price * duration, 2)
 
     return render_template(
         "booking_details.html",
@@ -2346,6 +2297,8 @@ def booking_details(booking_id):
         duration=duration,
         total_amount=total_amount
     )
+
+
 
 
 # ============================================================
@@ -2450,10 +2403,7 @@ def cancel_booking(booking_id):
 # MANUAL PAYMENT
 # ============================================================
 
-@app.route(
-    "/payment/<int:booking_id>",
-    methods=["GET", "POST"]
-)
+@app.route("/payment/<int:booking_id>", methods=["GET", "POST"])
 @login_required
 def payment(booking_id):
 
@@ -2463,163 +2413,65 @@ def payment(booking_id):
         """
         SELECT
             bookings.*,
-
             grounds.name AS ground_name,
             grounds.location AS ground_location,
-
             grounds.price AS price,
             grounds.price AS ground_price,
-
             grounds.contact AS ground_contact,
             grounds.opening_time AS opening_time,
             grounds.closing_time AS closing_time,
-
             grounds.image AS ground_image
-
         FROM bookings
-
-        JOIN grounds
-            ON bookings.ground_id = grounds.id
-
+        JOIN grounds ON bookings.ground_id = grounds.id
         WHERE bookings.id = ?
         AND bookings.user_id = ?
         """,
-        (
-            booking_id,
-            session["user_id"]
-        )
+        (booking_id, session["user_id"])
     ).fetchone()
 
-    # --------------------------------------------------------
-    # Booking not found
-    # --------------------------------------------------------
-
     if booking is None:
-
         conn.close()
-
-        flash(
-            "Booking not found.",
-            "danger"
-        )
-
-        return redirect(
-            url_for("my_bookings")
-        )
-
-    # --------------------------------------------------------
-    # Calculate price safely
-    # --------------------------------------------------------
+        flash("Booking not found.", "danger")
+        return redirect(url_for("my_bookings"))
 
     try:
-        price = float(
-            booking["price"] or 0
-        )
+        price = float(booking["price"] or 0)
     except (TypeError, ValueError):
-        price = 0
-
-    # --------------------------------------------------------
-    # Calculate duration safely
-    # --------------------------------------------------------
+        price = 0.0
 
     try:
-        duration = float(
-            booking["duration"] or 1
-        )
+        duration = float(booking["duration"] or 1)
     except (TypeError, ValueError):
-        duration = 1
+        duration = 1.0
 
-    # --------------------------------------------------------
-    # Calculate total
-    # --------------------------------------------------------
-
-    total_amount = price * duration
-
-    # --------------------------------------------------------
-    # Cancelled booking
-    # --------------------------------------------------------
+    total_amount = round(price * duration, 2)
 
     if booking["status"] == "cancelled":
-
         conn.close()
-
-        flash(
-            "This booking has been cancelled.",
-            "danger"
-        )
-
-        return redirect(
-            url_for(
-                "booking_details",
-                booking_id=booking_id
-            )
-        )
-
-    # --------------------------------------------------------
-    # Already paid
-    # --------------------------------------------------------
+        flash("This booking has been cancelled.", "danger")
+        return redirect(url_for("booking_details", booking_id=booking_id))
 
     if booking["payment_status"] == "paid":
-
         conn.close()
-
-        flash(
-            "This booking has already been paid.",
-            "success"
-        )
-
-        return redirect(
-            url_for(
-                "booking_details",
-                booking_id=booking_id
-            )
-        )
-
-    # --------------------------------------------------------
-    # POST - submit manual payment
-    # --------------------------------------------------------
+        flash("This booking has already been paid.", "success")
+        return redirect(url_for("booking_details", booking_id=booking_id))
 
     if request.method == "POST":
 
         payment_method = request.form.get(
-            "payment_method",
-            ""
+            "payment_method", ""
         ).strip().lower()
 
         payment_reference = request.form.get(
-            "payment_reference",
-            ""
+            "payment_reference", ""
         ).strip()
 
-        # ----------------------------------------------------
-        # Validate payment method
-        # ----------------------------------------------------
-
-        allowed_methods = {
-            "cash",
-            "bank",
-            "khalti"
-        }
+        allowed_methods = {"cash", "bank", "khalti"}
 
         if payment_method not in allowed_methods:
-
             conn.close()
-
-            flash(
-                "Please select a valid payment method.",
-                "danger"
-            )
-
-            return redirect(
-                url_for(
-                    "payment",
-                    booking_id=booking_id
-                )
-            )
-
-        # ----------------------------------------------------
-        # Save payment information
-        # ----------------------------------------------------
+            flash("Please select a valid payment method.", "danger")
+            return redirect(url_for("payment", booking_id=booking_id))
 
         conn.execute(
             """
@@ -2638,25 +2490,17 @@ def payment(booking_id):
                 session["user_id"]
             )
         )
-
         conn.commit()
         conn.close()
 
         flash(
-            "Payment submitted for admin verification.",
+            "Payment submitted successfully. Waiting for admin verification.",
             "success"
         )
 
         return redirect(
-            url_for(
-                "booking_details",
-                booking_id=booking_id
-            )
+            url_for("booking_details", booking_id=booking_id)
         )
-
-    # --------------------------------------------------------
-    # GET - show payment page
-    # --------------------------------------------------------
 
     conn.close()
 
@@ -2668,9 +2512,8 @@ def payment(booking_id):
         total_amount=total_amount,
         amount=total_amount
     )
-    
-    
-    
+
+
 
 
 # ============================================================
@@ -2941,68 +2784,155 @@ def admin_dashboard():
 @admin_required
 def admin_calendar():
 
+    today = date.today()
+
     month = request.args.get("month", type=int)
     year = request.args.get("year", type=int)
-    today = datetime.today()
 
-    if not month or month < 1 or month > 12:
+    if month is None or month < 1 or month > 12:
         month = today.month
-    if not year or year < 1:
+
+    if year is None or year < 1:
         year = today.year
 
-    first_day = datetime(year, month, 1)
+    # --------------------------------------------------------
+    # Previous and next month
+    # --------------------------------------------------------
 
     if month == 1:
-        previous_month, previous_year = 12, year - 1
+        previous_month = 12
+        previous_year = year - 1
     else:
-        previous_month, previous_year = month - 1, year
+        previous_month = month - 1
+        previous_year = year
 
     if month == 12:
-        next_month, next_year = 1, year + 1
+        next_month = 1
+        next_year = year + 1
     else:
-        next_month, next_year = month + 1, year
+        next_month = month + 1
+        next_year = year
+
+    # --------------------------------------------------------
+    # First and last day of month
+    # --------------------------------------------------------
+
+    first_day = date(year, month, 1)
+
+    if month == 12:
+        first_day_next_month = date(year + 1, 1, 1)
+    else:
+        first_day_next_month = date(year, month + 1, 1)
+
+    last_day = first_day_next_month - timedelta(days=1)
+
+    # --------------------------------------------------------
+    # Get bookings for this month
+    # --------------------------------------------------------
 
     conn = get_db()
+
     bookings = conn.execute(
         """
-        SELECT bookings.*, users.name AS user_name, users.email AS user_email,
-               grounds.name AS ground_name, grounds.location AS ground_location,
-               grounds.price AS ground_price, grounds.price AS price
+        SELECT
+            bookings.*,
+            users.id AS user_id,
+            users.name AS user_name,
+            users.email AS user_email,
+            grounds.id AS ground_id,
+            grounds.name AS ground_name,
+            grounds.location AS ground_location,
+            grounds.price AS ground_price,
+            grounds.price AS price,
+            grounds.contact AS ground_contact
         FROM bookings
-        JOIN users ON bookings.user_id = users.id
-        JOIN grounds ON bookings.ground_id = grounds.id
-        WHERE strftime('%Y', bookings.booking_date) = ?
-        AND strftime('%m', bookings.booking_date) = ?
-        ORDER BY bookings.booking_date ASC, bookings.booking_time ASC, bookings.id ASC
+        JOIN users
+            ON bookings.user_id = users.id
+        JOIN grounds
+            ON bookings.ground_id = grounds.id
+        WHERE bookings.booking_date >= ?
+          AND bookings.booking_date <= ?
+        ORDER BY
+            bookings.booking_date ASC,
+            bookings.booking_time ASC,
+            bookings.id ASC
         """,
-        (str(year), f"{month:02d}")
+        (
+            first_day.isoformat(),
+            last_day.isoformat()
+        )
     ).fetchall()
+
     conn.close()
 
+    # --------------------------------------------------------
+    # Group bookings by date
+    # --------------------------------------------------------
+
     bookings_by_date = {}
+
     for booking in bookings:
-        bookings_by_date.setdefault(booking["booking_date"], []).append(booking)
+        booking_date = booking["booking_date"]
 
-    if month == 12:
-        next_month_date = datetime(year + 1, 1, 1)
-    else:
-        next_month_date = datetime(year, month + 1, 1)
+        if booking_date not in bookings_by_date:
+            bookings_by_date[booking_date] = []
 
-    days_in_month = (next_month_date - first_day).days
-    calendar_days = [None] * first_day.weekday()
+        bookings_by_date[booking_date].append(booking)
 
-    for day in range(1, days_in_month + 1):
-        date_string = f"{year:04d}-{month:02d}-{day:02d}"
-        day_bookings = bookings_by_date.get(date_string, [])
+    # --------------------------------------------------------
+    # Build calendar
+    #
+    # IMPORTANT:
+    # Every item is a dictionary. We never put None into
+    # calendar_days because the template uses day.get(...).
+    # --------------------------------------------------------
+
+    calendar_days = []
+
+    # Calendar starts on Sunday.
+    # Python weekday(): Monday=0 ... Sunday=6.
+    first_weekday = (first_day.weekday() + 1) % 7
+
+    # Empty cells before first day
+    for _ in range(first_weekday):
         calendar_days.append({
-            "day": day,
+            "day": "",
+            "date": "",
+            "is_today": False,
+            "bookings": [],
+            "booking_count": 0
+        })
+
+    # Actual days
+    current_day = first_day
+
+    while current_day <= last_day:
+
+        date_string = current_day.isoformat()
+        day_bookings = bookings_by_date.get(
+            date_string,
+            []
+        )
+
+        calendar_days.append({
+            "day": current_day.day,
             "date": date_string,
+            "is_today": current_day == today,
             "bookings": day_bookings,
             "booking_count": len(day_bookings)
         })
 
+        current_day += timedelta(days=1)
+
+    # Empty cells after last day
     while len(calendar_days) % 7 != 0:
-        calendar_days.append(None)
+        calendar_days.append({
+            "day": "",
+            "date": "",
+            "is_today": False,
+            "bookings": [],
+            "booking_count": 0
+        })
 
     return render_template(
         "admin/calendar.html",
@@ -3011,6 +2941,7 @@ def admin_calendar():
         month=month,
         year=year,
         month_name=first_day.strftime("%B"),
+        calendar_year=year,
         previous_month=previous_month,
         previous_year=previous_year,
         next_month=next_month,

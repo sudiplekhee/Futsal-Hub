@@ -1,977 +1,514 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Add Futsal Ground - Admin</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Ground - Futsal Admin</title>
 
     <style>
-
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-
         body {
-
             font-family: Arial, sans-serif;
-
             background: #f5f6fa;
-
             color: #2d3436;
-
         }
 
-
-        /* =========================
-           NAVBAR
-        ========================= */
-
-        .navbar {
-
-            background: #6c5ce7;
-
-            color: white;
-
-            padding: 16px 30px;
-
+        .layout {
             display: flex;
-
-            justify-content: space-between;
-
-            align-items: center;
-
+            min-height: 100vh;
         }
 
-
-        .navbar h2 {
-
-            margin: 0;
-
-        }
-
-
-        .nav-links {
-
-            display: flex;
-
-            gap: 20px;
-
-            align-items: center;
-
-        }
-
-
-        .nav-links a {
-
+        .sidebar {
+            width: 250px;
+            background: #1e1e2f;
             color: white;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            padding: 25px 15px;
+        }
 
-            text-decoration: none;
-
+        .logo {
+            text-align: center;
+            font-size: 23px;
             font-weight: bold;
-
+            margin-bottom: 35px;
         }
 
-
-        .nav-links a:hover {
-
-            text-decoration: underline;
-
+        .logo span {
+            color: #6c5ce7;
         }
 
-
-        /* =========================
-           CONTAINER
-        ========================= */
-
-        .container {
-
-            width: 92%;
-
-            max-width: 900px;
-
-            margin: 40px auto;
-
+        .nav-title {
+            color: #a5a5b5;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin: 20px 12px 10px;
         }
 
+        .nav-link {
+            display: block;
+            text-decoration: none;
+            color: #dfe6e9;
+            padding: 13px 15px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
 
-        /* =========================
-           PAGE HEADER
-        ========================= */
+        .nav-link:hover,
+        .nav-link.active {
+            background: #6c5ce7;
+            color: white;
+        }
 
-        .page-header {
+        .main {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+        }
 
+        .topbar {
+            height: 70px;
+            background: white;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+
+        .admin-name {
+            background: #f1efff;
+            color: #6c5ce7;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 30px;
+            max-width: 1100px;
+        }
+
+        .page-title {
             margin-bottom: 25px;
-
         }
 
-
-        .page-header h1 {
-
-            font-size: 30px;
-
-            margin-bottom: 8px;
-
+        .page-title h1 {
+            font-size: 28px;
+            margin-bottom: 7px;
         }
 
-
-        .page-header p {
-
+        .page-title p {
             color: #636e72;
-
         }
-
-
-        /* =========================
-           FORM CARD
-        ========================= */
 
         .form-card {
-
             background: white;
-
+            border-radius: 15px;
             padding: 30px;
-
-            border-radius: 14px;
-
-            box-shadow:
-                0 5px 20px rgba(0,0,0,0.08);
-
+            box-shadow: 0 3px 15px rgba(0,0,0,0.05);
         }
 
-
-        /* =========================
-           FORM GROUP
-        ========================= */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
 
         .form-group {
-
-            margin-bottom: 20px;
-
+            margin-bottom: 5px;
         }
 
-
-        .form-row {
-
-            display: grid;
-
-            grid-template-columns: 1fr 1fr;
-
-            gap: 20px;
-
+        .full {
+            grid-column: 1 / -1;
         }
-
 
         label {
-
             display: block;
-
             font-weight: bold;
-
             margin-bottom: 8px;
-
         }
-
 
         .required {
-
             color: #d63031;
-
         }
-
 
         input,
-        textarea,
-        select {
-
+        textarea {
             width: 100%;
-
-            padding: 12px 14px;
-
             border: 1px solid #dfe6e9;
-
             border-radius: 8px;
-
+            padding: 12px;
             font-size: 15px;
-
-            font-family: Arial, sans-serif;
-
             outline: none;
-
+            font-family: inherit;
         }
-
 
         input:focus,
-        textarea:focus,
-        select:focus {
-
+        textarea:focus {
             border-color: #6c5ce7;
-
-            box-shadow:
-                0 0 0 3px rgba(108,92,231,0.1);
-
         }
-
 
         textarea {
-
-            resize: vertical;
-
             min-height: 130px;
-
+            resize: vertical;
         }
 
-
-        .help-text {
-
-            font-size: 13px;
-
-            color: #636e72;
-
+        .help {
+            display: block;
             margin-top: 6px;
-
+            color: #636e72;
+            font-size: 12px;
         }
 
-
-        /* =========================
-           IMAGE UPLOAD
-        ========================= */
-
-        .image-box {
-
-            border: 2px dashed #dfe6e9;
-
-            border-radius: 10px;
-
-            padding: 25px;
-
-            text-align: center;
-
-            background: #fafafa;
-
-        }
-
-
-        .image-icon {
-
-            font-size: 45px;
-
-            margin-bottom: 10px;
-
-        }
-
-
-        .image-box input {
-
-            border: none;
-
-            padding: 10px;
-
-            background: white;
-
-        }
-
-
-        .preview-container {
-
-            display: none;
-
-            margin-top: 20px;
-
-        }
-
-
-        .preview-container img {
-
-            max-width: 100%;
-
-            max-height: 250px;
-
-            border-radius: 10px;
-
-            object-fit: cover;
-
-        }
-
-
-        /* =========================
-           BUTTONS
-        ========================= */
-
-        .buttons {
-
+        .actions {
             display: flex;
-
             gap: 12px;
-
             margin-top: 25px;
-
+            padding-top: 20px;
+            border-top: 1px solid #eee;
         }
-
 
         .btn {
-
-            display: inline-block;
-
-            padding: 12px 22px;
-
-            border-radius: 8px;
-
             border: none;
-
-            text-decoration: none;
-
-            cursor: pointer;
-
-            font-size: 15px;
-
+            border-radius: 8px;
+            padding: 12px 22px;
             font-weight: bold;
-
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
         }
-
 
         .btn-primary {
-
             background: #6c5ce7;
-
             color: white;
-
         }
-
-
-        .btn-primary:hover {
-
-            background: #5849d6;
-
-        }
-
 
         .btn-secondary {
-
-            background: #636e72;
-
-            color: white;
-
+            background: #dfe6e9;
+            color: #2d3436;
         }
 
-
-        .btn-secondary:hover {
-
-            background: #4d5659;
-
+        .btn:hover {
+            opacity: 0.9;
         }
-
-
-        /* =========================
-           FLASH
-        ========================= */
 
         .flash {
-
-            padding: 14px 18px;
-
+            padding: 13px 16px;
             border-radius: 8px;
-
             margin-bottom: 20px;
-
-            font-weight: bold;
-
         }
-
-
-        .flash-success {
-
-            background: #dff9ee;
-
-            color: #087f5b;
-
-        }
-
 
         .flash-danger {
-
-            background: #ffe1e1;
-
-            color: #b71c1c;
-
+            background: #ffe5e5;
+            color: #c0392b;
         }
 
-
-        .flash-warning {
-
-            background: #fff4cc;
-
-            color: #856404;
-
+        .flash-success {
+            background: #dff8ef;
+            color: #008f70;
         }
-
-
-        .flash-info {
-
-            background: #dfeaff;
-
-            color: #2456a6;
-
-        }
-
-
-        /* =========================
-           MOBILE
-        ========================= */
 
         @media (max-width: 700px) {
 
-            .navbar {
-
-                flex-direction: column;
-
-                gap: 12px;
-
+            .layout {
+                display: block;
             }
 
-
-            .nav-links {
-
-                flex-wrap: wrap;
-
-                justify-content: center;
-
+            .sidebar {
+                position: relative;
+                width: 100%;
             }
 
-
-            .container {
-
-                width: 95%;
-
-                margin: 25px auto;
-
+            .main {
+                margin-left: 0;
+                width: 100%;
             }
 
-
-            .form-card {
-
-                padding: 20px;
-
+            .content {
+                padding: 15px;
             }
 
-
-            .form-row {
-
+            .form-grid {
                 grid-template-columns: 1fr;
-
             }
 
-
-            .buttons {
-
-                flex-direction: column;
-
+            .full {
+                grid-column: auto;
             }
-
-
-            .btn {
-
-                text-align: center;
-
-            }
-
         }
-
     </style>
-
 </head>
-
 
 <body>
 
+<div class="layout">
 
-<!-- =========================
-     NAVBAR
-========================= -->
+    <aside class="sidebar">
 
-<nav class="navbar">
+        <div class="logo">
+            ⚽ <span>Futsal</span> Admin
+        </div>
 
-    <h2>⚽ Futsal Admin</h2>
+        <div class="nav-title">Main</div>
 
-
-    <div class="nav-links">
-
-        <a href="{{ url_for('admin_dashboard') }}">
-            Dashboard
+        <a href="{{ url_for('admin_dashboard') }}" class="nav-link">
+            🏠 Dashboard
         </a>
 
-
-        <a href="{{ url_for('admin_users') }}">
-            Users
+        <a href="{{ url_for('admin_bookings') }}" class="nav-link">
+            📋 Bookings
         </a>
 
-
-        <a href="{{ url_for('admin_grounds') }}">
-            Grounds
+        <a href="{{ url_for('admin_calendar') }}" class="nav-link">
+            📅 Calendar
         </a>
 
+        <div class="nav-title">Management</div>
 
-        <a href="{{ url_for('admin_bookings') }}">
-            Bookings
+        <a href="{{ url_for('admin_users') }}" class="nav-link">
+            👥 Users
         </a>
 
-
-        <a href="{{ url_for('admin_logout') }}">
-            Logout
+        <a href="{{ url_for('admin_grounds') }}" class="nav-link active">
+            ⚽ Grounds
         </a>
 
-    </div>
+        <div class="nav-title">Account</div>
 
-</nav>
+        <a href="{{ url_for('admin_logout') }}" class="nav-link">
+            🚪 Logout
+        </a>
 
-
-<!-- =========================
-     MAIN CONTAINER
-========================= -->
-
-<div class="container">
+    </aside>
 
 
-    <!-- HEADER -->
+    <main class="main">
 
-    <div class="page-header">
+        <div class="topbar">
 
-        <h1>
-            ➕ Add New Futsal Ground
-        </h1>
+            <h2>Add Futsal Ground</h2>
 
-        <p>
-            Enter the details of your futsal ground below.
-        </p>
+            <div class="admin-name">
+                👤 Administrator
+            </div>
 
-    </div>
+        </div>
 
 
-    <!-- =========================
-         FLASH MESSAGES
-    ========================= -->
+        <div class="content">
 
-    {% with messages = get_flashed_messages(
-        with_categories=true
-    ) %}
+            <div class="page-title">
 
-        {% if messages %}
+                <h1>➕ Add New Ground</h1>
 
-            {% for category, message in messages %}
+                <p>
+                    Add a futsal ground that customers can book.
+                </p>
 
-                <div class="flash flash-{{ category }}">
-
-                    {{ message }}
-
-                </div>
-
-            {% endfor %}
-
-        {% endif %}
-
-    {% endwith %}
+            </div>
 
 
-    <!-- =========================
-         FORM
-    ========================= -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
 
-    <div class="form-card">
+                {% if messages %}
 
+                    {% for category, message in messages %}
 
-        <form
-            method="POST"
-            enctype="multipart/form-data"
-        >
+                        <div class="flash flash-{{ category }}">
+                            {{ message }}
+                        </div>
 
+                    {% endfor %}
 
-            <!-- GROUND NAME -->
+                {% endif %}
 
-            <div class="form-group">
-
-                <label for="name">
-
-                    Ground Name
-                    <span class="required">*</span>
-
-                </label>
+            {% endwith %}
 
 
-                <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    placeholder="Example: City Futsal Arena"
-                    required
+            <div class="form-card">
+
+                <form
+                    method="POST"
+                    enctype="multipart/form-data"
                 >
 
+                    <div class="form-grid">
 
-                <div class="help-text">
+                        <div class="form-group">
 
-                    Enter the name customers will see.
+                            <label>
+                                Ground Name
+                                <span class="required">*</span>
+                            </label>
 
-                </div>
+                            <input
+                                type="text"
+                                name="name"
+                                placeholder="Example: City Futsal Arena"
+                                required
+                            >
 
-            </div>
+                        </div>
 
 
-            <!-- LOCATION -->
+                        <div class="form-group">
 
-            <div class="form-group">
+                            <label>
+                                Location
+                                <span class="required">*</span>
+                            </label>
 
-                <label for="location">
+                            <input
+                                type="text"
+                                name="location"
+                                placeholder="Example: Biratnagar"
+                                required
+                            >
 
-                    Location
-                    <span class="required">*</span>
+                        </div>
 
-                </label>
 
+                        <div class="form-group">
 
-                <input
-                    type="text"
-                    id="location"
-                    name="location"
-                    placeholder="Example: Biratnagar, Nepal"
-                    required
-                >
+                            <label>
+                                Price per Hour
+                                <span class="required">*</span>
+                            </label>
 
+                            <input
+                                type="number"
+                                name="price"
+                                min="0"
+                                step="0.01"
+                                placeholder="Example: 1500"
+                                required
+                            >
 
-                <div class="help-text">
+                            <span class="help">
+                                Enter the price for one hour.
+                            </span>
 
-                    Enter the location or address of the ground.
+                        </div>
 
-                </div>
 
-            </div>
+                        <div class="form-group">
 
+                            <label>
+                                Contact Number
+                            </label>
 
-            <!-- PRICE + CONTACT -->
+                            <input
+                                type="text"
+                                name="contact"
+                                placeholder="Example: 98XXXXXXXX"
+                            >
 
-            <div class="form-row">
+                        </div>
 
 
-                <div class="form-group">
+                        <div class="form-group">
 
-                    <label for="price">
+                            <label>
+                                Opening Time
+                                <span class="required">*</span>
+                            </label>
 
-                        Price per Hour
-                        <span class="required">*</span>
+                            <input
+                                type="time"
+                                name="opening_time"
+                                value="06:00"
+                                required
+                            >
 
-                    </label>
+                        </div>
 
 
-                    <input
-                        type="number"
-                        id="price"
-                        name="price"
-                        min="0"
-                        step="1"
-                        placeholder="Example: 1500"
-                        required
-                    >
+                        <div class="form-group">
 
+                            <label>
+                                Closing Time
+                                <span class="required">*</span>
+                            </label>
 
-                    <div class="help-text">
+                            <input
+                                type="time"
+                                name="closing_time"
+                                value="22:00"
+                                required
+                            >
 
-                        Price in Nepalese Rupees (Rs.).
+                        </div>
 
-                    </div>
 
-                </div>
+                        <div class="form-group full">
 
+                            <label>
+                                Ground Image
+                            </label>
 
-                <div class="form-group">
+                            <input
+                                type="file"
+                                name="image"
+                                accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                            >
 
-                    <label for="contact">
+                            <span class="help">
+                                Recommended: JPG or PNG image.
+                            </span>
 
-                        Contact Number
+                        </div>
 
-                    </label>
 
+                        <div class="form-group full">
 
-                    <input
-                        type="text"
-                        id="contact"
-                        name="contact"
-                        placeholder="Example: 98XXXXXXXX"
-                    >
+                            <label>
+                                Description
+                            </label>
 
+                            <textarea
+                                name="description"
+                                placeholder="Write information about this futsal ground..."
+                            ></textarea>
 
-                    <div class="help-text">
-
-                        Phone number customers can use.
-
-                    </div>
-
-                </div>
-
-
-            </div>
-
-
-            <!-- OPENING + CLOSING -->
-
-            <div class="form-row">
-
-
-                <div class="form-group">
-
-                    <label for="opening_time">
-
-                        Opening Time
-                        <span class="required">*</span>
-
-                    </label>
-
-
-                    <input
-                        type="time"
-                        id="opening_time"
-                        name="opening_time"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="closing_time">
-
-                        Closing Time
-                        <span class="required">*</span>
-
-                    </label>
-
-
-                    <input
-                        type="time"
-                        id="closing_time"
-                        name="closing_time"
-                        required
-                    >
-
-                </div>
-
-
-            </div>
-
-
-            <!-- DESCRIPTION -->
-
-            <div class="form-group">
-
-                <label for="description">
-
-                    Description
-
-                </label>
-
-
-                <textarea
-                    id="description"
-                    name="description"
-                    placeholder="Describe your futsal ground, facilities, parking, changing rooms, lighting, etc."
-                ></textarea>
-
-
-                <div class="help-text">
-
-                    Give customers useful information about this ground.
-
-                </div>
-
-            </div>
-
-
-            <!-- IMAGE -->
-
-            <div class="form-group">
-
-                <label for="image">
-
-                    Ground Image
-
-                </label>
-
-
-                <div class="image-box">
-
-
-                    <div class="image-icon">
-                        🖼️
-                    </div>
-
-
-                    <p style="margin-bottom: 12px;">
-
-                        Upload a photo of the futsal ground.
-
-                    </p>
-
-
-                    <input
-                        type="file"
-                        id="image"
-                        name="image"
-                        accept="image/png,image/jpeg,image/jpg,image/webp"
-                    >
-
-
-                    <div class="help-text">
-
-                        Recommended: JPG or PNG image.
+                        </div>
 
                     </div>
 
 
-                    <!-- PREVIEW -->
+                    <div class="actions">
 
-                    <div
-                        class="preview-container"
-                        id="previewContainer"
-                    >
-
-                        <p style="margin-bottom: 10px;">
-                            Image Preview:
-                        </p>
-
-
-                        <img
-                            id="imagePreview"
-                            src=""
-                            alt="Image Preview"
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
                         >
+                            ➕ Add Ground
+                        </button>
+
+                        <a
+                            href="{{ url_for('admin_grounds') }}"
+                            class="btn btn-secondary"
+                        >
+                            Cancel
+                        </a>
 
                     </div>
 
-
-                </div>
-
-            </div>
-
-
-            <!-- BUTTONS -->
-
-            <div class="buttons">
-
-
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                >
-
-                    💾 Save Ground
-
-                </button>
-
-
-                <a
-                    href="{{ url_for('admin_grounds') }}"
-                    class="btn btn-secondary"
-                >
-
-                    ← Cancel
-
-                </a>
-
+                </form>
 
             </div>
 
+        </div>
 
-        </form>
-
-    </div>
+    </main>
 
 </div>
 
-
-<!-- =========================
-     IMAGE PREVIEW SCRIPT
-========================= -->
-
-<script>
-
-    const imageInput =
-        document.getElementById("image");
-
-    const previewContainer =
-        document.getElementById(
-            "previewContainer"
-        );
-
-    const imagePreview =
-        document.getElementById(
-            "imagePreview"
-        );
-
-
-    imageInput.addEventListener(
-        "change",
-        function () {
-
-            const file =
-                this.files[0];
-
-
-            if (!file) {
-
-                previewContainer.style.display =
-                    "none";
-
-                return;
-
-            }
-
-
-            if (!file.type.startsWith("image/")) {
-
-                alert(
-                    "Please select an image file."
-                );
-
-                this.value = "";
-
-                previewContainer.style.display =
-                    "none";
-
-                return;
-
-            }
-
-
-            const reader =
-                new FileReader();
-
-
-            reader.onload =
-                function (event) {
-
-                    imagePreview.src =
-                        event.target.result;
-
-                    previewContainer.style.display =
-                        "block";
-
-                };
-
-
-            reader.readAsDataURL(file);
-
-        }
-    );
-
-</script>
-
-
 </body>
-
 </html>

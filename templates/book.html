@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Book {{ ground['name'] }} - Futsal</title>
 
@@ -17,28 +20,28 @@
         }
 
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f5f7fb;
-            color: #222;
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+            color: #2d3436;
         }
 
         /* NAVBAR */
 
-        nav {
-            background: #111827;
-            color: white;
-            padding: 16px 30px;
-
+        .navbar {
+            background: white;
+            height: 70px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-
-            box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+            justify-content: space-between;
+            padding: 0 7%;
+            border-bottom: 1px solid #eee;
         }
 
         .logo {
-            font-size: 24px;
+            font-size: 25px;
             font-weight: bold;
+            color: #6c5ce7;
+            text-decoration: none;
         }
 
         .nav-links {
@@ -48,246 +51,232 @@
         }
 
         .nav-links a {
-            color: white;
             text-decoration: none;
-            font-size: 15px;
+            color: #2d3436;
+            font-weight: 600;
         }
 
         .nav-links a:hover {
-            color: #a29bfe;
+            color: #6c5ce7;
+        }
+
+        .logout {
+            background: #6c5ce7;
+            color: white !important;
+            padding: 9px 15px;
+            border-radius: 7px;
         }
 
         /* MAIN */
 
         .container {
-            width: 92%;
             max-width: 1100px;
-            margin: 40px auto;
+            margin: 35px auto;
+            padding: 0 20px;
         }
 
         .page-title {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .page-title h1 {
-            font-size: 32px;
-            margin-bottom: 8px;
-        }
-
-        .page-title p {
-            color: #6b7280;
-        }
-
-        /* LAYOUT */
-
-        .booking-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 14px;
-            padding: 25px;
-
-            box-shadow:
-                0 5px 20px rgba(0,0,0,0.08);
-        }
-
-        .card h2 {
-            margin-bottom: 20px;
-            font-size: 21px;
-        }
-
-        /* GROUND INFO */
-
-        .ground-info {
             margin-bottom: 25px;
         }
 
-        .ground-name {
-            font-size: 25px;
-            font-weight: bold;
-            margin-bottom: 8px;
+        .page-title h1 {
+            font-size: 30px;
+            margin-bottom: 7px;
         }
 
-        .location {
-            color: #6b7280;
-            margin-bottom: 15px;
+        .page-title p {
+            color: #636e72;
         }
 
-        .price {
-            font-size: 20px;
-            font-weight: bold;
-            color: #6c5ce7;
+        .booking-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 25px;
         }
 
-        .info-box {
-            background: #f3f4f6;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 18px;
+        /* GROUND CARD */
+
+        .ground-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+            height: fit-content;
+        }
+
+        .ground-image {
+            width: 100%;
+            height: 230px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .no-image {
+            height: 230px;
+            background: #e9e7ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 70px;
+        }
+
+        .ground-info {
+            padding: 22px;
+        }
+
+        .ground-info h2 {
+            margin-bottom: 12px;
         }
 
         .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 7px 0;
+            margin: 10px 0;
+            color: #636e72;
         }
 
-        .info-row span:first-child {
-            color: #6b7280;
-        }
-
-        .info-row span:last-child {
+        .price {
+            color: #6c5ce7;
+            font-size: 21px;
             font-weight: bold;
+            margin-top: 15px;
         }
 
-        /* FORM */
+        /* BOOKING CARD */
+
+        .booking-card {
+            background: white;
+            border-radius: 15px;
+            padding: 28px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 18px;
+        }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 23px;
         }
 
         label {
             display: block;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 9px;
         }
 
         input,
         select {
             width: 100%;
             padding: 13px;
-
-            border: 1px solid #d1d5db;
-            border-radius: 9px;
-
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
             font-size: 15px;
-
             outline: none;
         }
 
         input:focus,
         select:focus {
             border-color: #6c5ce7;
-
-            box-shadow:
-                0 0 0 3px rgba(108,92,231,0.12);
         }
 
-        select:disabled {
-            background: #f3f4f6;
+        /* SLOTS */
+
+        .slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .slot {
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            padding: 12px 7px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .slot:hover {
+            border-color: #6c5ce7;
+            background: #f8f7ff;
+        }
+
+        .slot.selected {
+            background: #6c5ce7;
+            color: white;
+            border-color: #6c5ce7;
+        }
+
+        .slot.disabled {
+            background: #f1f2f6;
+            color: #b2bec3;
+            border-color: #eee;
             cursor: not-allowed;
         }
 
-        /* SLOT STATUS */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #636e72;
+        }
 
-        .slot-status {
-            margin-top: 10px;
-            padding: 10px 12px;
-
+        .empty-slots {
+            background: #fff5d9;
+            color: #8c6500;
+            padding: 15px;
             border-radius: 8px;
-
-            font-size: 14px;
+            text-align: center;
         }
 
-        .slot-status.loading {
-            background: #eef2ff;
-            color: #4338ca;
-        }
+        /* SUMMARY */
 
-        .slot-status.success {
-            background: #ecfdf5;
-            color: #047857;
-        }
-
-        .slot-status.error {
-            background: #fef2f2;
-            color: #b91c1c;
-        }
-
-        /* TOTAL */
-
-        .total-box {
-            margin-top: 20px;
-
-            background: #f5f3ff;
-
-            border: 1px solid #ddd6fe;
-
+        .summary {
+            background: #f7f6ff;
             border-radius: 10px;
-
             padding: 18px;
+            margin-top: 25px;
         }
 
-        .total-row {
+        .summary-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            margin: 9px 0;
         }
 
-        .total-label {
-            font-size: 16px;
-            color: #555;
-        }
-
-        .total-price {
-            font-size: 25px;
+        .summary-total {
+            border-top: 1px solid #ddd;
+            padding-top: 12px;
+            margin-top: 12px;
+            font-size: 20px;
             font-weight: bold;
             color: #6c5ce7;
         }
 
         /* BUTTON */
 
-        .book-button {
+        .submit-btn {
             width: 100%;
-
             margin-top: 20px;
-
-            padding: 14px;
-
             border: none;
-            border-radius: 9px;
-
             background: #6c5ce7;
             color: white;
-
-            font-size: 17px;
+            padding: 15px;
+            border-radius: 9px;
+            font-size: 16px;
             font-weight: bold;
-
             cursor: pointer;
-
-            transition: 0.2s;
         }
 
-        .book-button:hover {
-            background: #5849d6;
+        .submit-btn:hover {
+            background: #5849c7;
         }
 
-        .book-button:disabled {
-            background: #9ca3af;
+        .submit-btn:disabled {
+            background: #b2bec3;
             cursor: not-allowed;
-        }
-
-        /* BACK */
-
-        .back-link {
-            display: inline-block;
-
-            margin-top: 25px;
-
-            color: #6c5ce7;
-
-            text-decoration: none;
-
-            font-weight: bold;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
         }
 
         /* FLASH */
@@ -299,63 +288,66 @@
         }
 
         .flash-danger {
-            background: #fee2e2;
-            color: #991b1b;
+            background: #ffe5e5;
+            color: #c0392b;
         }
 
         .flash-success {
-            background: #dcfce7;
-            color: #166534;
+            background: #dff8ef;
+            color: #008f70;
         }
 
-        .flash-warning {
-            background: #fef3c7;
-            color: #92400e;
-        }
+        /* RESPONSIVE */
 
-        /* MOBILE */
-
-        @media (max-width: 768px) {
+        @media (max-width: 800px) {
 
             .booking-layout {
                 grid-template-columns: 1fr;
             }
 
-            nav {
-                padding: 15px 18px;
+            .slots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .navbar {
+                padding: 0 20px;
             }
 
             .nav-links {
                 gap: 10px;
             }
+        }
 
-            .nav-links a {
-                font-size: 13px;
+        @media (max-width: 500px) {
+
+            .navbar {
+                height: auto;
+                padding: 15px;
+                flex-direction: column;
+                gap: 15px;
             }
 
-            .container {
-                width: 94%;
-                margin-top: 25px;
+            .slots {
+                grid-template-columns: 1fr 1fr;
             }
-
-            .page-title h1 {
-                font-size: 27px;
-            }
-
         }
 
     </style>
+
 </head>
 
 <body>
 
 <!-- NAVBAR -->
 
-<nav>
+<nav class="navbar">
 
-    <div class="logo">
+    <a
+        href="{{ url_for('index') }}"
+        class="logo"
+    >
         ⚽ Futsal
-    </div>
+    </a>
 
     <div class="nav-links">
 
@@ -367,11 +359,14 @@
             Grounds
         </a>
 
-        <a href="{{ url_for('my_bookings') }}">
-            My Bookings
+        <a href="{{ url_for('dashboard') }}">
+            Dashboard
         </a>
 
-        <a href="{{ url_for('logout') }}">
+        <a
+            href="{{ url_for('logout') }}"
+            class="logout"
+        >
             Logout
         </a>
 
@@ -391,7 +386,7 @@
         </h1>
 
         <p>
-            Select your date, time and duration
+            Select your date, duration and available time.
         </p>
 
     </div>
@@ -421,66 +416,62 @@
 
         <!-- GROUND INFORMATION -->
 
-        <div class="card">
+        <div class="ground-card">
 
-            <h2>
-                Ground Information
-            </h2>
+            {% if ground['image'] %}
+
+                <img
+                    src="{{ url_for(
+                        'uploaded_file',
+                        filename=ground['image']
+                    ) }}"
+                    class="ground-image"
+                    alt="{{ ground['name'] }}"
+                >
+
+            {% else %}
+
+                <div class="no-image">
+                    ⚽
+                </div>
+
+            {% endif %}
+
 
             <div class="ground-info">
 
-                <div class="ground-name">
+                <h2>
                     {{ ground['name'] }}
-                </div>
+                </h2>
 
-                <div class="location">
+                <div class="info-row">
                     📍 {{ ground['location'] }}
                 </div>
 
+                {% if ground['contact'] %}
+
+                    <div class="info-row">
+                        📞 {{ ground['contact'] }}
+                    </div>
+
+                {% endif %}
+
+                <div class="info-row">
+
+                    🕐
+                    {{ ground['opening_time'] }}
+                    -
+                    {{ ground['closing_time'] }}
+
+                </div>
+
                 <div class="price">
-                    Rs. {{ ground['price'] }} / hour
-                </div>
 
-            </div>
+                    Rs. {{ "%.2f"|format(
+                        ground['price']|float
+                    ) }}
 
-
-            <div class="info-box">
-
-                <div class="info-row">
-
-                    <span>
-                        Opening Time
-                    </span>
-
-                    <span>
-                        {{ ground['opening_time'] }}
-                    </span>
-
-                </div>
-
-
-                <div class="info-row">
-
-                    <span>
-                        Closing Time
-                    </span>
-
-                    <span>
-                        {{ ground['closing_time'] }}
-                    </span>
-
-                </div>
-
-
-                <div class="info-row">
-
-                    <span>
-                        Contact
-                    </span>
-
-                    <span>
-                        {{ ground['contact'] }}
-                    </span>
+                    / hour
 
                 </div>
 
@@ -491,15 +482,19 @@
 
         <!-- BOOKING FORM -->
 
-        <div class="card">
+        <div class="booking-card">
 
-            <h2>
-                Booking Details
-            </h2>
+            <div class="section-title">
+                📅 Select Booking Details
+            </div>
+
 
             <form
                 method="POST"
-                action="{{ url_for('book_ground', ground_id=ground['id']) }}"
+                action="{{ url_for(
+                    'book_ground',
+                    ground_id=ground['id']
+                ) }}"
                 id="bookingForm"
             >
 
@@ -509,46 +504,17 @@
                 <div class="form-group">
 
                     <label for="booking_date">
-                        📅 Select Date
+                        Select Date
                     </label>
 
                     <input
                         type="date"
                         id="booking_date"
                         name="booking_date"
+                        min="{{ today }}"
+                        value="{{ today }}"
                         required
                     >
-
-                </div>
-
-
-                <!-- TIME -->
-
-                <div class="form-group">
-
-                    <label for="booking_time">
-                        ⏰ Select Time
-                    </label>
-
-                    <select
-                        id="booking_time"
-                        name="booking_time"
-                        required
-                        disabled
-                    >
-
-                        <option value="">
-                            First select a date
-                        </option>
-
-                    </select>
-
-
-                    <div
-                        id="slotStatus"
-                        class="slot-status"
-                        style="display:none;"
-                    ></div>
 
                 </div>
 
@@ -558,7 +524,7 @@
                 <div class="form-group">
 
                     <label for="duration">
-                        ⏱️ Duration
+                        Select Duration
                     </label>
 
                     <select
@@ -584,18 +550,21 @@
                 </div>
 
 
-                <!-- TOTAL -->
+                <!-- TIME SLOTS -->
 
-                <div class="total-box">
+                <div class="form-group">
 
-                    <div class="total-row">
+                    <label>
+                        Select Available Time
+                    </label>
 
-                        <div class="total-label">
-                            Total Amount
-                        </div>
+                    <div
+                        id="slots"
+                        class="slots"
+                    >
 
-                        <div class="total-price">
-                            Rs. <span id="totalPrice">0</span>
+                        <div class="loading">
+                            Loading available slots...
                         </div>
 
                     </div>
@@ -603,26 +572,108 @@
                 </div>
 
 
-                <!-- SUBMIT -->
+                <!-- HIDDEN TIME -->
+
+                <input
+                    type="hidden"
+                    name="booking_time"
+                    id="booking_time"
+                    required
+                >
+
+
+                <!-- SUMMARY -->
+
+                <div class="summary">
+
+                    <div class="summary-row">
+
+                        <span>
+                            Ground
+                        </span>
+
+                        <strong>
+                            {{ ground['name'] }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span>
+                            Date
+                        </span>
+
+                        <strong id="summaryDate">
+                            {{ today }}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span>
+                            Time
+                        </span>
+
+                        <strong id="summaryTime">
+                            Not selected
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span>
+                            Duration
+                        </span>
+
+                        <strong id="summaryDuration">
+                            1 Hour
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-total">
+
+                        <div class="summary-row">
+
+                            <span>
+                                Total
+                            </span>
+
+                            <span>
+
+                                Rs.
+                                <span id="totalPrice">
+                                    {{ "%.2f"|format(
+                                        ground['price']|float
+                                    ) }}
+                                </span>
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
 
                 <button
                     type="submit"
-                    class="book-button"
-                    id="bookButton"
+                    class="submit-btn"
+                    id="submitBtn"
                     disabled
                 >
-                    Continue Booking
+                    ⚽ Confirm Booking
                 </button>
 
             </form>
-
-
-            <a
-                href="{{ url_for('ground_details', ground_id=ground['id']) }}"
-                class="back-link"
-            >
-                ← Back to Ground
-            </a>
 
         </div>
 
@@ -633,434 +684,269 @@
 
 <script>
 
-    const bookingDate =
+    const dateInput =
         document.getElementById("booking_date");
 
-    const bookingTime =
+    const durationInput =
+        document.getElementById("duration");
+
+    const slotsContainer =
+        document.getElementById("slots");
+
+    const bookingTimeInput =
         document.getElementById("booking_time");
 
-    const duration =
-        document.getElementById("duration");
+    const submitButton =
+        document.getElementById("submitBtn");
+
+    const summaryDate =
+        document.getElementById("summaryDate");
+
+    const summaryTime =
+        document.getElementById("summaryTime");
+
+    const summaryDuration =
+        document.getElementById("summaryDuration");
 
     const totalPrice =
         document.getElementById("totalPrice");
 
-    const slotStatus =
-        document.getElementById("slotStatus");
 
-    const bookButton =
-        document.getElementById("bookButton");
-
-    const bookingForm =
-        document.getElementById("bookingForm");
+    const groundId =
+        "{{ ground['id'] }}";
 
 
-    const hourlyPrice =
-        Number("{{ ground['price'] }}") || 0;
+    const groundPrice =
+        Number(
+            "{{ ground['price'] }}"
+        ) || 0;
 
 
-    /*
-        SET MINIMUM DATE
-    */
+    function updateTotal() {
 
-    const today =
-        new Date();
-
-    const year =
-        today.getFullYear();
-
-    const month =
-        String(today.getMonth() + 1)
-            .padStart(2, "0");
-
-    const day =
-        String(today.getDate())
-            .padStart(2, "0");
-
-    const todayString =
-        `${year}-${month}-${day}`;
-
-    bookingDate.min =
-        todayString;
-
-
-    /*
-        UPDATE TOTAL PRICE
-    */
-
-    function updateTotalPrice() {
-
-        const selectedDuration =
-            Number(duration.value) || 0;
+        const duration =
+            Number(durationInput.value) || 1;
 
         const total =
-            hourlyPrice * selectedDuration;
+            groundPrice * duration;
 
         totalPrice.textContent =
             total.toFixed(2);
+
+        summaryDuration.textContent =
+            duration + (
+                duration === 1
+                    ? " Hour"
+                    : " Hours"
+            );
     }
 
 
-    /*
-        SLOT VALUE
-    */
-
-    function getSlotValue(slot) {
-
-        if (typeof slot === "string") {
-            return slot;
-        }
-
-        if (slot.value) {
-            return slot.value;
-        }
-
-        if (slot.time) {
-            return slot.time;
-        }
-
-        if (slot.start_time) {
-            return slot.start_time;
-        }
-
-        return "";
-    }
-
-
-    /*
-        SLOT LABEL
-    */
-
-    function getSlotLabel(slot) {
-
-        if (typeof slot === "string") {
-            return slot;
-        }
-
-        if (slot.label) {
-            return slot.label;
-        }
-
-        if (slot.display) {
-            return slot.display;
-        }
-
-        if (slot.time) {
-            return slot.time;
-        }
-
-        if (slot.start_time) {
-            return slot.start_time;
-        }
-
-        return "";
-    }
-
-
-    /*
-        CHECK IF SLOT IS BOOKED
-    */
-
-    function isSlotBooked(slot) {
-
-        if (typeof slot === "string") {
-            return false;
-        }
-
-        return (
-            slot.booked === true ||
-            slot.is_booked === true ||
-            slot.available === false
-        );
-    }
-
-
-    /*
-        LOAD AVAILABLE SLOTS
-    */
-
-    async function loadSlots() {
+    function loadSlots() {
 
         const selectedDate =
-            bookingDate.value;
+            dateInput.value;
 
-
-        bookingTime.innerHTML =
-            '<option value="">Loading available slots...</option>';
-
-        bookingTime.disabled =
-            true;
-
-        bookButton.disabled =
-            true;
-
-
-        slotStatus.style.display =
-            "block";
-
-        slotStatus.className =
-            "slot-status loading";
-
-        slotStatus.textContent =
-            "Loading available time slots...";
+        const duration =
+            durationInput.value;
 
 
         if (!selectedDate) {
 
-            bookingTime.innerHTML =
-                '<option value="">First select a date</option>';
-
-            slotStatus.style.display =
-                "none";
+            slotsContainer.innerHTML =
+                '<div class="empty-slots">Please select a date.</div>';
 
             return;
         }
 
 
-        try {
+        bookingTimeInput.value = "";
 
-            const response =
-                await fetch(
-                    "{{ url_for('available_slots', ground_id=ground['id']) }}"
-                    + "?date="
-                    + encodeURIComponent(selectedDate)
-                );
+        summaryTime.textContent =
+            "Not selected";
+
+        submitButton.disabled = true;
 
 
-            if (!response.ok) {
-
-                throw new Error(
-                    "Server returned "
-                    + response.status
-                );
-
-            }
+        slotsContainer.innerHTML =
+            '<div class="loading">Loading available slots...</div>';
 
 
-            const data =
-                await response.json();
+        const url =
+            `/available-slots/${groundId}?date=${encodeURIComponent(
+                selectedDate
+            )}&duration=${encodeURIComponent(
+                duration
+            )}`;
 
 
-            console.log(
-                "Available slots response:",
-                data
-            );
+        fetch(url)
+
+            .then(response => {
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Unable to load time slots."
+                    );
+                }
+
+                return response.json();
+
+            })
+
+            .then(data => {
+
+                slotsContainer.innerHTML = "";
 
 
-            /*
-                SUPPORT DIFFERENT JSON FORMATS
-            */
-
-            let slots = [];
-
-
-            if (Array.isArray(data)) {
-
-                slots = data;
-
-            }
-
-            else if (Array.isArray(data.slots)) {
-
-                slots = data.slots;
-
-            }
-
-            else if (Array.isArray(data.available_slots)) {
-
-                slots = data.available_slots;
-
-            }
+                let slots =
+                    data.slots ||
+                    data.available_slots ||
+                    [];
 
 
-            bookingTime.innerHTML = "";
+                if (!Array.isArray(slots)) {
+
+                    slots = [];
+
+                }
 
 
-            if (slots.length === 0) {
+                if (slots.length === 0) {
 
-                bookingTime.innerHTML =
-                    '<option value="">No slots available</option>';
+                    slotsContainer.innerHTML =
+                        '<div class="empty-slots">' +
+                        'No available slots for this date.' +
+                        '</div>';
 
-                bookingTime.disabled =
-                    true;
-
-                slotStatus.className =
-                    "slot-status error";
-
-                slotStatus.textContent =
-                    "No available time slots for this date.";
-
-                slotStatus.style.display =
-                    "block";
-
-                return;
-            }
-
-
-            let availableCount =
-                0;
-
-
-            slots.forEach(function(slot) {
-
-                const value =
-                    getSlotValue(slot);
-
-                const label =
-                    getSlotLabel(slot);
-
-                const booked =
-                    isSlotBooked(slot);
-
-
-                if (!value) {
                     return;
-                }
-
-
-                const option =
-                    document.createElement("option");
-
-
-                option.value =
-                    value;
-
-
-                option.textContent =
-                    booked
-                        ? `${label || value} — Booked`
-                        : `${label || value} — Available`;
-
-
-                if (booked) {
-
-                    option.disabled =
-                        true;
-
-                }
-
-                else {
-
-                    availableCount++;
 
                 }
 
 
-                bookingTime.appendChild(
-                    option
-                );
+                slots.forEach(slot => {
+
+                    let time = "";
+
+                    let available = true;
+
+
+                    if (typeof slot === "string") {
+
+                        time = slot;
+
+                    } else {
+
+                        time =
+                            slot.time ||
+                            slot.booking_time ||
+                            "";
+
+                        if (
+                            slot.available === false
+                        ) {
+
+                            available = false;
+
+                        }
+
+                    }
+
+
+                    if (!time) {
+                        return;
+                    }
+
+
+                    const button =
+                        document.createElement("button");
+
+
+                    button.type = "button";
+
+                    button.className = "slot";
+
+                    button.textContent = time;
+
+
+                    if (!available) {
+
+                        button.classList.add(
+                            "disabled"
+                        );
+
+                        button.disabled = true;
+
+                    } else {
+
+                        button.addEventListener(
+                            "click",
+                            function() {
+
+                                document
+                                    .querySelectorAll(
+                                        ".slot"
+                                    )
+                                    .forEach(
+                                        item => {
+                                            item.classList.remove(
+                                                "selected"
+                                            );
+                                        }
+                                    );
+
+
+                                button.classList.add(
+                                    "selected"
+                                );
+
+
+                                bookingTimeInput.value =
+                                    time;
+
+
+                                summaryTime.textContent =
+                                    time;
+
+
+                                submitButton.disabled =
+                                    false;
+
+                            }
+                        );
+
+                    }
+
+
+                    slotsContainer.appendChild(
+                        button
+                    );
+
+                });
+
+            })
+
+            .catch(error => {
+
+                console.error(error);
+
+                slotsContainer.innerHTML =
+                    '<div class="empty-slots">' +
+                    'Unable to load time slots. ' +
+                    'Please refresh the page and try again.' +
+                    '</div>';
 
             });
 
-
-            if (availableCount === 0) {
-
-                bookingTime.innerHTML =
-                    '<option value="">All slots are booked</option>';
-
-                bookingTime.disabled =
-                    true;
-
-                bookButton.disabled =
-                    true;
-
-                slotStatus.className =
-                    "slot-status error";
-
-                slotStatus.textContent =
-                    "All time slots are already booked.";
-
-                return;
-            }
-
-
-            bookingTime.disabled =
-                false;
-
-
-            slotStatus.className =
-                "slot-status success";
-
-            slotStatus.textContent =
-                availableCount
-                + " time slot(s) available.";
-
-            slotStatus.style.display =
-                "block";
-
-
-            updateButtonState();
-
-        }
-
-
-        catch (error) {
-
-            console.error(
-                "Slot loading error:",
-                error
-            );
-
-
-            bookingTime.innerHTML =
-                '<option value="">Unable to load time slots</option>';
-
-            bookingTime.disabled =
-                true;
-
-            bookButton.disabled =
-                true;
-
-
-            slotStatus.className =
-                "slot-status error";
-
-            slotStatus.textContent =
-                "Unable to load time slots. Please try again.";
-
-            slotStatus.style.display =
-                "block";
-        }
-
     }
 
 
-    /*
-        BUTTON STATE
-    */
-
-    function updateButtonState() {
-
-        const dateSelected =
-            bookingDate.value !== "";
-
-        const timeSelected =
-            bookingTime.value !== "";
-
-        const durationSelected =
-            duration.value !== "";
-
-
-        bookButton.disabled =
-            !(
-                dateSelected &&
-                timeSelected &&
-                durationSelected
-            );
-
-    }
-
-
-    /*
-        DATE CHANGE
-    */
-
-    bookingDate.addEventListener(
+    dateInput.addEventListener(
         "change",
         function() {
 
-            bookingTime.value =
-                "";
+            summaryDate.textContent =
+                dateInput.value;
 
             loadSlots();
 
@@ -1068,75 +954,46 @@
     );
 
 
-    /*
-        TIME CHANGE
-    */
-
-    bookingTime.addEventListener(
+    durationInput.addEventListener(
         "change",
         function() {
 
-            updateButtonState();
+            updateTotal();
+
+            loadSlots();
 
         }
     );
 
 
-    /*
-        DURATION CHANGE
-    */
+    document
+        .getElementById("bookingForm")
+        .addEventListener(
+            "submit",
+            function(event) {
 
-    duration.addEventListener(
-        "change",
-        function() {
+                if (!bookingTimeInput.value) {
 
-            updateTotalPrice();
+                    event.preventDefault();
 
-            updateButtonState();
+                    alert(
+                        "Please select an available time slot."
+                    );
 
-        }
-    );
+                    return;
 
+                }
 
-    /*
-        FORM VALIDATION
-    */
-
-    bookingForm.addEventListener(
-        "submit",
-        function(event) {
-
-            if (
-                !bookingDate.value ||
-                !bookingTime.value ||
-                !duration.value
-            ) {
-
-                event.preventDefault();
-
-                alert(
-                    "Please select date, time and duration."
-                );
-
-                return;
             }
+        );
 
 
-            bookButton.disabled =
-                true;
+    updateTotal();
 
-            bookButton.textContent =
-                "Processing...";
+    summaryDate.textContent =
+        dateInput.value;
 
-        }
-    );
-
-
-    /*
-        INITIAL PRICE
-    */
-
-    updateTotalPrice();
+    loadSlots();
 
 </script>
 

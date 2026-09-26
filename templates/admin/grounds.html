@@ -1,356 +1,303 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Manage Grounds - Admin</title>
+    <title>Grounds - Admin</title>
 
     <style>
-
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
 
         body {
-            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            font-family: Arial, sans-serif;
             background: #f5f7fb;
-            color: #1f2937;
+            color: #222;
         }
 
-        /* NAVBAR */
-
-        nav {
-            background: #111827;
+        .topbar {
+            background: #6c5ce7;
             color: white;
-
-            padding: 16px 30px;
-
+            padding: 18px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-
-            box-shadow:
-                0 3px 12px rgba(0,0,0,0.12);
         }
 
-        .logo {
-            font-size: 23px;
+        .brand {
+            font-size: 22px;
             font-weight: bold;
         }
 
-        .nav-links {
+        .layout {
             display: flex;
-            gap: 18px;
-            align-items: center;
-            flex-wrap: wrap;
+            min-height: calc(100vh - 65px);
         }
 
-        .nav-links a {
-            color: white;
+        .sidebar {
+            width: 230px;
+            background: white;
+            padding: 22px 14px;
+            border-right: 1px solid #ddd;
+            flex-shrink: 0;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 13px 15px;
+            margin-bottom: 7px;
             text-decoration: none;
-            font-size: 14px;
+            color: #444;
+            border-radius: 9px;
+            font-weight: bold;
         }
 
-        .nav-links a:hover {
-            color: #a29bfe;
+        .sidebar a:hover {
+            background: #f0edff;
+            color: #6c5ce7;
         }
 
-        /* CONTAINER */
-
-        .container {
-            width: 92%;
-            max-width: 1200px;
-            margin: 35px auto;
+        .sidebar a.active {
+            background: #6c5ce7;
+            color: white;
         }
 
-        /* HEADER */
+        .logout {
+            color: #d63031 !important;
+            margin-top: 25px;
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+            min-width: 0;
+        }
 
         .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-
             gap: 20px;
-
             margin-bottom: 25px;
         }
 
-        .page-header h1 {
+        h1 {
+            margin: 0;
             font-size: 30px;
-            margin-bottom: 7px;
         }
 
-        .page-header p {
-            color: #6b7280;
+        .subtitle {
+            color: #777;
+            margin-top: 7px;
         }
 
-        /* BUTTON */
-
-        .btn {
+        .add-btn {
             display: inline-block;
-
-            padding: 10px 16px;
-
-            border-radius: 8px;
-
-            border: none;
-
-            text-decoration: none;
-
-            font-size: 14px;
-
-            font-weight: bold;
-
-            cursor: pointer;
-        }
-
-        .btn-primary {
             background: #6c5ce7;
             color: white;
+            text-decoration: none;
+            padding: 12px 18px;
+            border-radius: 9px;
+            font-weight: bold;
+            white-space: nowrap;
         }
 
-        .btn-primary:hover {
-            background: #5849d6;
+        .add-btn:hover {
+            opacity: .9;
         }
 
-        .btn-edit {
-            background: #eef2ff;
-            color: #4f46e5;
+        .flash-container {
+            margin-bottom: 20px;
         }
 
-        .btn-edit:hover {
-            background: #e0e7ff;
-        }
-
-        .btn-delete {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
-        .btn-delete:hover {
-            background: #fecaca;
-        }
-
-        /* STATS */
-
-        .stats {
-            display: grid;
-
-            grid-template-columns:
-                repeat(3, 1fr);
-
-            gap: 18px;
-
-            margin-bottom: 25px;
-        }
-
-        .stat {
-            background: white;
-
-            padding: 20px;
-
-            border-radius: 13px;
-
-            box-shadow:
-                0 5px 18px rgba(0,0,0,0.07);
-        }
-
-        .stat-icon {
-            font-size: 27px;
+        .flash {
+            padding: 13px 16px;
+            border-radius: 8px;
             margin-bottom: 10px;
         }
 
-        .stat-title {
-            color: #6b7280;
-            font-size: 13px;
-            margin-bottom: 5px;
+        .flash.success {
+            background: #e5f8f1;
+            color: #008f68;
         }
 
-        .stat-value {
-            font-size: 26px;
-            font-weight: bold;
+        .flash.danger,
+        .flash.error {
+            background: #ffe9e9;
+            color: #c62828;
         }
 
-        /* GROUND GRID */
+        .flash.warning {
+            background: #fff5dc;
+            color: #946200;
+        }
 
-        .ground-grid {
+        .stats {
             display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
 
-            grid-template-columns:
-                repeat(3, 1fr);
+        .stat-card {
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.05);
+        }
 
+        .stat-icon {
+            font-size: 28px;
+        }
+
+        .stat-title {
+            color: #777;
+            margin-top: 8px;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .grounds-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 22px;
         }
 
-        /* GROUND CARD */
-
         .ground-card {
             background: white;
-
             border-radius: 15px;
-
             overflow: hidden;
-
-            box-shadow:
-                0 5px 18px rgba(0,0,0,0.07);
-
-            transition: 0.2s;
+            box-shadow: 0 5px 20px rgba(0,0,0,.06);
         }
-
-        .ground-card:hover {
-            transform: translateY(-3px);
-
-            box-shadow:
-                0 9px 25px rgba(0,0,0,0.10);
-        }
-
-        /* IMAGE */
 
         .ground-image {
             width: 100%;
             height: 190px;
+            background: #eee;
+            position: relative;
+            overflow: hidden;
+        }
 
+        .ground-image img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-
             display: block;
-
-            background: #e5e7eb;
         }
 
         .no-image {
             width: 100%;
-            height: 190px;
-
+            height: 100%;
             display: flex;
-
-            justify-content: center;
             align-items: center;
-
-            background: #eef2ff;
-
-            color: #6c5ce7;
-
-            font-size: 55px;
+            justify-content: center;
+            flex-direction: column;
+            color: #888;
+            background: #f0f0f4;
         }
 
-        /* CONTENT */
+        .no-image-icon {
+            font-size: 45px;
+            margin-bottom: 5px;
+        }
 
-        .ground-content {
+        .ground-body {
             padding: 20px;
         }
 
         .ground-name {
-            font-size: 20px;
-
-            font-weight: bold;
-
-            margin-bottom: 7px;
+            margin: 0 0 8px;
+            font-size: 21px;
         }
 
-        .ground-location {
-            color: #6b7280;
-
-            font-size: 14px;
-
+        .location {
+            color: #666;
             margin-bottom: 15px;
         }
 
-        /* INFO */
-
-        .ground-info {
-            background: #f9fafb;
-
-            border-radius: 9px;
-
-            padding: 12px;
-
-            margin-bottom: 16px;
+        .price {
+            color: #6c5ce7;
+            font-size: 21px;
+            font-weight: bold;
+            margin-bottom: 15px;
         }
 
         .info-row {
             display: flex;
-
             justify-content: space-between;
-
-            gap: 10px;
-
-            padding: 6px 0;
-
-            font-size: 13px;
+            gap: 12px;
+            padding: 8px 0;
+            border-top: 1px solid #eee;
+            font-size: 14px;
         }
 
-        .info-row span:first-child {
-            color: #6b7280;
+        .info-label {
+            color: #777;
         }
 
-        .info-row span:last-child {
+        .info-value {
             font-weight: bold;
-
             text-align: right;
         }
 
-        /* DESCRIPTION */
-
         .description {
-            color: #6b7280;
-
-            font-size: 13px;
-
+            color: #666;
+            font-size: 14px;
             line-height: 1.5;
-
-            margin-bottom: 17px;
-
-            min-height: 40px;
+            margin: 15px 0;
+            min-height: 42px;
         }
-
-        /* ACTIONS */
 
         .actions {
             display: flex;
-
-            gap: 9px;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
         }
 
-        .actions .btn {
-            flex: 1;
-
-            text-align: center;
+        .action-btn {
+            display: inline-block;
+            border: none;
+            padding: 9px 12px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
         }
 
-        .actions form {
-            flex: 1;
+        .edit-btn {
+            background: #eeeaff;
+            color: #6c5ce7;
         }
 
-        .actions form .btn {
-            width: 100%;
+        .delete-btn {
+            background: #ffe8e8;
+            color: #d63031;
         }
 
-        /* EMPTY */
+        .action-btn:hover {
+            opacity: .85;
+        }
 
         .empty {
             background: white;
-
-            border-radius: 14px;
-
+            border-radius: 15px;
             padding: 60px 20px;
-
             text-align: center;
-
-            box-shadow:
-                0 5px 18px rgba(0,0,0,0.07);
+            box-shadow: 0 5px 20px rgba(0,0,0,.05);
         }
 
         .empty-icon {
-            font-size: 55px;
-
-            margin-bottom: 15px;
+            font-size: 60px;
+            margin-bottom: 10px;
         }
 
         .empty h2 {
@@ -358,55 +305,34 @@
         }
 
         .empty p {
-            color: #6b7280;
-
-            margin-bottom: 20px;
+            color: #777;
         }
 
-        /* FLASH */
-
-        .flash {
-            padding: 13px 16px;
-
-            border-radius: 8px;
-
-            margin-bottom: 20px;
-        }
-
-        .flash-success {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .flash-danger {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .flash-warning {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        /* MOBILE */
-
-        @media (max-width: 1000px) {
-
-            .ground-grid {
-                grid-template-columns:
-                    repeat(2, 1fr);
+        @media (max-width: 1100px) {
+            .grounds-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
-
         }
 
-        @media (max-width: 700px) {
-
+        @media (max-width: 900px) {
             .stats {
                 grid-template-columns: 1fr;
             }
 
-            .ground-grid {
-                grid-template-columns: 1fr;
+            .layout {
+                display: block;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .content {
+                padding: 20px;
             }
 
             .page-header {
@@ -414,402 +340,84 @@
                 align-items: flex-start;
             }
 
-            nav {
-                padding: 15px;
+            .grounds-grid {
+                grid-template-columns: 1fr;
             }
 
-            .nav-links {
-                gap: 10px;
+            .topbar {
+                padding: 15px 18px;
             }
-
-            .nav-links a {
-                font-size: 12px;
-            }
-
         }
-
     </style>
-
 </head>
-
 
 <body>
 
+<div class="topbar">
 
-<!-- NAVBAR -->
-
-<nav>
-
-    <div class="logo">
+    <div class="brand">
         ⚽ Futsal Admin
     </div>
 
-    <div class="nav-links">
+    <div>
+        ⚽ Grounds
+    </div>
+
+</div>
+
+
+<div class="layout">
+
+    <aside class="sidebar">
 
         <a href="{{ url_for('admin_dashboard') }}">
-            Dashboard
-        </a>
-
-        <a href="{{ url_for('admin_users') }}">
-            Users
+            🏠 Dashboard
         </a>
 
         <a href="{{ url_for('admin_bookings') }}">
-            Bookings
+            📅 Bookings
         </a>
 
-        <a href="{{ url_for('admin_grounds') }}">
-            Grounds
+        <a href="{{ url_for('admin_users') }}">
+            👥 Users
         </a>
 
-        <a href="{{ url_for('admin_logout') }}">
-            Logout
+        <a href="{{ url_for('admin_grounds') }}" class="active">
+            ⚽ Grounds
         </a>
 
-    </div>
+        <a href="{{ url_for('admin_calendar') }}">
+            🗓️ Calendar
+        </a>
 
-</nav>
+        <a href="{{ url_for('admin_logout') }}" class="logout">
+            🚪 Logout
+        </a>
+
+    </aside>
 
 
-<div class="container">
+    <main class="content">
 
 
-    <!-- FLASH MESSAGES -->
+        <div class="page-header">
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
+            <div>
 
-        {% if messages %}
+                <h1>
+                    ⚽ Ground Management
+                </h1>
 
-            {% for category, message in messages %}
-
-                <div class="flash flash-{{ category }}">
-                    {{ message }}
+                <div class="subtitle">
+                    Add, edit and manage your futsal grounds.
                 </div>
 
-            {% endfor %}
-
-        {% endif %}
-
-    {% endwith %}
-
-
-    <!-- PAGE HEADER -->
-
-    <div class="page-header">
-
-        <div>
-
-            <h1>
-                🏟️ Manage Grounds
-            </h1>
-
-            <p>
-                Add, edit and manage your futsal grounds.
-            </p>
-
-        </div>
-
-
-        <a
-            href="{{ url_for('admin_add_ground') }}"
-            class="btn btn-primary"
-        >
-            ➕ Add New Ground
-        </a>
-
-    </div>
-
-
-    <!-- STATS -->
-
-    <div class="stats">
-
-
-        <div class="stat">
-
-            <div class="stat-icon">
-                🏟️
             </div>
 
-            <div class="stat-title">
-                Total Grounds
-            </div>
-
-            <div class="stat-value">
-                {{ grounds|length }}
-            </div>
-
-        </div>
-
-
-        <div class="stat">
-
-            <div class="stat-icon">
-                💰
-            </div>
-
-            <div class="stat-title">
-                Average Price / Hour
-            </div>
-
-            <div class="stat-value">
-
-                {% if grounds %}
-
-                    Rs.
-                    {{
-                        (
-                            grounds
-                            |map(attribute='price')
-                            |sum
-                            / grounds|length
-                        )|round(2)
-                    }}
-
-                {% else %}
-
-                    Rs. 0
-
-                {% endif %}
-
-            </div>
-
-        </div>
-
-
-        <div class="stat">
-
-            <div class="stat-icon">
-                ⚽
-            </div>
-
-            <div class="stat-title">
-                Available Grounds
-            </div>
-
-            <div class="stat-value">
-                {{ grounds|length }}
-            </div>
-
-        </div>
-
-
-    </div>
-
-
-    <!-- GROUND LIST -->
-
-    {% if grounds %}
-
-
-        <div class="ground-grid">
-
-
-            {% for ground in grounds %}
-
-
-                <div class="ground-card">
-
-
-                    <!-- IMAGE -->
-
-                    {% if ground['image'] %}
-
-                        <img
-                            src="{{ url_for(
-                                'static',
-                                filename='uploads/' ~ ground['image']
-                            ) }}"
-                            alt="{{ ground['name'] }}"
-                            class="ground-image"
-                            onerror="
-                                this.style.display='none';
-                                this.nextElementSibling.style.display='flex';
-                            "
-                        >
-
-                        <div
-                            class="no-image"
-                            style="display:none;"
-                        >
-                            ⚽
-                        </div>
-
-                    {% else %}
-
-                        <div class="no-image">
-                            ⚽
-                        </div>
-
-                    {% endif %}
-
-
-                    <!-- CONTENT -->
-
-                    <div class="ground-content">
-
-
-                        <div class="ground-name">
-                            {{ ground['name'] }}
-                        </div>
-
-
-                        <div class="ground-location">
-                            📍 {{ ground['location'] }}
-                        </div>
-
-
-                        <!-- INFO -->
-
-                        <div class="ground-info">
-
-
-                            <div class="info-row">
-
-                                <span>
-                                    Price
-                                </span>
-
-                                <span>
-                                    Rs. {{ ground['price'] }}/hour
-                                </span>
-
-                            </div>
-
-
-                            <div class="info-row">
-
-                                <span>
-                                    Opening
-                                </span>
-
-                                <span>
-                                    {{ ground['opening_time'] }}
-                                </span>
-
-                            </div>
-
-
-                            <div class="info-row">
-
-                                <span>
-                                    Closing
-                                </span>
-
-                                <span>
-                                    {{ ground['closing_time'] }}
-                                </span>
-
-                            </div>
-
-
-                            <div class="info-row">
-
-                                <span>
-                                    Contact
-                                </span>
-
-                                <span>
-                                    {{ ground['contact'] }}
-                                </span>
-
-                            </div>
-
-
-                        </div>
-
-
-                        <!-- DESCRIPTION -->
-
-                        <div class="description">
-
-                            {% if ground['description'] %}
-
-                                {{ ground['description'] }}
-
-                            {% else %}
-
-                                No description available.
-
-                            {% endif %}
-
-                        </div>
-
-
-                        <!-- ACTIONS -->
-
-                        <div class="actions">
-
-
-                            <a
-                                href="{{ url_for(
-                                    'admin_edit_ground',
-                                    ground_id=ground['id']
-                                ) }}"
-                                class="btn btn-edit"
-                            >
-                                ✏️ Edit
-                            </a>
-
-
-                            <form
-                                method="POST"
-                                action="{{ url_for(
-                                    'admin_delete_ground',
-                                    ground_id=ground['id']
-                                ) }}"
-                                onsubmit="
-                                    return confirm(
-                                        'Are you sure you want to delete this ground? All bookings for this ground will also be deleted.'
-                                    );
-                                "
-                            >
-
-                                <button
-                                    type="submit"
-                                    class="btn btn-delete"
-                                >
-                                    🗑️ Delete
-                                </button>
-
-                            </form>
-
-
-                        </div>
-
-
-                    </div>
-
-
-                </div>
-
-
-            {% endfor %}
-
-
-        </div>
-
-
-    {% else %}
-
-
-        <div class="empty">
-
-            <div class="empty-icon">
-                🏟️
-            </div>
-
-            <h2>
-                No Grounds Added
-            </h2>
-
-            <p>
-                Add your first futsal ground to start accepting bookings.
-            </p>
 
             <a
                 href="{{ url_for('admin_add_ground') }}"
-                class="btn btn-primary"
+                class="add-btn"
             >
                 ➕ Add Ground
             </a>
@@ -817,12 +425,352 @@
         </div>
 
 
-    {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
 
+            {% if messages %}
+
+                <div class="flash-container">
+
+                    {% for category, message in messages %}
+
+                        <div class="flash {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <div class="stats">
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    ⚽
+                </div>
+
+                <div class="stat-title">
+                    Total Grounds
+                </div>
+
+                <div class="stat-number">
+                    {{ grounds|length }}
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    📅
+                </div>
+
+                <div class="stat-title">
+                    Total Bookings
+                </div>
+
+                <div class="stat-number">
+
+                    {% set total_bookings = namespace(value=0) %}
+
+                    {% for ground in grounds %}
+
+                        {% if ground['booking_count'] is defined %}
+
+                            {% set total_bookings.value =
+                                total_bookings.value +
+                                (ground['booking_count'] or 0)
+                            %}
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                    {{ total_bookings.value }}
+
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    💰
+                </div>
+
+                <div class="stat-title">
+                    Ground Price Range
+                </div>
+
+                <div class="stat-number">
+
+                    {% if grounds %}
+
+                        Rs.
+                        {{
+                            grounds
+                            |map(attribute='price')
+                            |map('float')
+                            |min
+                            |round(0)
+                            |int
+                        }}
+
+                        -
+
+                        Rs.
+                        {{
+                            grounds
+                            |map(attribute='price')
+                            |map('float')
+                            |max
+                            |round(0)
+                            |int
+                        }}
+
+                    {% else %}
+
+                        Rs. 0
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {% if grounds %}
+
+
+            <div class="grounds-grid">
+
+
+                {% for ground in grounds %}
+
+
+                    <div class="ground-card">
+
+
+                        <div class="ground-image">
+
+                            {% if ground['image'] %}
+
+                                <img
+                                    src="{{ url_for('uploaded_file', filename=ground['image']) }}"
+                                    alt="{{ ground['name'] }}"
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                >
+
+                                <div
+                                    class="no-image"
+                                    style="display:none;"
+                                >
+                                    <div class="no-image-icon">
+                                        ⚽
+                                    </div>
+
+                                    No image
+                                </div>
+
+                            {% else %}
+
+                                <div class="no-image">
+
+                                    <div class="no-image-icon">
+                                        ⚽
+                                    </div>
+
+                                    No image uploaded
+
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="ground-body">
+
+
+                            <h2 class="ground-name">
+                                {{ ground['name'] }}
+                            </h2>
+
+
+                            <div class="location">
+                                📍 {{ ground['location'] }}
+                            </div>
+
+
+                            <div class="price">
+                                Rs. {{ ground['price']|float|round(0)|int }}
+                                <small style="font-size:13px; color:#777;">
+                                    / hour
+                                </small>
+                            </div>
+
+
+                            <div class="info-row">
+
+                                <span class="info-label">
+                                    📞 Contact
+                                </span>
+
+                                <span class="info-value">
+
+                                    {% if ground['contact'] %}
+                                        {{ ground['contact'] }}
+                                    {% else %}
+                                        Not provided
+                                    {% endif %}
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="info-row">
+
+                                <span class="info-label">
+                                    🕐 Hours
+                                </span>
+
+                                <span class="info-value">
+
+                                    {{ ground['opening_time'] or '06:00' }}
+                                    -
+                                    {{ ground['closing_time'] or '22:00' }}
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="info-row">
+
+                                <span class="info-label">
+                                    📅 Bookings
+                                </span>
+
+                                <span class="info-value">
+
+                                    {% if ground['booking_count'] is defined %}
+
+                                        {{ ground['booking_count'] or 0 }}
+
+                                    {% else %}
+
+                                        0
+
+                                    {% endif %}
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="description">
+
+                                {% if ground['description'] %}
+
+                                    {{ ground['description'] }}
+
+                                {% else %}
+
+                                    No description provided.
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="actions">
+
+
+                                <a
+                                    href="{{ url_for('admin_edit_ground', ground_id=ground['id']) }}"
+                                    class="action-btn edit-btn"
+                                >
+                                    ✏️ Edit
+                                </a>
+
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('admin_delete_ground', ground_id=ground['id']) }}"
+                                    style="display:inline;"
+                                    onsubmit="return confirm('Are you sure you want to delete this ground? All bookings for this ground will also be deleted. This action cannot be undone.');"
+                                >
+
+                                    <button
+                                        type="submit"
+                                        class="action-btn delete-btn"
+                                    >
+                                        🗑️ Delete
+                                    </button>
+
+                                </form>
+
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+
+                {% endfor %}
+
+
+            </div>
+
+
+        {% else %}
+
+
+            <div class="empty">
+
+                <div class="empty-icon">
+                    ⚽
+                </div>
+
+                <h2>
+                    No Futsal Grounds Yet
+                </h2>
+
+                <p>
+                    Add your first futsal ground to start accepting bookings.
+                </p>
+
+                <br>
+
+                <a
+                    href="{{ url_for('admin_add_ground') }}"
+                    class="add-btn"
+                >
+                    ➕ Add Your First Ground
+                </a>
+
+            </div>
+
+
+        {% endif %}
+
+
+    </main>
 
 </div>
 
-
 </body>
-
 </html>

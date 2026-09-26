@@ -1,736 +1,493 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Edit Ground - Admin</title>
 
     <style>
-
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
 
         body {
+            margin: 0;
             font-family: Arial, sans-serif;
-            background: #f5f6fa;
-            color: #2d3436;
+            background: #f5f7fb;
+            color: #222;
         }
 
-        .navbar {
+        .topbar {
             background: #6c5ce7;
             color: white;
-            padding: 16px 30px;
+            padding: 18px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .navbar h2 {
-            margin: 0;
+        .brand {
+            font-size: 22px;
+            font-weight: bold;
         }
 
-        .nav-links {
+        .layout {
             display: flex;
-            gap: 20px;
-            align-items: center;
+            min-height: calc(100vh - 65px);
         }
 
-        .nav-links a {
+        .sidebar {
+            width: 230px;
+            background: white;
+            padding: 22px 14px;
+            border-right: 1px solid #ddd;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 13px 15px;
+            margin-bottom: 7px;
+            text-decoration: none;
+            color: #444;
+            border-radius: 9px;
+            font-weight: bold;
+        }
+
+        .sidebar a:hover {
+            background: #f0edff;
+            color: #6c5ce7;
+        }
+
+        .sidebar a.active {
+            background: #6c5ce7;
             color: white;
+        }
+
+        .logout {
+            color: #d63031 !important;
+            margin-top: 25px;
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #6c5ce7;
             text-decoration: none;
             font-weight: bold;
         }
 
-        .nav-links a:hover {
-            text-decoration: underline;
-        }
-
-        .container {
-            width: 92%;
-            max-width: 900px;
-            margin: 40px auto;
-        }
-
-        .page-header {
-            margin-bottom: 25px;
-        }
-
-        .page-header h1 {
-            font-size: 30px;
-            margin-bottom: 8px;
-        }
-
-        .page-header p {
-            color: #636e72;
+        h1 {
+            margin-top: 0;
         }
 
         .form-card {
+            max-width: 850px;
             background: white;
             padding: 30px;
-            border-radius: 14px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.05);
         }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-row {
+        .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
 
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
+        .form-group {
+            display: flex;
+            flex-direction: column;
         }
 
-        .required {
-            color: #d63031;
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            margin-bottom: 7px;
+            font-weight: bold;
         }
 
         input,
         textarea {
             width: 100%;
-            padding: 12px 14px;
-            border: 1px solid #dfe6e9;
+            padding: 12px;
+            border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 15px;
-            font-family: Arial, sans-serif;
             outline: none;
         }
 
         input:focus,
         textarea:focus {
             border-color: #6c5ce7;
-            box-shadow: 0 0 0 3px rgba(108,92,231,0.1);
         }
 
         textarea {
-            resize: vertical;
             min-height: 130px;
+            resize: vertical;
         }
 
-        .help-text {
-            font-size: 13px;
-            color: #636e72;
-            margin-top: 6px;
+        .hint {
+            color: #888;
+            font-size: 12px;
+            margin-top: 5px;
         }
-
-        /* CURRENT IMAGE */
 
         .current-image {
-            margin-bottom: 20px;
-        }
-
-        .current-image p {
-            font-weight: bold;
-            margin-bottom: 10px;
+            margin-top: 10px;
         }
 
         .current-image img {
-            width: 250px;
-            height: 170px;
+            width: 180px;
+            height: 120px;
             object-fit: cover;
             border-radius: 10px;
-            border: 1px solid #dfe6e9;
+            border: 1px solid #ddd;
         }
-
-        .no-current-image {
-            width: 250px;
-            height: 170px;
-            background: #f1f2f6;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 50px;
-        }
-
-        /* IMAGE UPLOAD */
-
-        .image-box {
-            border: 2px dashed #dfe6e9;
-            border-radius: 10px;
-            padding: 25px;
-            text-align: center;
-            background: #fafafa;
-        }
-
-        .image-icon {
-            font-size: 45px;
-            margin-bottom: 10px;
-        }
-
-        .image-box input {
-            border: none;
-            padding: 10px;
-            background: white;
-        }
-
-        .preview-container {
-            display: none;
-            margin-top: 20px;
-        }
-
-        .preview-container img {
-            max-width: 100%;
-            max-height: 250px;
-            border-radius: 10px;
-            object-fit: cover;
-        }
-
-        /* BUTTONS */
 
         .buttons {
-            display: flex;
-            gap: 12px;
             margin-top: 25px;
+            display: flex;
+            gap: 10px;
         }
 
         .btn {
-            display: inline-block;
-            padding: 12px 22px;
-            border-radius: 8px;
             border: none;
-            text-decoration: none;
+            border-radius: 8px;
+            padding: 12px 20px;
             cursor: pointer;
-            font-size: 15px;
+            text-decoration: none;
             font-weight: bold;
+            font-size: 15px;
         }
 
-        .btn-primary {
+        .save {
             background: #6c5ce7;
             color: white;
         }
 
-        .btn-primary:hover {
-            background: #5849d6;
-        }
-
-        .btn-secondary {
-            background: #636e72;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #4d5659;
+        .cancel {
+            background: #eee;
+            color: #444;
         }
 
         .flash {
-            padding: 14px 18px;
+            padding: 13px 16px;
             border-radius: 8px;
             margin-bottom: 20px;
-            font-weight: bold;
         }
 
-        .flash-success {
-            background: #dff9ee;
-            color: #087f5b;
+        .flash.danger {
+            background: #ffe9e9;
+            color: #c62828;
         }
 
-        .flash-danger {
-            background: #ffe1e1;
-            color: #b71c1c;
+        .flash.success {
+            background: #e5f8f1;
+            color: #008f68;
         }
 
-        .flash-warning {
-            background: #fff4cc;
-            color: #856404;
-        }
-
-        .flash-info {
-            background: #dfeaff;
-            color: #2456a6;
-        }
-
-        @media (max-width: 700px) {
-
-            .navbar {
-                flex-direction: column;
-                gap: 12px;
+        @media (max-width: 800px) {
+            .layout {
+                display: block;
             }
 
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
             }
 
-            .container {
-                width: 95%;
-                margin: 25px auto;
-            }
-
-            .form-card {
+            .content {
                 padding: 20px;
             }
 
-            .form-row {
+            .form-grid {
                 grid-template-columns: 1fr;
             }
 
-            .buttons {
-                flex-direction: column;
+            .full {
+                grid-column: auto;
             }
-
-            .btn {
-                text-align: center;
-            }
-
         }
-
     </style>
-
 </head>
-
 
 <body>
 
+<div class="topbar">
 
-<!-- NAVBAR -->
-
-<nav class="navbar">
-
-    <h2>⚽ Futsal Admin</h2>
-
-    <div class="nav-links">
-
-        <a href="{{ url_for('admin_dashboard') }}">
-            Dashboard
-        </a>
-
-        <a href="{{ url_for('admin_users') }}">
-            Users
-        </a>
-
-        <a href="{{ url_for('admin_grounds') }}">
-            Grounds
-        </a>
-
-        <a href="{{ url_for('admin_bookings') }}">
-            Bookings
-        </a>
-
-        <a href="{{ url_for('admin_logout') }}">
-            Logout
-        </a>
-
+    <div class="brand">
+        ⚽ Futsal Admin
     </div>
 
-</nav>
-
-
-<div class="container">
-
-
-    <!-- HEADER -->
-
-    <div class="page-header">
-
-        <h1>
-            ✏️ Edit Futsal Ground
-        </h1>
-
-        <p>
-            Update the information of this futsal ground.
-        </p>
-
-    </div>
-
-
-    <!-- FLASH MESSAGES -->
-
-    {% with messages = get_flashed_messages(
-        with_categories=true
-    ) %}
-
-        {% if messages %}
-
-            {% for category, message in messages %}
-
-                <div class="flash flash-{{ category }}">
-                    {{ message }}
-                </div>
-
-            {% endfor %}
-
-        {% endif %}
-
-    {% endwith %}
-
-
-    <!-- FORM -->
-
-    <div class="form-card">
-
-        <form
-            method="POST"
-            enctype="multipart/form-data"
-        >
-
-
-            <!-- GROUND NAME -->
-
-            <div class="form-group">
-
-                <label for="name">
-
-                    Ground Name
-                    <span class="required">*</span>
-
-                </label>
-
-                <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value="{{ ground['name'] }}"
-                    required
-                >
-
-            </div>
-
-
-            <!-- LOCATION -->
-
-            <div class="form-group">
-
-                <label for="location">
-
-                    Location
-                    <span class="required">*</span>
-
-                </label>
-
-                <input
-                    type="text"
-                    id="location"
-                    name="location"
-                    value="{{ ground['location'] or '' }}"
-                    required
-                >
-
-            </div>
-
-
-            <!-- PRICE + CONTACT -->
-
-            <div class="form-row">
-
-
-                <div class="form-group">
-
-                    <label for="price">
-
-                        Price per Hour
-                        <span class="required">*</span>
-
-                    </label>
-
-                    <input
-                        type="number"
-                        id="price"
-                        name="price"
-                        min="0"
-                        step="1"
-                        value="{{ ground['price'] or 0 }}"
-                        required
-                    >
-
-                    <div class="help-text">
-                        Price in Nepalese Rupees (Rs.).
-                    </div>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="contact">
-                        Contact Number
-                    </label>
-
-                    <input
-                        type="text"
-                        id="contact"
-                        name="contact"
-                        value="{{ ground['contact'] or '' }}"
-                    >
-
-                </div>
-
-
-            </div>
-
-
-            <!-- OPENING + CLOSING -->
-
-            <div class="form-row">
-
-
-                <div class="form-group">
-
-                    <label for="opening_time">
-
-                        Opening Time
-                        <span class="required">*</span>
-
-                    </label>
-
-                    <input
-                        type="time"
-                        id="opening_time"
-                        name="opening_time"
-                        value="{{ ground['opening_time'] or '' }}"
-                        required
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="closing_time">
-
-                        Closing Time
-                        <span class="required">*</span>
-
-                    </label>
-
-                    <input
-                        type="time"
-                        id="closing_time"
-                        name="closing_time"
-                        value="{{ ground['closing_time'] or '' }}"
-                        required
-                    >
-
-                </div>
-
-
-            </div>
-
-
-            <!-- DESCRIPTION -->
-
-            <div class="form-group">
-
-                <label for="description">
-                    Description
-                </label>
-
-                <textarea
-                    id="description"
-                    name="description"
-                >{{ ground['description'] or '' }}</textarea>
-
-            </div>
-
-
-            <!-- CURRENT IMAGE -->
-
-            <div class="form-group">
-
-                <label>
-                    Current Ground Image
-                </label>
-
-                <div class="current-image">
-
-                    {% if ground['image'] %}
-
-                        <img
-                            src="{{ url_for(
-                                'static',
-                                filename='uploads/' ~ ground['image']
-                            ) }}"
-                            alt="{{ ground['name'] }}"
-                        >
-
-                    {% else %}
-
-                        <div class="no-current-image">
-                            ⚽
-                        </div>
-
-                    {% endif %}
-
-                </div>
-
-            </div>
-
-
-            <!-- NEW IMAGE -->
-
-            <div class="form-group">
-
-                <label for="image">
-
-                    Replace Ground Image
-
-                </label>
-
-
-                <div class="image-box">
-
-                    <div class="image-icon">
-                        🖼️
-                    </div>
-
-                    <p style="margin-bottom: 12px;">
-                        Select a new image only if you want to replace
-                        the current image.
-                    </p>
-
-
-                    <input
-                        type="file"
-                        id="image"
-                        name="image"
-                        accept="image/png,image/jpeg,image/jpg,image/webp"
-                    >
-
-
-                    <div class="help-text">
-                        Leave empty to keep the current image.
-                    </div>
-
-
-                    <!-- PREVIEW -->
-
-                    <div
-                        class="preview-container"
-                        id="previewContainer"
-                    >
-
-                        <p style="margin-bottom: 10px;">
-                            New Image Preview:
-                        </p>
-
-                        <img
-                            id="imagePreview"
-                            src=""
-                            alt="New Image Preview"
-                        >
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- BUTTONS -->
-
-            <div class="buttons">
-
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                >
-                    💾 Update Ground
-                </button>
-
-
-                <a
-                    href="{{ url_for('admin_grounds') }}"
-                    class="btn btn-secondary"
-                >
-                    ← Cancel
-                </a>
-
-            </div>
-
-
-        </form>
-
+    <div>
+        ✏️ Edit Ground
     </div>
 
 </div>
 
 
-<!-- IMAGE PREVIEW -->
+<div class="layout">
 
-<script>
+    <aside class="sidebar">
 
-    const imageInput =
-        document.getElementById("image");
+        <a href="{{ url_for('admin_dashboard') }}">
+            🏠 Dashboard
+        </a>
 
-    const previewContainer =
-        document.getElementById(
-            "previewContainer"
-        );
+        <a href="{{ url_for('admin_bookings') }}">
+            📅 Bookings
+        </a>
 
-    const imagePreview =
-        document.getElementById(
-            "imagePreview"
-        );
+        <a href="{{ url_for('admin_users') }}">
+            👥 Users
+        </a>
 
+        <a href="{{ url_for('admin_grounds') }}" class="active">
+            ⚽ Grounds
+        </a>
 
-    imageInput.addEventListener(
-        "change",
-        function () {
+        <a href="{{ url_for('admin_calendar') }}">
+            🗓️ Calendar
+        </a>
 
-            const file = this.files[0];
+        <a href="{{ url_for('admin_logout') }}" class="logout">
+            🚪 Logout
+        </a>
 
-            if (!file) {
-
-                previewContainer.style.display =
-                    "none";
-
-                return;
-            }
+    </aside>
 
 
-            if (!file.type.startsWith("image/")) {
+    <main class="content">
 
-                alert(
-                    "Please select a valid image file."
-                );
-
-                this.value = "";
-
-                previewContainer.style.display =
-                    "none";
-
-                return;
-            }
+        <a
+            href="{{ url_for('admin_grounds') }}"
+            class="back"
+        >
+            ← Back to Grounds
+        </a>
 
 
-            const reader =
-                new FileReader();
+        <h1>
+            ✏️ Edit Ground
+        </h1>
 
 
-            reader.onload =
-                function (event) {
+        {% with messages = get_flashed_messages(with_categories=true) %}
 
-                    imagePreview.src =
-                        event.target.result;
+            {% if messages %}
 
-                    previewContainer.style.display =
-                        "block";
+                {% for category, message in messages %}
 
-                };
+                    <div class="flash {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endwith %}
 
 
-            reader.readAsDataURL(file);
+        <div class="form-card">
 
-        }
-    );
+            <form
+                method="POST"
+                enctype="multipart/form-data"
+            >
 
-</script>
+                <div class="form-grid">
 
+
+                    <div class="form-group">
+
+                        <label for="name">
+                            Ground Name *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            value="{{ ground['name'] }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="location">
+                            Location *
+                        </label>
+
+                        <input
+                            type="text"
+                            id="location"
+                            name="location"
+                            value="{{ ground['location'] }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="price">
+                            Price per Hour (Rs.) *
+                        </label>
+
+                        <input
+                            type="number"
+                            id="price"
+                            name="price"
+                            min="0"
+                            step="1"
+                            value="{{ ground['price'] }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="contact">
+                            Contact Number
+                        </label>
+
+                        <input
+                            type="text"
+                            id="contact"
+                            name="contact"
+                            value="{{ ground['contact'] or '' }}"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="opening_time">
+                            Opening Time *
+                        </label>
+
+                        <input
+                            type="time"
+                            id="opening_time"
+                            name="opening_time"
+                            value="{{ ground['opening_time'] or '06:00' }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="closing_time">
+                            Closing Time *
+                        </label>
+
+                        <input
+                            type="time"
+                            id="closing_time"
+                            name="closing_time"
+                            value="{{ ground['closing_time'] or '22:00' }}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group full">
+
+                        <label for="image">
+                            Replace Ground Image
+                        </label>
+
+                        <input
+                            type="file"
+                            id="image"
+                            name="image"
+                            accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                        >
+
+                        {% if ground['image'] %}
+
+                            <div class="current-image">
+
+                                <div class="hint">
+                                    Current image:
+                                </div>
+
+                                <br>
+
+                                <img
+                                    src="{{ url_for('uploaded_file', filename=ground['image']) }}"
+                                    alt="Current ground image"
+                                >
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="form-group full">
+
+                        <label for="description">
+                            Description
+                        </label>
+
+                        <textarea
+                            id="description"
+                            name="description"
+                        >{{ ground['description'] or '' }}</textarea>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="buttons">
+
+                    <button
+                        type="submit"
+                        class="btn save"
+                    >
+                        💾 Update Ground
+                    </button>
+
+                    <a
+                        href="{{ url_for('admin_grounds') }}"
+                        class="btn cancel"
+                    >
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</div>
 
 </body>
-
 </html>
