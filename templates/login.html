@@ -10,262 +10,198 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Login | Futsal Booking</title>
+    <title>Login - Futsal Booking</title>
 
     <style>
 
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
 
         body {
-
-            font-family: Arial, Helvetica, sans-serif;
-
-            background: #f5f7fb;
-
             min-height: 100vh;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
 
-            color: #222;
-        }
-
-        nav {
-
-            background: #111827;
-
-            padding: 18px 7%;
+            background:
+                linear-gradient(
+                    135deg,
+                    #eef2ff,
+                    #f8fafc
+                );
 
             display: flex;
-
-            justify-content: space-between;
-
             align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+
+            background: white;
+
+            border-radius: 20px;
+
+            padding: 40px;
+
+            box-shadow:
+                0 20px 50px
+                rgba(0, 0, 0, 0.10);
         }
 
         .logo {
+            text-align: center;
 
-            color: white;
+            font-size: 42px;
 
-            text-decoration: none;
-
-            font-size: 24px;
-
-            font-weight: bold;
+            margin-bottom: 10px;
         }
 
-        .nav-links {
+        h1 {
+            text-align: center;
 
-            display: flex;
+            color: #172033;
 
-            gap: 25px;
+            margin-bottom: 8px;
+
+            font-size: 30px;
         }
 
-        .nav-links a {
+        .subtitle {
+            text-align: center;
 
-            color: white;
+            color: #64748b;
 
-            text-decoration: none;
+            margin-bottom: 30px;
 
             font-size: 15px;
         }
 
-        .nav-links a:hover {
+        .alert {
+            padding: 13px 15px;
 
-            color: #a78bfa;
-        }
+            border-radius: 10px;
 
-        .container {
-
-            width: 90%;
-
-            max-width: 450px;
-
-            margin: 60px auto;
-        }
-
-        .login-card {
-
-            background: white;
-
-            padding: 35px;
-
-            border-radius: 16px;
-
-            box-shadow:
-                0 8px 30px
-                rgba(0, 0, 0, 0.08);
-        }
-
-        .title {
-
-            text-align: center;
-
-            margin-bottom: 25px;
-        }
-
-        .title h1 {
-
-            font-size: 30px;
-
-            margin-bottom: 8px;
-        }
-
-        .title p {
-
-            color: #6b7280;
-
-            font-size: 14px;
-        }
-
-        /* FLASH MESSAGES */
-
-        .flash-container {
-
-            margin-bottom: 20px;
-        }
-
-        .flash-message {
-
-            padding: 14px 16px;
-
-            border-radius: 9px;
-
-            margin-bottom: 10px;
-
-            font-size: 14px;
-
-            font-weight: 500;
-        }
-
-        .flash-message.error {
+            margin-bottom: 18px;
 
             background: #fee2e2;
 
             color: #991b1b;
 
-            border: 1px solid #fecaca;
-        }
-
-        .flash-message.success {
-
-            background: #dcfce7;
-
-            color: #166534;
-
-            border: 1px solid #bbf7d0;
+            font-size: 14px;
         }
 
         .form-group {
-
             margin-bottom: 20px;
         }
 
-        .form-group label {
-
+        label {
             display: block;
 
-            margin-bottom: 7px;
+            margin-bottom: 8px;
 
-            font-weight: bold;
-        }
+            font-weight: 600;
 
-        .form-group input {
-
-            width: 100%;
-
-            padding: 13px;
-
-            border: 1px solid #d1d5db;
-
-            border-radius: 8px;
-
-            font-size: 15px;
-
-            outline: none;
-        }
-
-        .form-group input:focus {
-
-            border-color: #7c3aed;
-
-            box-shadow:
-                0 0 0 3px
-                rgba(124, 58, 237, 0.1);
-        }
-
-        .login-button {
-
-            width: 100%;
-
-            padding: 14px;
-
-            border: none;
-
-            border-radius: 9px;
-
-            background: #7c3aed;
-
-            color: white;
-
-            font-size: 16px;
-
-            font-weight: bold;
-
-            cursor: pointer;
-        }
-
-        .login-button:hover {
-
-            background: #6d28d9;
-        }
-
-        .register-text {
-
-            text-align: center;
-
-            margin-top: 22px;
-
-            color: #6b7280;
+            color: #334155;
 
             font-size: 14px;
         }
 
-        .register-text a {
+        input {
+            width: 100%;
 
-            color: #6d28d9;
+            padding: 14px 15px;
 
-            font-weight: bold;
+            border: 1px solid #cbd5e1;
 
-            text-decoration: none;
+            border-radius: 10px;
+
+            font-size: 15px;
+
+            outline: none;
+
+            transition: 0.2s;
         }
 
-        .register-text a:hover {
+        input:focus {
+            border-color: #2563eb;
 
+            box-shadow:
+                0 0 0 3px
+                rgba(37, 99, 235, 0.12);
+        }
+
+        .login-button {
+            width: 100%;
+
+            border: none;
+
+            background: #2563eb;
+
+            color: white;
+
+            padding: 14px;
+
+            border-radius: 10px;
+
+            font-size: 16px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+        .login-button:hover {
+            background: #1d4ed8;
+        }
+
+        .links {
+            text-align: center;
+
+            margin-top: 25px;
+
+            color: #64748b;
+
+            font-size: 14px;
+        }
+
+        .links a {
+            color: #2563eb;
+
+            text-decoration: none;
+
+            font-weight: 600;
+        }
+
+        .links a:hover {
             text-decoration: underline;
         }
 
-        @media (max-width: 600px) {
+        .home-link {
+            display: block;
 
-            nav {
+            text-align: center;
 
-                flex-direction: column;
+            margin-top: 18px;
 
-                gap: 15px;
-            }
+            color: #64748b;
 
-            .nav-links {
+            text-decoration: none;
 
-                flex-wrap: wrap;
+            font-size: 14px;
+        }
 
-                justify-content: center;
-            }
-
-            .login-card {
-
-                padding: 25px;
-            }
+        .home-link:hover {
+            color: #2563eb;
         }
 
     </style>
@@ -274,73 +210,34 @@
 
 <body>
 
+    <div class="login-container">
 
-<nav>
-
-    <a
-        href="{{ url_for('index') }}"
-        class="logo"
-    >
-        Futsal Booking
-    </a>
-
-    <div class="nav-links">
-
-        <a href="{{ url_for('index') }}">
-            Home
-        </a>
-
-        <a href="{{ url_for('grounds') }}">
-            Grounds
-        </a>
-
-        <a href="{{ url_for('register') }}">
-            Register
-        </a>
-
-    </div>
-
-</nav>
-
-
-<div class="container">
-
-    <div class="login-card">
-
-        <div class="title">
-
-            <h1>
-                Welcome Back
-            </h1>
-
-            <p>
-                Login to manage your futsal bookings.
-            </p>
-
+        <div class="logo">
+            ⚽
         </div>
+
+        <h1>
+            Welcome Back
+        </h1>
+
+        <p class="subtitle">
+            Login to your Futsal Booking account
+        </p>
 
 
         <!-- FLASH MESSAGES -->
 
-        {% with messages = get_flashed_messages(
-            with_categories=true
-        ) %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
 
             {% if messages %}
 
-                <div class="flash-container">
+                {% for category, message in messages %}
 
-                    {% for category, message in messages %}
+                    <div class="alert">
+                        {{ message }}
+                    </div>
 
-                        <div
-                            class="flash-message {{ category }}"
-                        >
-                            {{ message }}
-                        </div>
-
-                    {% endfor %}
-
-                </div>
+                {% endfor %}
 
             {% endif %}
 
@@ -354,10 +251,21 @@
             action="{{ url_for('login') }}"
         >
 
+            <!-- CSRF TOKEN -->
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+
+
+            <!-- EMAIL -->
+
             <div class="form-group">
 
                 <label for="email">
-                    Email
+                    Email Address
                 </label>
 
                 <input
@@ -366,10 +274,13 @@
                     name="email"
                     placeholder="Enter your email"
                     required
+                    autocomplete="email"
                 >
 
             </div>
 
+
+            <!-- PASSWORD -->
 
             <div class="form-group">
 
@@ -383,35 +294,47 @@
                     name="password"
                     placeholder="Enter your password"
                     required
+                    autocomplete="current-password"
                 >
 
             </div>
 
 
+            <!-- BUTTON -->
+
             <button
                 type="submit"
                 class="login-button"
             >
-                Login
+                🔐 Login
             </button>
 
         </form>
 
 
-        <div class="register-text">
+        <!-- REGISTER -->
+
+        <div class="links">
 
             Don't have an account?
 
             <a href="{{ url_for('register') }}">
-                Create Account
+                Register
             </a>
 
         </div>
 
+
+        <!-- HOME -->
+
+        <a
+            href="{{ url_for('index') }}"
+            class="home-link"
+        >
+            ← Back to Home
+        </a>
+
     </div>
-
-</div>
-
 
 </body>
 

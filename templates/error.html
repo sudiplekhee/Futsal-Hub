@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{{ error_code|default(500) }} - Futsal Booking</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6fb;
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: white;
+            border-radius: 18px;
+
+            padding: 50px 35px;
+
+            text-align: center;
+
+            box-shadow:
+                0 10px 35px rgba(0, 0, 0, 0.08);
+        }
+
+        .icon {
+            font-size: 70px;
+            margin-bottom: 20px;
+        }
+
+        .error-code {
+            font-size: 70px;
+            font-weight: 800;
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #111827;
+            margin-bottom: 15px;
+        }
+
+        p {
+            color: #6b7280;
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 13px 22px;
+
+            border-radius: 8px;
+
+            font-weight: bold;
+            text-decoration: none;
+
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        @media (max-width: 500px) {
+
+            .container {
+                padding: 35px 20px;
+            }
+
+            .error-code {
+                font-size: 55px;
+            }
+
+            h1 {
+                font-size: 23px;
+            }
+
+            p {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        {% if error_code == 404 %}
+
+            <div class="icon">
+                🔍
+            </div>
+
+            <div class="error-code">
+                404
+            </div>
+
+            <h1>
+                Page Not Found
+            </h1>
+
+            <p>
+                Sorry, the page you are looking for
+                does not exist or may have been moved.
+            </p>
+
+        {% elif error_code == 403 %}
+
+            <div class="icon">
+                🔒
+            </div>
+
+            <div class="error-code">
+                403
+            </div>
+
+            <h1>
+                Access Denied
+            </h1>
+
+            <p>
+                You do not have permission to access
+                this page.
+            </p>
+
+        {% elif error_code == 400 %}
+
+            <div class="icon">
+                ⚠️
+            </div>
+
+            <div class="error-code">
+                400
+            </div>
+
+            <h1>
+                Bad Request
+            </h1>
+
+            <p>
+                The request could not be processed.
+                Please check your information and try again.
+            </p>
+
+        {% else %}
+
+            <div class="icon">
+                🛠️
+            </div>
+
+            <div class="error-code">
+                {{ error_code|default(500) }}
+            </div>
+
+            <h1>
+                Something Went Wrong
+            </h1>
+
+            <p>
+                An unexpected error occurred.
+                Please try again later.
+            </p>
+
+        {% endif %}
+
+
+        <div class="buttons">
+
+            <a
+                href="{{ url_for('index') }}"
+                class="btn btn-primary"
+            >
+                🏠 Go Home
+            </a>
+
+            <a
+                href="javascript:history.back()"
+                class="btn btn-secondary"
+            >
+                ← Go Back
+            </a>
+
+        </div>
+
+
+        <div class="footer">
+            ⚽ Futsal Booking System
+        </div>
+
+    </div>
+
+</body>
+</html>

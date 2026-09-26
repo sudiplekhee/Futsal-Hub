@@ -10,7 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Register | Futsal Booking</title>
+    <title>Register - Futsal Booking System</title>
 
     <style>
 
@@ -22,249 +22,310 @@
 
         body {
 
-            font-family: Arial, Helvetica, sans-serif;
-
-            background: #f5f7fb;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
 
             min-height: 100vh;
 
-            color: #222;
-        }
-
-        nav {
-
-            background: #111827;
-
-            padding: 18px 7%;
+            background:
+                linear-gradient(
+                    135deg,
+                    #6c5ce7,
+                    #a29bfe
+                );
 
             display: flex;
-
-            justify-content: space-between;
 
             align-items: center;
+
+            justify-content: center;
+
+            padding: 20px;
         }
 
-        .logo {
+        .register-container {
 
-            color: white;
+            width: 100%;
 
-            text-decoration: none;
-
-            font-size: 24px;
-
-            font-weight: bold;
-        }
-
-        .nav-links {
-
-            display: flex;
-
-            gap: 25px;
-        }
-
-        .nav-links a {
-
-            color: white;
-
-            text-decoration: none;
-
-            font-size: 15px;
-        }
-
-        .nav-links a:hover {
-
-            color: #a78bfa;
-        }
-
-        .container {
-
-            width: 90%;
-
-            max-width: 480px;
-
-            margin: 50px auto;
+            max-width: 450px;
         }
 
         .register-card {
 
             background: white;
 
-            padding: 35px;
+            border-radius: 20px;
 
-            border-radius: 16px;
+            padding: 40px;
 
             box-shadow:
-                0 8px 30px
-                rgba(0, 0, 0, 0.08);
+                0 20px 50px
+                rgba(0, 0, 0, 0.20);
         }
 
-        .title {
+        .logo {
+
+            width: 70px;
+
+            height: 70px;
+
+            margin:
+                0 auto 20px;
+
+            border-radius: 50%;
+
+            background: #6c5ce7;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 34px;
+        }
+
+        h1 {
 
             text-align: center;
 
-            margin-bottom: 25px;
-        }
+            color: #2d3436;
 
-        .title h1 {
-
-            font-size: 30px;
+            font-size: 28px;
 
             margin-bottom: 8px;
         }
 
-        .title p {
+        .subtitle {
 
-            color: #6b7280;
+            text-align: center;
 
-            font-size: 14px;
-        }
-
-        /* FLASH MESSAGES */
-
-        .flash-container {
-
-            margin-bottom: 20px;
-        }
-
-        .flash-message {
-
-            padding: 14px 16px;
-
-            border-radius: 9px;
-
-            margin-bottom: 10px;
+            color: #636e72;
 
             font-size: 14px;
 
-            font-weight: 500;
-        }
-
-        .flash-message.error {
-
-            background: #fee2e2;
-
-            color: #991b1b;
-
-            border: 1px solid #fecaca;
-        }
-
-        .flash-message.success {
-
-            background: #dcfce7;
-
-            color: #166534;
-
-            border: 1px solid #bbf7d0;
+            margin-bottom: 30px;
         }
 
         .form-group {
 
-            margin-bottom: 19px;
+            margin-bottom: 20px;
         }
 
-        .form-group label {
+        label {
 
             display: block;
 
-            margin-bottom: 7px;
+            color: #2d3436;
 
-            font-weight: bold;
+            font-weight: 600;
+
+            font-size: 14px;
+
+            margin-bottom: 8px;
         }
 
-        .form-group input {
+        input {
 
             width: 100%;
 
-            padding: 13px;
+            padding: 14px 15px;
 
-            border: 1px solid #d1d5db;
+            border:
+                1px solid #dfe6e9;
 
-            border-radius: 8px;
+            border-radius: 10px;
 
             font-size: 15px;
 
             outline: none;
+
+            transition:
+                border-color 0.2s,
+                box-shadow 0.2s;
         }
 
-        .form-group input:focus {
+        input:focus {
 
-            border-color: #7c3aed;
+            border-color: #6c5ce7;
 
             box-shadow:
                 0 0 0 3px
-                rgba(124, 58, 237, 0.1);
+                rgba(108, 92, 231, 0.12);
         }
 
-        .register-button {
+        input::placeholder {
+
+            color: #b2bec3;
+        }
+
+        .password-note {
+
+            margin-top: 6px;
+
+            font-size: 12px;
+
+            color: #636e72;
+        }
+
+        .submit-btn {
 
             width: 100%;
 
-            padding: 14px;
-
             border: none;
 
-            border-radius: 9px;
+            border-radius: 10px;
 
-            background: #7c3aed;
+            padding: 15px;
+
+            background: #6c5ce7;
 
             color: white;
 
             font-size: 16px;
 
-            font-weight: bold;
+            font-weight: 700;
 
             cursor: pointer;
+
+            transition:
+                background 0.2s,
+                transform 0.2s;
         }
 
-        .register-button:hover {
+        .submit-btn:hover {
 
-            background: #6d28d9;
+            background: #5b4bc4;
+
+            transform:
+                translateY(-1px);
         }
 
-        .login-text {
+        .submit-btn:active {
+
+            transform:
+                translateY(0);
+        }
+
+        .login-link {
 
             text-align: center;
 
-            margin-top: 22px;
+            margin-top: 25px;
 
-            color: #6b7280;
+            color: #636e72;
 
             font-size: 14px;
         }
 
-        .login-text a {
+        .login-link a {
 
-            color: #6d28d9;
+            color: #6c5ce7;
 
-            font-weight: bold;
+            font-weight: 700;
 
             text-decoration: none;
         }
 
-        .login-text a:hover {
+        .login-link a:hover {
 
             text-decoration: underline;
         }
 
-        @media (max-width: 600px) {
+        .home-link {
 
-            nav {
+            display: block;
 
-                flex-direction: column;
+            text-align: center;
 
-                gap: 15px;
-            }
+            margin-top: 18px;
 
-            .nav-links {
+            color: #636e72;
 
-                flex-wrap: wrap;
+            text-decoration: none;
 
-                justify-content: center;
+            font-size: 14px;
+        }
+
+        .home-link:hover {
+
+            color: #6c5ce7;
+        }
+
+        .alert {
+
+            padding: 12px 15px;
+
+            border-radius: 8px;
+
+            margin-bottom: 20px;
+
+            font-size: 14px;
+        }
+
+        .alert-danger {
+
+            background: #ffe5e5;
+
+            color: #c0392b;
+
+            border:
+                1px solid #ffcaca;
+        }
+
+        .alert-success {
+
+            background: #e8fff5;
+
+            color: #008f68;
+
+            border:
+                1px solid #b8f0dc;
+        }
+
+        .alert-warning {
+
+            background: #fff8df;
+
+            color: #9a7d00;
+
+            border:
+                1px solid #f5e6a8;
+        }
+
+        .alert-info {
+
+            background: #eaf4ff;
+
+            color: #2471a3;
+
+            border:
+                1px solid #c9e5ff;
+        }
+
+        .csrf-note {
+
+            display: none;
+        }
+
+        @media (max-width: 500px) {
+
+            body {
+
+                padding: 15px;
             }
 
             .register-card {
 
-                padding: 25px;
+                padding:
+                    30px 22px;
+            }
+
+            h1 {
+
+                font-size: 24px;
             }
         }
 
@@ -274,180 +335,234 @@
 
 <body>
 
+    <div class="register-container">
 
-<nav>
+        <div class="register-card">
 
-    <a
-        href="{{ url_for('index') }}"
-        class="logo"
-    >
-        Futsal Booking
-    </a>
-
-    <div class="nav-links">
-
-        <a href="{{ url_for('index') }}">
-            Home
-        </a>
-
-        <a href="{{ url_for('grounds') }}">
-            Grounds
-        </a>
-
-        <a href="{{ url_for('login') }}">
-            Login
-        </a>
-
-    </div>
-
-</nav>
-
-
-<div class="container">
-
-    <div class="register-card">
-
-        <div class="title">
+            <div class="logo">
+                ⚽
+            </div>
 
             <h1>
                 Create Account
             </h1>
 
-            <p>
-                Register to book your favorite futsal ground.
+            <p class="subtitle">
+                Join the Futsal Booking System
             </p>
 
-        </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
 
-
-        <!-- FLASH MESSAGES -->
-
-        {% with messages = get_flashed_messages(
-            with_categories=true
-        ) %}
-
-            {% if messages %}
-
-                <div class="flash-container">
+                {% if messages %}
 
                     {% for category, message in messages %}
 
-                        <div
-                            class="flash-message {{ category }}"
-                        >
+                        <div class="alert alert-{{ category }}">
+
                             {{ message }}
+
                         </div>
 
                     {% endfor %}
 
+                {% endif %}
+
+            {% endwith %}
+
+
+            <!-- ================================================= -->
+            <!-- REGISTRATION FORM -->
+            <!-- ================================================= -->
+
+            <form
+                method="POST"
+                action="{{ url_for('register') }}"
+            >
+
+                <!-- CSRF TOKEN -->
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+
+
+                <!-- NAME -->
+
+                <div class="form-group">
+
+                    <label for="name">
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Enter your full name"
+                        autocomplete="name"
+                        minlength="2"
+                        required
+                    >
+
                 </div>
 
-            {% endif %}
 
-        {% endwith %}
+                <!-- EMAIL -->
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        autocomplete="email"
+                        required
+                    >
+
+                </div>
 
 
-        <!-- REGISTER FORM -->
+                <!-- PASSWORD -->
 
-        <form
-            method="POST"
-            action="{{ url_for('register') }}"
-        >
+                <div class="form-group">
 
-            <div class="form-group">
+                    <label for="password">
+                        Password
+                    </label>
 
-                <label for="name">
-                    Full Name
-                </label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Create a password"
+                        autocomplete="new-password"
+                        minlength="6"
+                        required
+                    >
 
-                <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    placeholder="Enter your full name"
-                    required
+                    <div class="password-note">
+
+                        Password must contain at least
+                        6 characters.
+
+                    </div>
+
+                </div>
+
+
+                <!-- CONFIRM PASSWORD -->
+
+                <div class="form-group">
+
+                    <label for="confirm_password">
+                        Confirm Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="confirm_password"
+                        name="confirm_password"
+                        placeholder="Enter your password again"
+                        autocomplete="new-password"
+                        minlength="6"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- SUBMIT -->
+
+                <button
+                    type="submit"
+                    class="submit-btn"
                 >
+
+                    Create Account
+
+                </button>
+
+            </form>
+
+
+            <!-- LOGIN -->
+
+            <div class="login-link">
+
+                Already have an account?
+
+                <a href="{{ url_for('login') }}">
+
+                    Login
+
+                </a>
 
             </div>
 
 
-            <div class="form-group">
+            <!-- HOME -->
 
-                <label for="email">
-                    Email
-                </label>
-
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="password">
-                    Password
-                </label>
-
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="At least 6 characters"
-                    minlength="6"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="confirm_password">
-                    Confirm Password
-                </label>
-
-                <input
-                    type="password"
-                    id="confirm_password"
-                    name="confirm_password"
-                    placeholder="Enter password again"
-                    minlength="6"
-                    required
-                >
-
-            </div>
-
-
-            <button
-                type="submit"
-                class="register-button"
+            <a
+                href="{{ url_for('index') }}"
+                class="home-link"
             >
-                Create Account
-            </button>
 
-        </form>
+                ← Back to Home
 
-
-        <div class="login-text">
-
-            Already have an account?
-
-            <a href="{{ url_for('login') }}">
-                Login
             </a>
 
         </div>
 
     </div>
 
-</div>
 
+    <!-- ========================================================= -->
+    <!-- PASSWORD CHECK -->
+    <!-- ========================================================= -->
+
+    <script>
+
+        const form =
+            document.querySelector("form");
+
+        const password =
+            document.getElementById("password");
+
+        const confirmPassword =
+            document.getElementById(
+                "confirm_password"
+            );
+
+
+        form.addEventListener(
+            "submit",
+            function(event) {
+
+                if (
+                    password.value !==
+                    confirmPassword.value
+                ) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Passwords do not match."
+                    );
+
+                    confirmPassword.focus();
+
+                }
+
+            }
+        );
+
+    </script>
 
 </body>
 

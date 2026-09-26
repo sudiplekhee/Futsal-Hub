@@ -6,6 +6,8 @@ import hashlib
 import base64
 import requests
 
+from functools import wraps
+from flask_wtf.csrf import CSRFProtect
 from datetime import datetime, date, timedelta
 from functools import wraps
 
@@ -34,27 +36,145 @@ from werkzeug.utils import secure_filename
 # ============================================================
 
 app = Flask(__name__)
+# ============================================================
+# CSRF PROTECTION
+# ============================================================
 
-app.secret_key = "futsal_secret_key_change_this_later"
+csrf = CSRFProtect(app)
+
+# ------------------------------------------------------------
+# SECRET KEY
+# ------------------------------------------------------------
+# The secret key is used to protect Flask sessions.
+#
+# IMPORTANT:
+# For local development, the fallback value below is acceptable.
+# For production, create an environment variable named:
+#
+# FUTSAL_SECRET_KEY
+#
+# Example in Windows PowerShell:
+#
+# $env:FUTSAL_SECRET_KEY="your-long-random-secret-key"
+# ------------------------------------------------------------
+
+app.secret_key = os.environ.get(
+    "FUTSAL_SECRET_KEY",
+    "dev-only-change-this-secret-key"
+)
+
+# Prevent browsers from accessing the session cookie through JavaScript.
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+
+# Prevent the session cookie from being sent with cross-site requests.
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
+# Set this to True when the website is running over HTTPS in production.
+app.config["SESSION_COOKIE_SECURE"] = False
+
+# ============================================================
+# LOGIN REQUIRED
+# ============================================================
+
+def login_required(view_function):
+
+    @wraps(view_function)
+    def wrapper(*args, **kwargs):
+
+        if "user_id" not in session:
+
+            flash(
+                "Please login first.",
+                "warning"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
+        return view_function(
+            *args,
+            **kwargs
+        )
+
+    return wrapper
 
 
 # ============================================================
-# ESEWA TEST CONFIGURATION
+# ADMIN REQUIRED
 # ============================================================
 
-ESEWA_PRODUCT_CODE = "EPAYTEST"
+def admin_required(view_function):
 
-ESEWA_SECRET_KEY = "8gBm/:&EnhH.1/q"
+    @wraps(view_function)
+    def wrapper(*args, **kwargs):
 
-ESEWA_PAYMENT_URL = (
-    "https://rc-epay.esewa.com.np/api/epay/main/v2/form"
-)
+        if "user_id" not in session:
 
-ESEWA_STATUS_URL = (
-    "https://uat.esewa.com.np/api/epay/transaction/status/"
-)
+            flash(
+                "Please login first.",
+                "warning"
+            )
 
+            return redirect(
+                url_for("admin_login")
+            )
 
+        user_id = session.get("user_id")
+
+        conn = get_db()
+
+        user = conn.execute(
+            """
+            SELECT
+                id,
+                name,
+                email,
+                is_admin
+            FROM users
+            WHERE id = ?
+            """,
+            (user_id,)
+        ).fetchone()
+
+        conn.close()
+
+        if user is None:
+
+            session.clear()
+
+            flash(
+                "Your account could not be found. Please login again.",
+                "warning"
+            )
+
+            return redirect(
+                url_for("admin_login")
+            )
+
+        if user["is_admin"] != 1:
+
+            session.clear()
+
+            flash(
+                "Admin access required.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("index")
+            )
+
+        session["user_id"] = user["id"]
+        session["user_name"] = user["name"]
+        session["is_admin"] = 1
+
+        return view_function(
+            *args,
+            **kwargs
+        )
+
+    return wrapper
 # ============================================================
 # PATH CONFIGURATION
 # ============================================================
@@ -479,12 +599,35 @@ initialize_database()
 
 
 # ============================================================
-# HELPER FUNCTIONS
+# SECURE IMAGE VALIDATION
 # ============================================================
+
+ALLOWED_IMAGE_EXTENSIONS = {
+    "jpg",
+    "jpeg",
+    "png",
+    "gif",
+    "webp"
+}
+
+MAX_IMAGE_SIZE = 5 * 1024 * 1024
+
 
 def allowed_image(filename):
 
     if not filename:
+        return False
+
+    filename = filename.strip()
+
+    if not filename:
+        return False
+
+    # Reject suspicious path characters.
+    if "/" in filename or "\\" in filename:
+        return False
+
+    if filename.startswith("."):
         return False
 
     if "." not in filename:
@@ -498,34 +641,18 @@ def allowed_image(filename):
     return extension in ALLOWED_IMAGE_EXTENSIONS
 
 
-def login_required(view_function):
-
-    @wraps(view_function)
-    def wrapper(*args, **kwargs):
-
-        if "user_id" not in session:
-
-            flash(
-                "Please login first.",
-                "warning"
-            )
-
-            return redirect(
-                url_for("login")
-            )
-
-        return view_function(
-            *args,
-            **kwargs
-        )
-
-    return wrapper
-
+# ============================================================
+# SECURE ADMIN REQUIRED DECORATOR
+# ============================================================
 
 def admin_required(view_function):
 
     @wraps(view_function)
     def wrapper(*args, **kwargs):
+
+        # ----------------------------------------------------
+        # User must be logged in
+        # ----------------------------------------------------
 
         if "user_id" not in session:
 
@@ -538,7 +665,55 @@ def admin_required(view_function):
                 url_for("admin_login")
             )
 
-        if session.get("is_admin") != 1:
+        user_id = session.get("user_id")
+
+        # ----------------------------------------------------
+        # Verify admin status directly from database
+        # ----------------------------------------------------
+
+        conn = get_db()
+
+        user = conn.execute(
+            """
+            SELECT
+                id,
+                name,
+                email,
+                is_admin
+            FROM users
+            WHERE id = ?
+            """,
+            (
+                user_id,
+            )
+        ).fetchone()
+
+        conn.close()
+
+        # ----------------------------------------------------
+        # User does not exist anymore
+        # ----------------------------------------------------
+
+        if user is None:
+
+            session.clear()
+
+            flash(
+                "Your account could not be found. Please login again.",
+                "warning"
+            )
+
+            return redirect(
+                url_for("admin_login")
+            )
+
+        # ----------------------------------------------------
+        # Database says user is NOT an admin
+        # ----------------------------------------------------
+
+        if user["is_admin"] != 1:
+
+            session.clear()
 
             flash(
                 "Admin access required.",
@@ -548,6 +723,18 @@ def admin_required(view_function):
             return redirect(
                 url_for("index")
             )
+
+        # ----------------------------------------------------
+        # Refresh trusted session information
+        # ----------------------------------------------------
+
+        session["user_id"] = user["id"]
+        session["user_name"] = user["name"]
+        session["is_admin"] = 1
+
+        # ----------------------------------------------------
+        # Allow access
+        # ----------------------------------------------------
 
         return view_function(
             *args,
@@ -947,6 +1134,9 @@ def index():
 # ============================================================
 # ESEWA SUCCESS ROUTE
 # ============================================================
+# ============================================================
+# ESEWA SUCCESS ROUTE
+# ============================================================
 
 @app.route("/esewa/success")
 @login_required
@@ -969,7 +1159,6 @@ def esewa_success():
             url_for("my_bookings")
         )
 
-
     # --------------------------------------------------------
     # Decode Base64 response
     # --------------------------------------------------------
@@ -977,24 +1166,23 @@ def esewa_success():
     try:
 
         decoded_bytes = base64.b64decode(
-            encoded_data
+            encoded_data,
+            validate=True
         )
 
         decoded_data = decoded_bytes.decode(
             "utf-8"
         )
 
-        import json
-
         esewa_response = json.loads(
             decoded_data
         )
 
-    except Exception as e:
+    except Exception as error:
 
         print(
             "eSewa response decoding error:",
-            e
+            error
         )
 
         flash(
@@ -1006,9 +1194,8 @@ def esewa_success():
             url_for("my_bookings")
         )
 
-
     # --------------------------------------------------------
-    # Get important response values
+    # Read response fields
     # --------------------------------------------------------
 
     transaction_uuid = (
@@ -1035,21 +1222,32 @@ def esewa_success():
         )
     )
 
-    status = (
+    response_status = (
         esewa_response.get(
             "status"
         )
     )
 
+    response_signature = (
+        esewa_response.get(
+            "signature"
+        )
+    )
+
+    signed_field_names = (
+        esewa_response.get(
+            "signed_field_names"
+        )
+    )
 
     # --------------------------------------------------------
-    # Check required information
+    # Required response fields
     # --------------------------------------------------------
 
     if not transaction_uuid:
 
         flash(
-            "Transaction ID was not received.",
+            "Transaction ID was not received from eSewa.",
             "danger"
         )
 
@@ -1057,6 +1255,27 @@ def esewa_success():
             url_for("my_bookings")
         )
 
+    if not response_signature:
+
+        flash(
+            "eSewa response signature was not received.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("my_bookings")
+        )
+
+    if not signed_field_names:
+
+        flash(
+            "eSewa signed fields were not received.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("my_bookings")
+        )
 
     # --------------------------------------------------------
     # Verify product code
@@ -1073,9 +1292,130 @@ def esewa_success():
             url_for("my_bookings")
         )
 
+    # --------------------------------------------------------
+    # Verify response signature
+    #
+    # eSewa returns signed_field_names such as:
+    #
+    # transaction_code,status,total_amount,
+    # transaction_uuid,product_code,signed_field_names
+    #
+    # The signature must be generated from those exact
+    # fields in that exact order.
+    # --------------------------------------------------------
+
+    try:
+
+        signed_fields = [
+            field.strip()
+            for field in signed_field_names.split(",")
+            if field.strip()
+        ]
+
+        if not signed_fields:
+
+            flash(
+                "Invalid eSewa signed fields.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("my_bookings")
+            )
+
+        signed_values = []
+
+        for field_name in signed_fields:
+
+            if field_name not in esewa_response:
+
+                print(
+                    "Missing signed field:",
+                    field_name
+                )
+
+                flash(
+                    "Invalid eSewa response.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("my_bookings")
+                )
+
+            value = esewa_response.get(
+                field_name
+            )
+
+            # eSewa signs the string representation
+            # of the returned field values.
+            if value is None:
+
+                value = ""
+
+            signed_values.append(
+                f"{field_name}={value}"
+            )
+
+        signature_message = ",".join(
+            signed_values
+        )
+
+        expected_signature = base64.b64encode(
+            hmac.new(
+                ESEWA_SECRET_KEY.encode("utf-8"),
+                signature_message.encode("utf-8"),
+                hashlib.sha256
+            ).digest()
+        ).decode("utf-8")
+
+        # Constant-time comparison prevents timing attacks.
+        if not hmac.compare_digest(
+            expected_signature,
+            response_signature
+        ):
+
+            print(
+                "eSewa signature verification failed."
+            )
+
+            print(
+                "Expected signature:",
+                expected_signature
+            )
+
+            print(
+                "Received signature:",
+                response_signature
+            )
+
+            flash(
+                "eSewa response could not be verified.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("my_bookings")
+            )
+
+    except Exception as error:
+
+        print(
+            "eSewa signature verification error:",
+            error
+        )
+
+        flash(
+            "Could not verify the eSewa response.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("my_bookings")
+        )
 
     # --------------------------------------------------------
-    # Find booking
+    # Find the booking
     # --------------------------------------------------------
 
     conn = get_db()
@@ -1098,8 +1438,7 @@ def esewa_success():
         )
     ).fetchone()
 
-
-    if not booking:
+    if booking is None:
 
         conn.close()
 
@@ -1112,34 +1451,38 @@ def esewa_success():
             url_for("my_bookings")
         )
 
-
     # --------------------------------------------------------
-    # Calculate expected amount
-    # --------------------------------------------------------
-
-    expected_amount = (
-        float(booking["ground_price"] or 0)
-        *
-        float(booking["duration"] or 1)
-    )
-
-
-    # --------------------------------------------------------
-    # Check returned amount
+    # IMPORTANT:
+    # If this booking has already been paid, do not process
+    # the same eSewa success response again.
     # --------------------------------------------------------
 
-    try:
-
-        returned_amount = float(
-            total_amount
-        )
-
-    except (TypeError, ValueError):
+    if booking["payment_status"] == "paid":
 
         conn.close()
 
         flash(
-            "Invalid payment amount received.",
+            "This payment has already been verified.",
+            "info"
+        )
+
+        return redirect(
+            url_for(
+                "booking_details",
+                booking_id=booking["id"]
+            )
+        )
+
+    # --------------------------------------------------------
+    # Cancelled bookings cannot be paid
+    # --------------------------------------------------------
+
+    if booking["status"] == "cancelled":
+
+        conn.close()
+
+        flash(
+            "This booking has been cancelled.",
             "danger"
         )
 
@@ -1150,16 +1493,115 @@ def esewa_success():
             )
         )
 
+    # --------------------------------------------------------
+    # Calculate expected amount from our database
+    # --------------------------------------------------------
+
+    try:
+
+        ground_price = float(
+            booking["ground_price"] or 0
+        )
+
+    except (TypeError, ValueError):
+
+        conn.close()
+
+        flash(
+            "Invalid ground price.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "booking_details",
+                booking_id=booking["id"]
+            )
+        )
+
+    try:
+
+        duration = float(
+            booking["duration"] or 1
+        )
+
+    except (TypeError, ValueError):
+
+        conn.close()
+
+        flash(
+            "Invalid booking duration.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "booking_details",
+                booking_id=booking["id"]
+            )
+        )
+
+    expected_amount = round(
+        ground_price * duration,
+        2
+    )
+
+    if expected_amount <= 0:
+
+        conn.close()
+
+        flash(
+            "Invalid booking amount.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "booking_details",
+                booking_id=booking["id"]
+            )
+        )
 
     # --------------------------------------------------------
-    # Compare amounts
+    # Validate amount returned by eSewa
     # --------------------------------------------------------
+
+    try:
+
+        returned_amount = round(
+            float(total_amount),
+            2
+        )
+
+    except (TypeError, ValueError):
+
+        conn.close()
+
+        flash(
+            "Invalid payment amount received from eSewa.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "booking_details",
+                booking_id=booking["id"]
+            )
+        )
 
     if abs(
         returned_amount - expected_amount
     ) > 0.01:
 
         conn.close()
+
+        print(
+            "eSewa amount mismatch:",
+            "expected=",
+            expected_amount,
+            "received=",
+            returned_amount
+        )
 
         flash(
             "Payment amount does not match the booking amount.",
@@ -1173,16 +1615,16 @@ def esewa_success():
             )
         )
 
-
     # --------------------------------------------------------
-    # Ask eSewa to verify transaction
+    # Verify transaction directly with eSewa
+    #
+    # This is the second verification layer.
     # --------------------------------------------------------
 
     verification = verify_esewa_transaction(
         transaction_uuid,
         expected_amount
     )
-
 
     if not verification:
 
@@ -1200,21 +1642,20 @@ def esewa_success():
             )
         )
 
-
     print(
         "eSewa verification response:",
         verification
     )
 
-
     # --------------------------------------------------------
-    # Check eSewa status
+    # Verify status
     # --------------------------------------------------------
 
     verified_status = (
-        verification.get("status")
+        verification.get(
+            "status"
+        )
     )
-
 
     if verified_status != "COMPLETE":
 
@@ -1232,26 +1673,147 @@ def esewa_success():
             )
         )
 
+    # --------------------------------------------------------
+    # Verify status API product code
+    # --------------------------------------------------------
+
+    verified_product_code = (
+        verification.get(
+            "product_code"
+        )
+        or verification.get(
+            "scd"
+        )
+    )
+
+    if verified_product_code != ESEWA_PRODUCT_CODE:
+
+        conn.close()
+
+        flash(
+            "eSewa verification returned an invalid product code.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "booking_details",
+                booking_id=booking["id"]
+            )
+        )
 
     # --------------------------------------------------------
-    # Get reference ID from eSewa
+    # Verify status API transaction UUID when provided
+    # --------------------------------------------------------
+
+    verified_transaction_uuid = (
+        verification.get(
+            "transaction_uuid"
+        )
+    )
+
+    if (
+        verified_transaction_uuid
+        and
+        verified_transaction_uuid != transaction_uuid
+    ):
+
+        conn.close()
+
+        flash(
+            "eSewa transaction verification failed.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "booking_details",
+                booking_id=booking["id"]
+            )
+        )
+
+    # --------------------------------------------------------
+    # Verify status API amount when provided
+    # --------------------------------------------------------
+
+    verified_amount = (
+        verification.get(
+            "total_amount"
+        )
+    )
+
+    if verified_amount is None:
+
+        verified_amount = verification.get(
+            "totalAmount"
+        )
+
+    if verified_amount is not None:
+
+        try:
+
+            verified_amount = round(
+                float(verified_amount),
+                2
+            )
+
+        except (TypeError, ValueError):
+
+            conn.close()
+
+            flash(
+                "Invalid amount returned by eSewa verification.",
+                "danger"
+            )
+
+            return redirect(
+                url_for(
+                    "booking_details",
+                    booking_id=booking["id"]
+                )
+            )
+
+        if abs(
+            verified_amount - expected_amount
+        ) > 0.01:
+
+            conn.close()
+
+            flash(
+                "eSewa verified amount does not match the booking amount.",
+                "danger"
+            )
+
+            return redirect(
+                url_for(
+                    "booking_details",
+                    booking_id=booking["id"]
+                )
+            )
+
+    # --------------------------------------------------------
+    # Get official eSewa reference ID
     # --------------------------------------------------------
 
     reference_id = (
         verification.get("refId")
+        or verification.get("ref_id")
         or transaction_code
     )
 
-
     # --------------------------------------------------------
-    # Payment successfully verified
+    # Final atomic payment update
+    #
+    # Only change the booking from unpaid -> paid.
+    # This prevents duplicate processing.
     # --------------------------------------------------------
 
-    conn.execute(
+    cursor = conn.execute(
         """
         UPDATE bookings
         SET
             payment_status = 'paid',
+            status = 'confirmed',
             payment_method = 'esewa',
             payment_reference = ?,
             esewa_transaction_code = ?,
@@ -1261,11 +1823,13 @@ def esewa_success():
             paid_at = CURRENT_TIMESTAMP
         WHERE id = ?
         AND user_id = ?
+        AND payment_status != 'paid'
+        AND status != 'cancelled'
         """,
         (
             reference_id,
             transaction_code,
-            product_code,
+            ESEWA_PRODUCT_CODE,
             expected_amount,
             booking["id"],
             session["user_id"]
@@ -1274,18 +1838,36 @@ def esewa_success():
 
     conn.commit()
 
+    updated_rows = cursor.rowcount
+
     conn.close()
 
+    # --------------------------------------------------------
+    # Check whether payment was actually updated
+    # --------------------------------------------------------
+
+    if updated_rows != 1:
+
+        flash(
+            "This payment was already processed or could not be updated.",
+            "info"
+        )
+
+        return redirect(
+            url_for(
+                "booking_details",
+                booking_id=booking["id"]
+            )
+        )
 
     # --------------------------------------------------------
-    # Success message
+    # Success
     # --------------------------------------------------------
 
     flash(
         "eSewa payment successful and verified!",
         "success"
     )
-
 
     return redirect(
         url_for(
@@ -1398,7 +1980,7 @@ def esewa_failure():
     )
 
 # ============================================================
-# REGISTER
+# USER REGISTRATION
 # ============================================================
 
 @app.route(
@@ -1407,77 +1989,169 @@ def esewa_failure():
 )
 def register():
 
-    if request.method == "POST":
+    # --------------------------------------------------------
+    # GET REQUEST
+    # --------------------------------------------------------
 
-        name = request.form.get(
-            "name",
-            ""
-        ).strip()
+    if request.method == "GET":
 
-        email = request.form.get(
-            "email",
-            ""
-        ).strip().lower()
-
-        password = request.form.get(
-            "password",
-            ""
+        return render_template(
+            "register.html"
         )
 
-        confirm_password = request.form.get(
-            "confirm_password",
-            ""
+    # --------------------------------------------------------
+    # READ FORM DATA
+    # --------------------------------------------------------
+
+    name = request.form.get(
+        "name",
+        ""
+    ).strip()
+
+    email = request.form.get(
+        "email",
+        ""
+    ).strip().lower()
+
+    password = request.form.get(
+        "password",
+        ""
+    )
+
+    confirm_password = request.form.get(
+        "confirm_password",
+        ""
+    )
+
+    # --------------------------------------------------------
+    # VALIDATE NAME
+    # --------------------------------------------------------
+
+    if name == "":
+
+        flash(
+            "Please enter your name.",
+            "danger"
         )
 
-        if not name or not email or not password:
+        return redirect(
+            url_for("register")
+        )
 
-            flash(
-                "Please fill all required fields.",
-                "danger"
-            )
+    # --------------------------------------------------------
+    # VALIDATE EMAIL
+    # --------------------------------------------------------
 
-            return render_template(
-                "register.html"
-            )
+    if email == "":
 
-        if password != confirm_password:
+        flash(
+            "Please enter your email.",
+            "danger"
+        )
 
-            flash(
-                "Passwords do not match.",
-                "danger"
-            )
+        return redirect(
+            url_for("register")
+        )
 
-            return render_template(
-                "register.html"
-            )
+    if "@" not in email:
 
-        conn = get_db()
+        flash(
+            "Please enter a valid email address.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("register")
+        )
+
+    # --------------------------------------------------------
+    # VALIDATE PASSWORD
+    # --------------------------------------------------------
+
+    if password == "":
+
+        flash(
+            "Please enter a password.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("register")
+        )
+
+    if len(password) < 6:
+
+        flash(
+            "Password must contain at least 6 characters.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("register")
+        )
+
+    # --------------------------------------------------------
+    # CONFIRM PASSWORD
+    # --------------------------------------------------------
+
+    if password != confirm_password:
+
+        flash(
+            "Passwords do not match.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("register")
+        )
+
+    # --------------------------------------------------------
+    # DATABASE CONNECTION
+    # --------------------------------------------------------
+
+    conn = get_db()
+
+    try:
+
+        # ----------------------------------------------------
+        # CHECK EXISTING EMAIL
+        # ----------------------------------------------------
 
         existing_user = conn.execute(
             """
             SELECT id
             FROM users
-            WHERE email = ?
+            WHERE LOWER(email) = ?
             """,
             (
                 email,
             )
         ).fetchone()
 
-        if existing_user:
-
-            conn.close()
+        if existing_user is not None:
 
             flash(
-                "Email is already registered.",
-                "danger"
+                "This email is already registered. Please login.",
+                "warning"
             )
 
-            return render_template(
-                "register.html"
+            return redirect(
+                url_for("login")
             )
 
-        conn.execute(
+        # ----------------------------------------------------
+        # HASH PASSWORD
+        # ----------------------------------------------------
+
+        hashed_password = generate_password_hash(
+            password
+        )
+
+        # ----------------------------------------------------
+        # CREATE USER
+        # ----------------------------------------------------
+
+        cursor = conn.execute(
             """
             INSERT INTO users
             (
@@ -1486,33 +2160,125 @@ def register():
                 password,
                 is_admin
             )
-            VALUES (?, ?, ?, 0)
+            VALUES
+            (
+                ?,
+                ?,
+                ?,
+                0
+            )
             """,
             (
                 name,
                 email,
-                generate_password_hash(
-                    password
-                )
+                hashed_password,
             )
         )
 
         conn.commit()
 
-        conn.close()
+        # ----------------------------------------------------
+        # GET NEW USER ID
+        # ----------------------------------------------------
+
+        user_id = cursor.lastrowid
+
+        # ----------------------------------------------------
+        # LOGIN USER AUTOMATICALLY
+        # ----------------------------------------------------
+
+        session.clear()
+
+        session["user_id"] = user_id
+
+        session["user_name"] = name
+
+        session["user_email"] = email
+
+        session["is_admin"] = 0
+
+        # ----------------------------------------------------
+        # SUCCESS
+        # ----------------------------------------------------
 
         flash(
-            "Registration successful. Please login.",
+            "Registration successful! Welcome to Futsal Booking System.",
             "success"
         )
 
         return redirect(
-            url_for("login")
+            url_for("dashboard")
         )
 
-    return render_template(
-        "register.html"
-    )
+    # --------------------------------------------------------
+    # DUPLICATE EMAIL
+    # --------------------------------------------------------
+
+    except sqlite3.IntegrityError as error:
+
+        conn.rollback()
+
+        print(
+            "REGISTRATION INTEGRITY ERROR:",
+            error
+        )
+
+        flash(
+            "This email is already registered.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("register")
+        )
+
+    # --------------------------------------------------------
+    # DATABASE ERROR
+    # --------------------------------------------------------
+
+    except sqlite3.Error as error:
+
+        conn.rollback()
+
+        print(
+            "REGISTRATION DATABASE ERROR:",
+            error
+        )
+
+        flash(
+            "Database error occurred during registration.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("register")
+        )
+
+    # --------------------------------------------------------
+    # OTHER ERROR
+    # --------------------------------------------------------
+
+    except Exception as error:
+
+        conn.rollback()
+
+        print(
+            "REGISTRATION ERROR:",
+            error
+        )
+
+        flash(
+            "Something went wrong during registration.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("register")
+        )
+
+    finally:
+
+        conn.close()
 
 
 # ============================================================
@@ -2622,15 +3388,17 @@ def admin_dashboard():
     month = request.args.get("month", type=int)
     year = request.args.get("year", type=int)
 
-    today = datetime.today()
+    today = date.today()
 
-    if not month or month < 1 or month > 12:
+    if month is None or month < 1 or month > 12:
         month = today.month
 
-    if not year or year < 1:
+    if year is None or year < 1:
         year = today.year
 
-    first_day = datetime(year, month, 1)
+    # --------------------------------------------------------
+    # Month navigation
+    # --------------------------------------------------------
 
     if month == 12:
         next_month = 1
@@ -2646,132 +3414,381 @@ def admin_dashboard():
         previous_month = month - 1
         previous_year = year
 
+    # --------------------------------------------------------
+    # First day of current month
+    # --------------------------------------------------------
+
+    first_day = date(year, month, 1)
+
+    # --------------------------------------------------------
+    # Database connection
+    # --------------------------------------------------------
+
     conn = get_db()
 
+    # --------------------------------------------------------
+    # Total users
+    # --------------------------------------------------------
+
     total_users = conn.execute(
-        "SELECT COUNT(*) AS count FROM users WHERE is_admin = 0"
+        """
+        SELECT COUNT(*) AS count
+        FROM users
+        WHERE is_admin = 0
+        """
     ).fetchone()["count"]
+
+    # --------------------------------------------------------
+    # Total grounds
+    # --------------------------------------------------------
 
     total_grounds = conn.execute(
-        "SELECT COUNT(*) AS count FROM grounds"
+        """
+        SELECT COUNT(*) AS count
+        FROM grounds
+        """
     ).fetchone()["count"]
+
+    # --------------------------------------------------------
+    # Total bookings
+    # --------------------------------------------------------
 
     total_bookings = conn.execute(
-        "SELECT COUNT(*) AS count FROM bookings"
+        """
+        SELECT COUNT(*) AS count
+        FROM bookings
+        """
     ).fetchone()["count"]
 
+    # --------------------------------------------------------
+    # Paid bookings
+    # --------------------------------------------------------
+
     paid_bookings = conn.execute(
-        "SELECT COUNT(*) AS count FROM bookings WHERE payment_status = 'paid'"
+        """
+        SELECT COUNT(*) AS count
+        FROM bookings
+        WHERE payment_status = 'paid'
+        """
     ).fetchone()["count"]
+
+    # --------------------------------------------------------
+    # Pending payments
+    # --------------------------------------------------------
 
     pending_payments = conn.execute(
         """
-        SELECT COUNT(*) AS count FROM bookings
+        SELECT COUNT(*) AS count
+        FROM bookings
         WHERE payment_status IN ('pending', 'submitted')
         AND status != 'cancelled'
         """
     ).fetchone()["count"]
 
+    # --------------------------------------------------------
+    # Cancelled bookings
+    # --------------------------------------------------------
+
     cancelled_bookings = conn.execute(
-        "SELECT COUNT(*) AS count FROM bookings WHERE status = 'cancelled'"
+        """
+        SELECT COUNT(*) AS count
+        FROM bookings
+        WHERE status = 'cancelled'
+        """
     ).fetchone()["count"]
+
+    # --------------------------------------------------------
+    # Pending bookings
+    # --------------------------------------------------------
+
+    pending_bookings_count = conn.execute(
+        """
+        SELECT COUNT(*) AS count
+        FROM bookings
+        WHERE status = 'pending'
+        """
+    ).fetchone()["count"]
+
+    # --------------------------------------------------------
+    # Total revenue
+    # --------------------------------------------------------
 
     total_revenue = conn.execute(
         """
-        SELECT COALESCE(SUM(grounds.price * bookings.duration), 0) AS total
+        SELECT
+            COALESCE(
+                SUM(grounds.price * bookings.duration),
+                0
+            ) AS total
         FROM bookings
-        JOIN grounds ON bookings.ground_id = grounds.id
+        JOIN grounds
+            ON bookings.ground_id = grounds.id
         WHERE bookings.payment_status = 'paid'
         AND bookings.status != 'cancelled'
         """
     ).fetchone()["total"]
 
-    pending_bookings = conn.execute(
+    # --------------------------------------------------------
+    # Pending payment bookings
+    # --------------------------------------------------------
+
+    pending_payment_bookings = conn.execute(
         """
-        SELECT bookings.*, users.name AS user_name, users.email AS user_email,
-               grounds.name AS ground_name, grounds.location AS ground_location,
-               grounds.price AS ground_price, grounds.price AS price
+        SELECT
+            bookings.*,
+
+            users.name AS user_name,
+            users.email AS user_email,
+
+            grounds.name AS ground_name,
+            grounds.location AS ground_location,
+            grounds.price AS ground_price,
+            grounds.price AS price
+
         FROM bookings
-        JOIN users ON bookings.user_id = users.id
-        JOIN grounds ON bookings.ground_id = grounds.id
-        WHERE bookings.payment_status IN ('pending', 'submitted')
+
+        JOIN users
+            ON bookings.user_id = users.id
+
+        JOIN grounds
+            ON bookings.ground_id = grounds.id
+
+        WHERE bookings.payment_status IN (
+            'pending',
+            'submitted'
+        )
+
         AND bookings.status != 'cancelled'
-        ORDER BY bookings.booking_date ASC, bookings.booking_time ASC, bookings.id ASC
+
+        ORDER BY
+            bookings.booking_date ASC,
+            bookings.booking_time ASC,
+            bookings.id ASC
+
         LIMIT 10
         """
     ).fetchall()
+
+    # --------------------------------------------------------
+    # Recent bookings
+    # --------------------------------------------------------
 
     recent_bookings = conn.execute(
         """
-        SELECT bookings.*, users.name AS user_name, users.email AS user_email,
-               grounds.name AS ground_name, grounds.location AS ground_location,
-               grounds.price AS ground_price, grounds.price AS price
+        SELECT
+            bookings.*,
+
+            users.name AS user_name,
+            users.email AS user_email,
+
+            grounds.name AS ground_name,
+            grounds.location AS ground_location,
+            grounds.price AS ground_price,
+            grounds.price AS price
+
         FROM bookings
-        JOIN users ON bookings.user_id = users.id
-        JOIN grounds ON bookings.ground_id = grounds.id
+
+        JOIN users
+            ON bookings.user_id = users.id
+
+        JOIN grounds
+            ON bookings.ground_id = grounds.id
+
         ORDER BY bookings.id DESC
+
         LIMIT 10
         """
     ).fetchall()
 
+    # --------------------------------------------------------
+    # Calendar booking counts
+    # --------------------------------------------------------
+
+    # Calculate next month
+    if month == 12:
+        next_month_date = date(year + 1, 1, 1)
+    else:
+        next_month_date = date(year, month + 1, 1)
+
+    # Number of days in current month
+    days_in_month = (
+        next_month_date - first_day
+    ).days
+
+    # Get booking counts for current month
     calendar_rows = conn.execute(
         """
-        SELECT booking_date, COUNT(*) AS booking_count
+        SELECT
+            booking_date,
+            COUNT(*) AS booking_count
+
         FROM bookings
+
         WHERE status != 'cancelled'
+
         AND strftime('%Y', booking_date) = ?
+
         AND strftime('%m', booking_date) = ?
+
         GROUP BY booking_date
         """,
-        (str(year), f"{month:02d}")
+        (
+            str(year),
+            f"{month:02d}"
+        )
     ).fetchall()
 
     conn.close()
 
-    booking_counts = {row["booking_date"]: row["booking_count"] for row in calendar_rows}
+    # --------------------------------------------------------
+    # Convert calendar rows into dictionary
+    # --------------------------------------------------------
 
-    if month == 12:
-        next_month_date = datetime(year + 1, 1, 1)
-    else:
-        next_month_date = datetime(year, month + 1, 1)
+    booking_counts = {
+        row["booking_date"]: row["booking_count"]
+        for row in calendar_rows
+    }
 
-    days_in_month = (next_month_date - first_day).days
+    # --------------------------------------------------------
+    # Build calendar
+    # --------------------------------------------------------
+
+    calendar_days = []
+
+    # Monday = 0
+    # Sunday = 6
     first_weekday = first_day.weekday()
-    calendar_days = [None] * first_weekday
 
-    for day in range(1, days_in_month + 1):
-        date_string = f"{year:04d}-{month:02d}-{day:02d}"
-        calendar_days.append({
-            "day": day,
-            "date": date_string,
-            "booking_count": booking_counts.get(date_string, 0)
-        })
+    # --------------------------------------------------------
+    # Empty cells BEFORE first day
+    #
+    # IMPORTANT:
+    # Never use None here.
+    # Every calendar item must be a dictionary.
+    # --------------------------------------------------------
+
+    for _ in range(first_weekday):
+
+        calendar_days.append(
+            {
+                "day": "",
+                "date": "",
+                "is_today": False,
+                "bookings": [],
+                "booking_count": 0
+            }
+        )
+
+    # --------------------------------------------------------
+    # Actual days
+    # --------------------------------------------------------
+
+    for day_number in range(
+        1,
+        days_in_month + 1
+    ):
+
+        date_string = (
+            f"{year:04d}-"
+            f"{month:02d}-"
+            f"{day_number:02d}"
+        )
+
+        is_today = (
+            date_string == today.isoformat()
+        )
+
+        calendar_days.append(
+            {
+                "day": day_number,
+                "date": date_string,
+                "is_today": is_today,
+                "bookings": [],
+                "booking_count": booking_counts.get(
+                    date_string,
+                    0
+                )
+            }
+        )
+
+    # --------------------------------------------------------
+    # Empty cells AFTER last day
+    #
+    # Again, use dictionaries instead of None.
+    # --------------------------------------------------------
 
     while len(calendar_days) % 7 != 0:
-        calendar_days.append(None)
+
+        calendar_days.append(
+            {
+                "day": "",
+                "date": "",
+                "is_today": False,
+                "bookings": [],
+                "booking_count": 0
+            }
+        )
+
+    # --------------------------------------------------------
+    # Make sure revenue is numeric
+    # --------------------------------------------------------
 
     try:
-        total_revenue = float(total_revenue or 0)
-    except (TypeError, ValueError):
-        total_revenue = 0
+
+        total_revenue = float(
+            total_revenue or 0
+        )
+
+    except (
+        TypeError,
+        ValueError
+    ):
+
+        total_revenue = 0.0
+
+    # --------------------------------------------------------
+    # Render dashboard
+    # --------------------------------------------------------
 
     return render_template(
         "admin/dashboard.html",
+
         total_users=total_users,
+
         total_grounds=total_grounds,
+
         total_bookings=total_bookings,
+
         paid_bookings=paid_bookings,
+
         pending_payments=pending_payments,
+
         cancelled_bookings=cancelled_bookings,
+
+        pending_bookings=pending_bookings_count,
+
         total_revenue=total_revenue,
-        pending_bookings=pending_bookings,
+
+        pending_payment_bookings=(
+            pending_payment_bookings
+        ),
+
         recent_bookings=recent_bookings,
+
         calendar_days=calendar_days,
-        month_name=first_day.strftime("%B"),
+
+        month_name=first_day.strftime(
+            "%B"
+        ),
+
         calendar_year=year,
+
         previous_month=previous_month,
+
         previous_year=previous_year,
+
         next_month=next_month,
+
         next_year=next_year
     )
 
@@ -3122,7 +4139,7 @@ def admin_add_ground():
         price = request.form.get(
             "price",
             "0"
-        )
+        ).strip()
 
         contact = request.form.get(
             "contact",
@@ -3132,12 +4149,12 @@ def admin_add_ground():
         opening_time = request.form.get(
             "opening_time",
             "06:00"
-        )
+        ).strip()
 
         closing_time = request.form.get(
             "closing_time",
             "22:00"
-        )
+        ).strip()
 
         description = request.form.get(
             "description",
@@ -3147,6 +4164,10 @@ def admin_add_ground():
         image = request.files.get(
             "image"
         )
+
+        # ----------------------------------------------------
+        # BASIC VALIDATION
+        # ----------------------------------------------------
 
         if not name or not location:
 
@@ -3161,9 +4182,7 @@ def admin_add_ground():
 
         try:
 
-            price = float(
-                price
-            )
+            price = float(price)
 
         except (
             TypeError,
@@ -3179,16 +4198,35 @@ def admin_add_ground():
                 "admin/add_ground.html"
             )
 
+        if price < 0:
+
+            flash(
+                "Price cannot be negative.",
+                "danger"
+            )
+
+            return render_template(
+                "admin/add_ground.html"
+            )
+
+        # ----------------------------------------------------
+        # IMAGE UPLOAD
+        # ----------------------------------------------------
+
         filename = None
 
         if image and image.filename:
 
+            original_filename = image.filename.strip()
+
+            # Validate filename.
             if not allowed_image(
-                image.filename
+                original_filename
             ):
 
                 flash(
-                    "Invalid image format.",
+                    "Invalid image format. "
+                    "Only JPG, JPEG, PNG, GIF and WEBP are allowed.",
                     "danger"
                 )
 
@@ -3196,55 +4234,180 @@ def admin_add_ground():
                     "admin/add_ground.html"
                 )
 
-            filename = (
-                uuid.uuid4().hex
-                +
-                "_"
-                +
-                secure_filename(
-                    image.filename
-                )
+            # Sanitize filename.
+            safe_filename = secure_filename(
+                original_filename
             )
 
-            image.save(
-                os.path.join(
-                    UPLOAD_FOLDER,
+            if not safe_filename:
+
+                flash(
+                    "Invalid image filename.",
+                    "danger"
+                )
+
+                return render_template(
+                    "admin/add_ground.html"
+                )
+
+            # ------------------------------------------------
+            # CHECK FILE SIZE
+            # ------------------------------------------------
+
+            image.seek(
+                0,
+                os.SEEK_END
+            )
+
+            image_size = image.tell()
+
+            image.seek(0)
+
+            if image_size > MAX_IMAGE_SIZE:
+
+                flash(
+                    "Image is too large. Maximum size is 5 MB.",
+                    "danger"
+                )
+
+                return render_template(
+                    "admin/add_ground.html"
+                )
+
+            if image_size == 0:
+
+                flash(
+                    "The uploaded image is empty.",
+                    "danger"
+                )
+
+                return render_template(
+                    "admin/add_ground.html"
+                )
+
+            # ------------------------------------------------
+            # CREATE RANDOM SERVER-SIDE FILENAME
+            # ------------------------------------------------
+
+            extension = safe_filename.rsplit(
+                ".",
+                1
+            )[1].lower()
+
+            filename = (
+                uuid.uuid4().hex
+                + "."
+                + extension
+            )
+
+            file_path = os.path.join(
+                UPLOAD_FOLDER,
+                filename
+            )
+
+            # ------------------------------------------------
+            # SAVE FILE
+            # ------------------------------------------------
+
+            try:
+
+                image.save(
+                    file_path
+                )
+
+            except Exception as error:
+
+                print(
+                    "IMAGE SAVE ERROR:",
+                    error
+                )
+
+                flash(
+                    "Could not save the uploaded image.",
+                    "danger"
+                )
+
+                return render_template(
+                    "admin/add_ground.html"
+                )
+
+        # ----------------------------------------------------
+        # SAVE GROUND
+        # ----------------------------------------------------
+
+        conn = get_db()
+
+        try:
+
+            conn.execute(
+                """
+                INSERT INTO grounds
+                (
+                    name,
+                    location,
+                    price,
+                    contact,
+                    opening_time,
+                    closing_time,
+                    description,
+                    image
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    name,
+                    location,
+                    price,
+                    contact,
+                    opening_time,
+                    closing_time,
+                    description,
                     filename
                 )
             )
 
-        conn = get_db()
+            conn.commit()
 
-        conn.execute(
-            """
-            INSERT INTO grounds
-            (
-                name,
-                location,
-                price,
-                contact,
-                opening_time,
-                closing_time,
-                description,
-                image
+        except sqlite3.Error as error:
+
+            conn.rollback()
+
+            print(
+                "ADD GROUND DATABASE ERROR:",
+                error
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                name,
-                location,
-                price,
-                contact,
-                opening_time,
-                closing_time,
-                description,
-                filename
+
+            # Remove uploaded file if database save failed.
+            if filename:
+
+                uploaded_path = os.path.join(
+                    UPLOAD_FOLDER,
+                    filename
+                )
+
+                if os.path.exists(
+                    uploaded_path
+                ):
+
+                    try:
+                        os.remove(
+                            uploaded_path
+                        )
+                    except OSError:
+                        pass
+
+            flash(
+                "Could not save the ground.",
+                "danger"
             )
-        )
 
-        conn.commit()
+            return render_template(
+                "admin/add_ground.html"
+            )
 
-        conn.close()
+        finally:
+
+            conn.close()
 
         flash(
             "Ground added successfully.",
@@ -3639,6 +4802,9 @@ def admin_bookings():
 # ============================================================
 # ADMIN BOOKING DETAILS
 # ============================================================
+# ============================================================
+# ADMIN BOOKING DETAILS
+# ============================================================
 
 @app.route("/admin/bookings/<int:booking_id>")
 @admin_required
@@ -3650,32 +4816,83 @@ def admin_booking_details(booking_id):
         """
         SELECT
             bookings.*,
+
             users.name AS user_name,
             users.email AS user_email,
+
             grounds.name AS ground_name,
             grounds.location AS ground_location,
+
+            -- Provide BOTH names because different templates
+            -- may use either price or ground_price.
+            grounds.price AS price,
             grounds.price AS ground_price,
+
             grounds.image AS ground_image,
             grounds.contact AS ground_contact,
             grounds.opening_time AS opening_time,
             grounds.closing_time AS closing_time
+
         FROM bookings
-        JOIN users ON bookings.user_id = users.id
-        JOIN grounds ON bookings.ground_id = grounds.id
+
+        JOIN users
+            ON bookings.user_id = users.id
+
+        JOIN grounds
+            ON bookings.ground_id = grounds.id
+
         WHERE bookings.id = ?
         """,
-        (booking_id,)
+        (
+            booking_id,
+        )
     ).fetchone()
 
     conn.close()
 
     if booking is None:
-        flash("Booking not found.", "danger")
-        return redirect(url_for("admin_bookings"))
+
+        flash(
+            "Booking not found.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin_bookings")
+        )
+
+    # --------------------------------------------------------
+    # Safely calculate price and total amount
+    # --------------------------------------------------------
+
+    try:
+        price = float(
+            booking["price"] or 0
+        )
+    except (TypeError, ValueError):
+        price = 0.0
+
+    try:
+        duration = float(
+            booking["duration"] or 1
+        )
+    except (TypeError, ValueError):
+        duration = 1.0
+
+    total_amount = round(
+        price * duration,
+        2
+    )
 
     return render_template(
         "admin/booking_details.html",
-        booking=booking
+
+        booking=booking,
+
+        # Extra values available to the template
+        price=price,
+        duration=duration,
+        total_amount=total_amount
     )
 
 
@@ -3754,16 +4971,33 @@ def admin_confirm_payment(booking_id):
 
     conn = get_db()
 
+    # --------------------------------------------------------
+    # Find booking
+    # --------------------------------------------------------
+
     booking = conn.execute(
         """
-        SELECT *
+        SELECT
+            bookings.*,
+            users.name AS user_name,
+            users.email AS user_email,
+            grounds.name AS ground_name,
+            grounds.price AS ground_price
         FROM bookings
-        WHERE id = ?
+        JOIN users
+            ON bookings.user_id = users.id
+        JOIN grounds
+            ON bookings.ground_id = grounds.id
+        WHERE bookings.id = ?
         """,
         (
             booking_id,
         )
     ).fetchone()
+
+    # --------------------------------------------------------
+    # Booking not found
+    # --------------------------------------------------------
 
     if booking is None:
 
@@ -3778,17 +5012,163 @@ def admin_confirm_payment(booking_id):
             url_for("admin_bookings")
         )
 
+    # --------------------------------------------------------
+    # Do not confirm cancelled booking
+    # --------------------------------------------------------
+
+    if booking["status"] == "cancelled":
+
+        conn.close()
+
+        flash(
+            "Cancelled bookings cannot be marked as paid.",
+            "warning"
+        )
+
+        return redirect(
+            url_for(
+                "admin_booking_details",
+                booking_id=booking_id
+            )
+        )
+
+    # --------------------------------------------------------
+    # Already paid
+    # --------------------------------------------------------
+
+    if booking["payment_status"] == "paid":
+
+        conn.close()
+
+        flash(
+            "This payment has already been confirmed.",
+            "info"
+        )
+
+        return redirect(
+            url_for(
+                "admin_booking_details",
+                booking_id=booking_id
+            )
+        )
+
+    # --------------------------------------------------------
+    # Only pending/submitted payments can be confirmed
+    # --------------------------------------------------------
+
+    allowed_statuses = {
+        "pending",
+        "submitted"
+    }
+
+    if booking["payment_status"] not in allowed_statuses:
+
+        conn.close()
+
+        flash(
+            "This payment is not in a confirmable state.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "admin_booking_details",
+                booking_id=booking_id
+            )
+        )
+
+    # --------------------------------------------------------
+    # Calculate booking amount
+    # --------------------------------------------------------
+
+    try:
+
+        ground_price = float(
+            booking["ground_price"] or 0
+        )
+
+    except (TypeError, ValueError):
+
+        conn.close()
+
+        flash(
+            "Invalid ground price.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "admin_booking_details",
+                booking_id=booking_id
+            )
+        )
+
+    try:
+
+        duration = float(
+            booking["duration"] or 1
+        )
+
+    except (TypeError, ValueError):
+
+        conn.close()
+
+        flash(
+            "Invalid booking duration.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "admin_booking_details",
+                booking_id=booking_id
+            )
+        )
+
+    total_amount = round(
+        ground_price * duration,
+        2
+    )
+
+    if total_amount <= 0:
+
+        conn.close()
+
+        flash(
+            "Invalid booking amount.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "admin_booking_details",
+                booking_id=booking_id
+            )
+        )
+
+    # --------------------------------------------------------
+    # Confirm payment
+    # --------------------------------------------------------
+
     conn.execute(
         """
         UPDATE bookings
         SET
             payment_status = 'paid',
             status = 'confirmed',
+            esewa_amount = CASE
+                WHEN payment_method = 'esewa'
+                THEN ?
+                ELSE esewa_amount
+            END,
             paid_at = CURRENT_TIMESTAMP
         WHERE id = ?
+        AND payment_status IN ('pending', 'submitted')
+        AND status != 'cancelled'
         """,
         (
-            booking_id,
+            total_amount,
+            booking_id
         )
     )
 
@@ -3796,13 +5176,20 @@ def admin_confirm_payment(booking_id):
 
     conn.close()
 
+    # --------------------------------------------------------
+    # Success
+    # --------------------------------------------------------
+
     flash(
         "Payment confirmed successfully.",
         "success"
     )
 
     return redirect(
-        url_for("admin_bookings")
+        url_for(
+            "admin_booking_details",
+            booking_id=booking_id
+        )
     )
 
 
@@ -3819,16 +5206,33 @@ def admin_reject_payment(booking_id):
 
     conn = get_db()
 
+    # --------------------------------------------------------
+    # Find booking
+    # --------------------------------------------------------
+
     booking = conn.execute(
         """
-        SELECT *
+        SELECT
+            bookings.*,
+            users.name AS user_name,
+            users.email AS user_email,
+            grounds.name AS ground_name,
+            grounds.price AS ground_price
         FROM bookings
-        WHERE id = ?
+        JOIN users
+            ON bookings.user_id = users.id
+        JOIN grounds
+            ON bookings.ground_id = grounds.id
+        WHERE bookings.id = ?
         """,
         (
             booking_id,
         )
     ).fetchone()
+
+    # --------------------------------------------------------
+    # Booking does not exist
+    # --------------------------------------------------------
 
     if booking is None:
 
@@ -3843,12 +5247,111 @@ def admin_reject_payment(booking_id):
             url_for("admin_bookings")
         )
 
+    # --------------------------------------------------------
+    # Cancelled booking
+    # --------------------------------------------------------
+
+    if booking["status"] == "cancelled":
+
+        conn.close()
+
+        flash(
+            "Payment for a cancelled booking cannot be rejected.",
+            "warning"
+        )
+
+        return redirect(
+            url_for(
+                "admin_booking_details",
+                booking_id=booking_id
+            )
+        )
+
+    # --------------------------------------------------------
+    # Already paid
+    # --------------------------------------------------------
+
+    if booking["payment_status"] == "paid":
+
+        conn.close()
+
+        flash(
+            "A paid payment cannot be rejected.",
+            "warning"
+        )
+
+        return redirect(
+            url_for(
+                "admin_booking_details",
+                booking_id=booking_id
+            )
+        )
+
+    # --------------------------------------------------------
+    # Already rejected
+    # --------------------------------------------------------
+
+    if booking["payment_status"] == "rejected":
+
+        conn.close()
+
+        flash(
+            "This payment has already been rejected.",
+            "info"
+        )
+
+        return redirect(
+            url_for(
+                "admin_booking_details",
+                booking_id=booking_id
+            )
+        )
+
+    # --------------------------------------------------------
+    # Only pending/submitted payments can be rejected
+    # --------------------------------------------------------
+
+    allowed_statuses = {
+        "pending",
+        "submitted"
+    }
+
+    if booking["payment_status"] not in allowed_statuses:
+
+        conn.close()
+
+        flash(
+            "This payment is not in a rejectable state.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "admin_booking_details",
+                booking_id=booking_id
+            )
+        )
+
+    # --------------------------------------------------------
+    # Reject payment
+    #
+    # IMPORTANT:
+    # We keep the booking itself as pending.
+    # We only change the payment status.
+    #
+    # This means:
+    # payment_status = rejected
+    # booking status  = pending
+    # --------------------------------------------------------
+
     conn.execute(
         """
         UPDATE bookings
-        SET payment_status = 'rejected'
+        SET
+            payment_status = 'rejected'
         WHERE id = ?
-        AND payment_status != 'paid'
+        AND payment_status IN ('pending', 'submitted')
+        AND status != 'cancelled'
         """,
         (
             booking_id,
@@ -3860,12 +5363,15 @@ def admin_reject_payment(booking_id):
     conn.close()
 
     flash(
-        "Payment rejected.",
+        "Payment rejected successfully.",
         "warning"
     )
 
     return redirect(
-        url_for("admin_bookings")
+        url_for(
+            "admin_booking_details",
+            booking_id=booking_id
+        )
     )
 
 
@@ -3892,7 +5398,55 @@ def file_too_large(error):
     return redirect(
         url_for("index")
     )
+# ============================================================
+# GLOBAL ERROR HANDLERS
+# ============================================================
 
+@app.errorhandler(400)
+def bad_request(error):
+
+    return render_template(
+        "error.html",
+        error_code=400
+    ), 400
+
+
+@app.errorhandler(403)
+def forbidden(error):
+
+    return render_template(
+        "error.html",
+        error_code=403
+    ), 403
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+
+    return render_template(
+        "error.html",
+        error_code=404
+    ), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(error):
+
+    # Print the real error in the terminal
+    # so the developer can still debug it.
+    print(
+        "INTERNAL SERVER ERROR:",
+        error
+    )
+
+    return render_template(
+        "error.html",
+        error_code=500
+    ), 500
+
+# ============================================================
+# START APPLICATION
+# ============================================================
 
 # ============================================================
 # START APPLICATION
@@ -3901,7 +5455,7 @@ def file_too_large(error):
 if __name__ == "__main__":
 
     app.run(
-        debug=True,
+        debug=False,
         host="127.0.0.1",
         port=5000
     )

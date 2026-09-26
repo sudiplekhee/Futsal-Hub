@@ -10,336 +10,629 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Payment - Futsal</title>
+    <title>
+        Payment - Futsal Booking
+    </title>
 
     <style>
 
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: Arial, Helvetica, sans-serif;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
             background: #f5f7fb;
             color: #1f2937;
+            min-height: 100vh;
         }
+
+
+        /* =========================
+           NAVBAR
+        ========================= */
 
         .navbar {
             background: #111827;
             color: white;
-            padding: 16px 30px;
+
+            padding: 16px 5%;
 
             display: flex;
             justify-content: space-between;
             align-items: center;
 
-            flex-wrap: wrap;
-            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .logo {
+            color: white;
+            text-decoration: none;
+
             font-size: 24px;
             font-weight: bold;
         }
 
         .nav-links {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 20px;
         }
 
         .nav-links a {
             color: white;
             text-decoration: none;
-            padding: 9px 13px;
-            border-radius: 7px;
-            background: #1f2937;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .nav-links a:hover {
-            background: #374151;
+            color: #60a5fa;
         }
+
+        .logout {
+            background: #ef4444;
+            padding: 9px 14px;
+            border-radius: 7px;
+        }
+
+        .logout:hover {
+            color: white !important;
+            background: #dc2626;
+        }
+
+
+        /* =========================
+           MAIN CONTAINER
+        ========================= */
 
         .container {
-            max-width: 900px;
+            width: 92%;
+            max-width: 1100px;
+
             margin: 35px auto;
-            padding: 0 20px;
         }
 
-        .back {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #2563eb;
-            text-decoration: none;
-            font-weight: bold;
-        }
 
-        .back:hover {
-            text-decoration: underline;
-        }
-
-        .header {
-            margin-bottom: 25px;
-        }
-
-        .header h1 {
-            font-size: 30px;
-            color: #111827;
-        }
-
-        .header p {
-            margin-top: 8px;
-            color: #6b7280;
-        }
+        /* =========================
+           FLASH MESSAGES
+        ========================= */
 
         .flash {
-            padding: 13px 16px;
+            padding: 14px 18px;
             border-radius: 8px;
-            margin-bottom: 10px;
+
+            margin-bottom: 15px;
+
+            font-size: 14px;
         }
 
         .flash.success {
             background: #dcfce7;
             color: #166534;
+            border: 1px solid #bbf7d0;
         }
 
         .flash.danger {
             background: #fee2e2;
             color: #991b1b;
+            border: 1px solid #fecaca;
         }
 
         .flash.warning {
             background: #fef3c7;
             color: #92400e;
+            border: 1px solid #fde68a;
         }
+
+        .flash.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+
+        /* =========================
+           PAGE HEADER
+        ========================= */
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 31px;
+            color: #111827;
+
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: #6b7280;
+            font-size: 15px;
+        }
+
+
+        /* =========================
+           PAYMENT LAYOUT
+        ========================= */
+
+        .payment-layout {
+            display: grid;
+
+            grid-template-columns:
+                1fr
+                1.15fr;
+
+            gap: 25px;
+
+            align-items: start;
+        }
+
+
+        /* =========================
+           CARD
+        ========================= */
 
         .card {
             background: white;
+
             border-radius: 14px;
-            padding: 25px;
+
+            padding: 26px;
+
+            border: 1px solid #e5e7eb;
 
             box-shadow:
-                0 4px 15px rgba(0, 0, 0, 0.06);
+                0 5px 20px
+                rgba(0, 0, 0, 0.06);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: bold;
+
+            color: #111827;
+
+            margin-bottom: 22px;
+        }
+
+
+        /* =========================
+           BOOKING SUMMARY
+        ========================= */
+
+        .ground-name {
+            font-size: 22px;
+            font-weight: bold;
+
+            color: #111827;
+
+            margin-bottom: 8px;
+        }
+
+        .location {
+            color: #6b7280;
+
+            font-size: 14px;
 
             margin-bottom: 20px;
         }
 
-        .card h2 {
-            font-size: 20px;
-            margin-bottom: 18px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .info-row {
+        .booking-row {
             display: flex;
+
             justify-content: space-between;
-            gap: 15px;
 
-            padding: 11px 0;
+            gap: 20px;
 
-            border-bottom: 1px solid #f3f4f6;
+            padding: 13px 0;
+
+            border-bottom:
+                1px solid #e5e7eb;
+
+            font-size: 14px;
         }
 
-        .info-row:last-child {
+        .booking-row:last-child {
             border-bottom: none;
         }
 
-        .label {
+        .booking-label {
             color: #6b7280;
         }
 
-        .value {
-            font-weight: 600;
+        .booking-value {
+            color: #111827;
+
+            font-weight: bold;
+
             text-align: right;
         }
 
-        .total {
-            margin-top: 18px;
-            padding: 20px;
 
-            background: #eff6ff;
-            border-radius: 10px;
+        /* =========================
+           TOTAL
+        ========================= */
 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .total span {
-            font-size: 16px;
-            color: #374151;
-        }
-
-        .total strong {
-            font-size: 27px;
-            color: #111827;
-        }
-
-        .payment-option {
-            border: 1px solid #d1d5db;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 12px;
-        }
-
-        .payment-option label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .payment-option input {
-            width: 18px;
-            height: 18px;
-        }
-
-        .payment-option p {
-            margin-top: 7px;
-            margin-left: 28px;
-            color: #6b7280;
-            font-size: 13px;
-        }
-
-        .reference {
-            margin-top: 18px;
-        }
-
-        .reference label {
-            display: block;
-            margin-bottom: 7px;
-            font-weight: bold;
-        }
-
-        .reference input {
-            width: 100%;
-            padding: 12px;
-
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-
-            font-size: 14px;
-        }
-
-        .reference input:focus {
-            outline: none;
-            border-color: #2563eb;
-        }
-
-        .notice {
-            background: #eff6ff;
-            border-left: 4px solid #2563eb;
-
-            padding: 15px;
-
-            border-radius: 7px;
-
-            color: #1e40af;
-
-            line-height: 1.6;
-
-            font-size: 14px;
-
-            margin-bottom: 20px;
-        }
-
-        .actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        .btn {
-            border: none;
-            padding: 12px 18px;
-            border-radius: 8px;
-
-            cursor: pointer;
-
-            text-decoration: none;
-
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .btn-primary {
-            background: #2563eb;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
-
-        .btn-success {
-            background: #16a34a;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #15803d;
-        }
-
-        .btn-secondary {
-            background: #e5e7eb;
-            color: #111827;
-        }
-
-        .btn-secondary:hover {
-            background: #d1d5db;
-        }
-
-        .esewa-box {
+        .total-box {
             margin-top: 20px;
 
             padding: 18px;
 
             border-radius: 10px;
 
-            background: #f9fafb;
+            background: #eff6ff;
 
-            border: 1px solid #e5e7eb;
+            border: 1px solid #bfdbfe;
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
+            gap: 15px;
         }
 
-        .esewa-box h3 {
+        .total-label {
+            color: #1e3a8a;
+
+            font-size: 16px;
+
+            font-weight: bold;
+        }
+
+        .total-amount {
+            color: #1d4ed8;
+
+            font-size: 25px;
+
+            font-weight: bold;
+        }
+
+
+        /* =========================
+           PAYMENT METHODS
+        ========================= */
+
+        .method-list {
+            display: grid;
+            gap: 13px;
+        }
+
+        .method {
+            position: relative;
+        }
+
+        .method input {
+            position: absolute;
+
+            opacity: 0;
+
+            pointer-events: none;
+        }
+
+        .method label {
+            display: block;
+
+            padding: 17px;
+
+            border:
+                2px solid #e5e7eb;
+
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            transition:
+                border-color 0.2s,
+                background 0.2s,
+                transform 0.2s;
+        }
+
+        .method label:hover {
+            border-color: #93c5fd;
+            background: #f8fbff;
+        }
+
+        .method input:checked + label {
+            border-color: #2563eb;
+            background: #eff6ff;
+
+            transform: translateY(-1px);
+        }
+
+        .method-icon {
+            float: left;
+
+            font-size: 27px;
+
+            margin-right: 13px;
+        }
+
+        .method-title {
+            color: #111827;
+
+            font-weight: bold;
+
+            margin-bottom: 5px;
+        }
+
+        .method-description {
+            color: #6b7280;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =========================
+           ESEWA HIGHLIGHT
+        ========================= */
+
+        .esewa-label {
+            position: relative;
+        }
+
+        .recommended {
+            position: absolute;
+
+            top: 10px;
+            right: 10px;
+
+            background: #16a34a;
+
+            color: white;
+
+            font-size: 10px;
+
+            padding: 4px 8px;
+
+            border-radius: 12px;
+
+            font-weight: bold;
+        }
+
+
+        /* =========================
+           REFERENCE
+        ========================= */
+
+        .reference-box {
+            margin-top: 22px;
+        }
+
+        .reference-box label {
+            display: block;
+
+            color: #111827;
+
+            font-weight: bold;
+
             margin-bottom: 8px;
         }
 
-        .esewa-box p {
-            color: #6b7280;
-            font-size: 14px;
-            line-height: 1.6;
+        .optional {
+            color: #9ca3af;
+
+            font-weight: normal;
+
+            font-size: 12px;
         }
 
-        @media (max-width: 600px) {
+        .reference-box input {
+            width: 100%;
 
-            .container {
-                padding: 0 12px;
+            padding: 13px;
+
+            border:
+                1px solid #d1d5db;
+
+            border-radius: 8px;
+
+            outline: none;
+
+            font-size: 14px;
+        }
+
+        .reference-box input:focus {
+            border-color: #2563eb;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(37, 99, 235, 0.1);
+        }
+
+        .reference-help {
+            color: #6b7280;
+
+            font-size: 12px;
+
+            margin-top: 7px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =========================
+           SUBMIT BUTTON
+        ========================= */
+
+        .submit-btn {
+            width: 100%;
+
+            border: none;
+
+            background: #2563eb;
+
+            color: white;
+
+            padding: 14px;
+
+            border-radius: 8px;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            margin-top: 22px;
+
+            transition:
+                background 0.2s,
+                transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #1d4ed8;
+
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:disabled {
+            background: #9ca3af;
+
+            cursor: not-allowed;
+
+            transform: none;
+        }
+
+
+        /* =========================
+           SECURITY BOX
+        ========================= */
+
+        .secure-box {
+            margin-top: 14px;
+
+            padding: 13px;
+
+            background: #f8fafc;
+
+            border-radius: 8px;
+
+            text-align: center;
+
+            color: #6b7280;
+
+            font-size: 12px;
+        }
+
+
+        /* =========================
+           BACK LINK
+        ========================= */
+
+        .back-link {
+            display: inline-block;
+
+            margin-top: 20px;
+
+            color: #2563eb;
+
+            text-decoration: none;
+
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+
+        /* =========================
+           PAYMENT NOTICE
+        ========================= */
+
+        .payment-notice {
+            margin-top: 18px;
+
+            padding: 14px;
+
+            border-radius: 8px;
+
+            background: #fffbeb;
+
+            border: 1px solid #fde68a;
+
+            color: #92400e;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 850px) {
+
+            .navbar {
+                flex-direction: column;
+
+                gap: 15px;
             }
 
-            .header h1 {
+            .nav-links {
+                flex-wrap: wrap;
+
+                justify-content: center;
+            }
+
+            .payment-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                width: 94%;
+
+                margin-top: 25px;
+            }
+        }
+
+
+        @media (max-width: 500px) {
+
+            .page-header h1 {
                 font-size: 25px;
             }
 
-            .info-row {
+            .card {
+                padding: 20px;
+            }
+
+            .total-box {
                 flex-direction: column;
+
+                align-items: flex-start;
+            }
+
+            .total-amount {
+                font-size: 23px;
+            }
+
+            .booking-row {
+                flex-direction: column;
+
                 gap: 5px;
             }
 
-            .value {
+            .booking-value {
                 text-align: left;
-            }
-
-            .total {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
             }
 
         }
@@ -352,362 +645,733 @@
 <body>
 
 
-<nav class="navbar">
+    <!-- =========================
+         NAVBAR
+    ========================= -->
 
-    <div class="logo">
-        ⚽ Futsal
-    </div>
+    <nav class="navbar">
 
-    <div class="nav-links">
-
-        <a href="{{ url_for('index') }}">
-            Home
+        <a
+            href="{{ url_for('index') }}"
+            class="logo"
+        >
+            ⚽ Futsal
         </a>
 
-        <a href="{{ url_for('grounds') }}">
-            Grounds
-        </a>
 
-        <a href="{{ url_for('dashboard') }}">
-            Dashboard
-        </a>
+        <div class="nav-links">
 
-        <a href="{{ url_for('my_bookings') }}">
-            My Bookings
-        </a>
+            <a href="{{ url_for('index') }}">
+                Home
+            </a>
 
-        <a href="{{ url_for('logout') }}">
-            Logout
-        </a>
+            <a href="{{ url_for('grounds') }}">
+                Grounds
+            </a>
 
-    </div>
+            <a href="{{ url_for('dashboard') }}">
+                Dashboard
+            </a>
 
-</nav>
+            <a href="{{ url_for('my_bookings') }}">
+                My Bookings
+            </a>
 
+            <a
+                href="{{ url_for('logout') }}"
+                class="logout"
+            >
+                Logout
+            </a>
 
-<div class="container">
+        </div>
 
-
-    <a
-        href="{{ url_for(
-            'booking_details',
-            booking_id=booking['id']
-        ) }}"
-        class="back"
-    >
-        ← Back to Booking
-    </a>
+    </nav>
 
 
-    <div class="header">
 
-        <h1>
-            💳 Make Payment
-        </h1>
+    <!-- =========================
+         MAIN
+    ========================= -->
 
-        <p>
-            Complete payment for your futsal booking.
-        </p>
-
-    </div>
+    <main class="container">
 
 
-    {% with messages = get_flashed_messages(
-        with_categories=true
-    ) %}
+        <!-- FLASH MESSAGES -->
 
-        {% if messages %}
+        {% with messages =
+            get_flashed_messages(
+                with_categories=true
+            )
+        %}
 
-            {% for category, message in messages %}
+            {% if messages %}
 
-                <div class="flash {{ category }}">
-                    {{ message }}
+                {% for category, message in messages %}
+
+                    <div class="flash {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endwith %}
+
+
+
+        <!-- =========================
+             PAGE HEADER
+        ========================= -->
+
+        <div class="page-header">
+
+            <h1>
+                💳 Complete Your Payment
+            </h1>
+
+            <p>
+                Choose a payment method for your
+                futsal booking.
+            </p>
+
+        </div>
+
+
+
+        <!-- =========================
+             PAYMENT LAYOUT
+        ========================= -->
+
+        <div class="payment-layout">
+
+
+            <!-- =========================
+                 BOOKING SUMMARY
+            ========================= -->
+
+            <div class="card">
+
+                <div class="card-title">
+                    📋 Booking Summary
                 </div>
 
-            {% endfor %}
 
-        {% endif %}
+                <div class="ground-name">
 
-    {% endwith %}
+                    ⚽
+                    {{ booking['ground_name'] }}
 
+                </div>
 
-    <!-- BOOKING SUMMARY -->
 
-    <div class="card">
+                <div class="location">
 
-        <h2>
-            📅 Booking Summary
-        </h2>
+                    📍
+                    {{ booking['ground_location'] }}
 
+                </div>
 
-        <div class="info-row">
 
-            <span class="label">
-                Ground
-            </span>
+                <div class="booking-row">
 
-            <span class="value">
-                {{ booking['ground_name'] }}
-            </span>
-
-        </div>
-
-
-        <div class="info-row">
-
-            <span class="label">
-                Location
-            </span>
-
-            <span class="value">
-                {{ booking['ground_location'] }}
-            </span>
-
-        </div>
-
-
-        <div class="info-row">
-
-            <span class="label">
-                Date
-            </span>
-
-            <span class="value">
-                {{ booking['booking_date'] }}
-            </span>
-
-        </div>
-
-
-        <div class="info-row">
-
-            <span class="label">
-                Time
-            </span>
-
-            <span class="value">
-                {{ booking['booking_time'] }}
-            </span>
-
-        </div>
-
-
-        <div class="info-row">
-
-            <span class="label">
-                Duration
-            </span>
-
-            <span class="value">
-                {{ booking['duration'] }} hour(s)
-            </span>
-
-        </div>
-
-
-        <div class="info-row">
-
-            <span class="label">
-                Price per hour
-            </span>
-
-            <span class="value">
-                Rs. {{ booking['price']|float|round(2) }}
-            </span>
-
-        </div>
-
-
-        <div class="total">
-
-            <span>
-                Total Amount
-            </span>
-
-            <strong>
-                Rs. {{ total_amount|float|round(2) }}
-            </strong>
-
-        </div>
-
-    </div>
-
-
-    <!-- PAYMENT -->
-
-    <div class="card">
-
-        <h2>
-            💰 Payment Method
-        </h2>
-
-
-        <div class="notice">
-
-            Select a payment method below.
-
-            If you use manual payment, enter your
-            transaction/reference number so the admin
-            can verify your payment.
-
-        </div>
-
-
-        <form
-            method="POST"
-            action="{{ url_for(
-                'payment',
-                booking_id=booking['id']
-            ) }}"
-        >
-
-
-            <div class="payment-option">
-
-                <label>
-
-                    <input
-                        type="radio"
-                        name="payment_method"
-                        value="cash"
-                        required
-                    >
-
-                    Cash Payment
-
-                </label>
-
-                <p>
-                    Pay directly at the futsal ground.
-                </p>
-
-            </div>
-
-
-            <div class="payment-option">
-
-                <label>
-
-                    <input
-                        type="radio"
-                        name="payment_method"
-                        value="bank"
-                    >
-
-                    Bank Transfer
-
-                </label>
-
-                <p>
-                    Transfer the amount to the futsal
-                    ground's bank account and enter
-                    your transaction reference.
-                </p>
-
-            </div>
-
-
-            <div class="payment-option">
-
-                <label>
-
-                    <input
-                        type="radio"
-                        name="payment_method"
-                        value="khalti"
-                    >
-
-                    Khalti
-
-                </label>
-
-                <p>
-                    Use Khalti and provide the transaction
-                    reference after payment.
-                </p>
-
-            </div>
-
-
-            <div class="reference">
-
-                <label for="payment_reference">
-
-                    Payment Reference
-                    <span style="color:#6b7280;">
-                        (optional)
+                    <span class="booking-label">
+                        Booking ID
                     </span>
 
-                </label>
+                    <span class="booking-value">
 
-                <input
-                    type="text"
-                    id="payment_reference"
-                    name="payment_reference"
-                    placeholder="Enter transaction/reference number"
-                >
+                        #{{ booking['id'] }}
 
-            </div>
+                    </span>
+
+                </div>
 
 
-            <div class="actions">
+                <div class="booking-row">
 
-                <button
-                    type="submit"
-                    class="btn btn-success"
-                >
-                    Submit Payment
-                </button>
+                    <span class="booking-label">
+                        📅 Date
+                    </span>
 
+                    <span class="booking-value">
+
+                        {{ booking['booking_date'] }}
+
+                    </span>
+
+                </div>
+
+
+                <div class="booking-row">
+
+                    <span class="booking-label">
+                        🕐 Time
+                    </span>
+
+                    <span class="booking-value">
+
+                        {{ booking['booking_time'] }}
+
+                    </span>
+
+                </div>
+
+
+                <div class="booking-row">
+
+                    <span class="booking-label">
+                        ⏱️ Duration
+                    </span>
+
+                    <span class="booking-value">
+
+                        {{ duration }}
+                        hour(s)
+
+                    </span>
+
+                </div>
+
+
+                <div class="booking-row">
+
+                    <span class="booking-label">
+                        💰 Price / Hour
+                    </span>
+
+                    <span class="booking-value">
+
+                        Rs.
+                        {{ "%.2f"|format(
+                            price|float
+                        ) }}
+
+                    </span>
+
+                </div>
+
+
+                <!-- TOTAL -->
+
+                <div class="total-box">
+
+                    <span class="total-label">
+                        Total Amount
+                    </span>
+
+                    <span class="total-amount">
+
+                        Rs.
+                        {{ "%.2f"|format(
+                            total_amount|float
+                        ) }}
+
+                    </span>
+
+                </div>
+
+
+                <!-- BACK -->
 
                 <a
                     href="{{ url_for(
                         'booking_details',
                         booking_id=booking['id']
                     ) }}"
-                    class="btn btn-secondary"
+                    class="back-link"
                 >
-                    Cancel
+                    ← Back to Booking Details
                 </a>
 
             </div>
 
-        </form>
 
 
-        <!-- ESEWA -->
+            <!-- =========================
+                 PAYMENT FORM
+            ========================= -->
 
-        <div class="esewa-box">
+            <div class="card">
 
-            <h3>
-                Pay Online with eSewa
-            </h3>
-
-            <p>
-                You can also use the eSewa payment system
-                to make an online payment.
-            </p>
+                <div class="card-title">
+                    💰 Select Payment Method
+                </div>
 
 
-            <div class="actions">
-
-                <a
-                    href="{{ url_for(
-                        'esewa_pay',
+                <form
+                    method="POST"
+                    action="{{ url_for(
+                        'payment',
                         booking_id=booking['id']
                     ) }}"
-                    class="btn btn-primary"
+                    id="paymentForm"
                 >
-                    Pay with eSewa
-                </a>
+
+
+                    <!-- =====================
+                         PAYMENT METHODS
+                    ===================== -->
+
+                    <div class="method-list">
+
+
+                        <!-- CASH -->
+
+                        <div class="method">
+
+                            <input
+                                type="radio"
+                                name="payment_method"
+                                id="cash"
+                                value="cash"
+                                required
+                            >
+
+                            <label for="cash">
+
+                                <span class="method-icon">
+                                    💵
+                                </span>
+
+                                <div class="method-title">
+                                    Cash Payment
+                                </div>
+
+                                <div class="method-description">
+                                    Pay directly at the
+                                    futsal ground.
+                                </div>
+
+                            </label>
+
+                        </div>
+
+
+
+                        <!-- BANK -->
+
+                        <div class="method">
+
+                            <input
+                                type="radio"
+                                name="payment_method"
+                                id="bank"
+                                value="bank"
+                            >
+
+                            <label for="bank">
+
+                                <span class="method-icon">
+                                    🏦
+                                </span>
+
+                                <div class="method-title">
+                                    Bank Transfer
+                                </div>
+
+                                <div class="method-description">
+                                    Transfer the booking
+                                    amount to the ground's
+                                    bank account and enter
+                                    the transaction reference.
+                                </div>
+
+                            </label>
+
+                        </div>
+
+
+
+                        <!-- KHALTI -->
+
+                        <div class="method">
+
+                            <input
+                                type="radio"
+                                name="payment_method"
+                                id="khalti"
+                                value="khalti"
+                            >
+
+                            <label for="khalti">
+
+                                <span class="method-icon">
+                                    📱
+                                </span>
+
+                                <div class="method-title">
+                                    Khalti
+                                </div>
+
+                                <div class="method-description">
+                                    Pay using your Khalti
+                                    account and provide
+                                    the transaction reference.
+                                </div>
+
+                            </label>
+
+                        </div>
+
+
+
+                        <!-- ESEWA -->
+
+                        <div class="method">
+
+                            <input
+                                type="radio"
+                                name="payment_method"
+                                id="esewa"
+                                value="esewa"
+                            >
+
+                            <label
+                                for="esewa"
+                                class="esewa-label"
+                            >
+
+                                <span class="method-icon">
+                                    💳
+                                </span>
+
+                                <span class="recommended">
+                                    ONLINE
+                                </span>
+
+                                <div class="method-title">
+                                    eSewa
+                                </div>
+
+                                <div class="method-description">
+                                    Pay securely through
+                                    the eSewa payment gateway.
+                                </div>
+
+                            </label>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- =====================
+                         PAYMENT REFERENCE
+                    ===================== -->
+
+                    <div
+                        class="reference-box"
+                        id="referenceBox"
+                    >
+
+                        <label
+                            for="payment_reference"
+                        >
+
+                            Payment Reference
+
+                            <span class="optional">
+                                (Optional)
+                            </span>
+
+                        </label>
+
+
+                        <input
+                            type="text"
+                            id="payment_reference"
+                            name="payment_reference"
+                            placeholder="Enter transaction/reference number"
+                            maxlength="100"
+                        >
+
+
+                        <div class="reference-help">
+
+                            For bank or Khalti payments,
+                            enter the transaction/reference
+                            number after making the payment.
+
+                            For cash payment, you can leave
+                            this field empty.
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- =====================
+                         NOTICE
+                    ===================== -->
+
+                    <div
+                        class="payment-notice"
+                        id="paymentNotice"
+                    >
+
+                        💡 Select <strong>eSewa</strong>
+                        to continue to the online eSewa
+                        payment gateway.
+
+                    </div>
+
+
+
+                    <!-- =====================
+                         SUBMIT BUTTON
+                    ===================== -->
+
+                    <button
+                        type="submit"
+                        class="submit-btn"
+                        id="submitButton"
+                    >
+
+                        Continue Payment
+
+                    </button>
+
+
+
+                    <!-- SECURITY -->
+
+                    <div class="secure-box">
+
+                        🔒
+                        Your booking and payment
+                        information is protected.
+
+                    </div>
+
+
+                </form>
 
             </div>
 
         </div>
 
-    </div>
+    </main>
 
-</div>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================= -->
+
+    <script>
+
+        const paymentForm =
+            document.getElementById(
+                "paymentForm"
+            );
+
+        const submitButton =
+            document.getElementById(
+                "submitButton"
+            );
+
+        const paymentNotice =
+            document.getElementById(
+                "paymentNotice"
+            );
+
+        const paymentReference =
+            document.getElementById(
+                "payment_reference"
+            );
+
+        const paymentMethods =
+            document.querySelectorAll(
+                'input[name="payment_method"]'
+            );
+
+
+        /*
+         * Update page when payment method
+         * changes.
+         */
+
+        paymentMethods.forEach(
+            function(method) {
+
+                method.addEventListener(
+                    "change",
+                    function() {
+
+                        if (
+                            this.value ===
+                            "esewa"
+                        ) {
+
+                            submitButton.innerText =
+                                "💳 Continue to eSewa";
+
+                            paymentNotice.innerHTML =
+                                "💳 You will be redirected " +
+                                "to the eSewa payment gateway " +
+                                "to complete your payment.";
+
+                            paymentReference.disabled =
+                                true;
+
+                            paymentReference.value =
+                                "";
+
+                        }
+
+                        else if (
+                            this.value ===
+                            "cash"
+                        ) {
+
+                            submitButton.innerText =
+                                "Submit Cash Payment";
+
+                            paymentNotice.innerHTML =
+                                "💵 You can pay the amount " +
+                                "directly at the futsal ground.";
+
+                            paymentReference.disabled =
+                                false;
+
+                        }
+
+                        else if (
+                            this.value ===
+                            "bank"
+                        ) {
+
+                            submitButton.innerText =
+                                "Submit Bank Payment";
+
+                            paymentNotice.innerHTML =
+                                "🏦 Complete your bank transfer " +
+                                "and enter the transaction " +
+                                "reference above.";
+
+                            paymentReference.disabled =
+                                false;
+
+                        }
+
+                        else if (
+                            this.value ===
+                            "khalti"
+                        ) {
+
+                            submitButton.innerText =
+                                "Submit Khalti Payment";
+
+                            paymentNotice.innerHTML =
+                                "📱 Complete your Khalti payment " +
+                                "and enter the transaction " +
+                                "reference above.";
+
+                            paymentReference.disabled =
+                                false;
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+        /*
+         * Handle payment form.
+         */
+
+        paymentForm.addEventListener(
+            "submit",
+            function(event) {
+
+                let selectedMethod = null;
+
+
+                paymentMethods.forEach(
+                    function(method) {
+
+                        if (method.checked) {
+                            selectedMethod =
+                                method.value;
+                        }
+
+                    }
+                );
+
+
+                if (!selectedMethod) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Please select a payment method."
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                 * eSewa uses its own route.
+                 */
+
+                if (
+                    selectedMethod ===
+                    "esewa"
+                ) {
+
+                    event.preventDefault();
+
+
+                    const bookingId =
+                        "{{ booking['id'] }}";
+
+
+                    submitButton.disabled =
+                        true;
+
+                    submitButton.innerText =
+                        "Opening eSewa...";
+
+
+                    /*
+                     * This route must exist
+                     * in app.py.
+                     */
+
+                    window.location.href =
+                        "/esewa/pay/" +
+                        bookingId;
+
+
+                    return;
+
+                }
+
+
+                /*
+                 * Manual payment methods.
+                 */
+
+                submitButton.disabled =
+                    true;
+
+                submitButton.innerText =
+                    "Submitting Payment...";
+
+            }
+        );
+
+    </script>
 
 
 </body>
