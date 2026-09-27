@@ -11,6 +11,7 @@ from flask_wtf.csrf import CSRFProtect
 from datetime import datetime, date, timedelta
 from functools import wraps
 
+
 from flask import (
     Flask,
     render_template,
@@ -1983,6 +1984,10 @@ def esewa_failure():
 # USER REGISTRATION
 # ============================================================
 
+# ============================================================
+# USER REGISTRATION
+# ============================================================
+
 @app.route(
     "/register",
     methods=["GET", "POST"]
@@ -1990,7 +1995,7 @@ def esewa_failure():
 def register():
 
     # --------------------------------------------------------
-    # GET REQUEST
+    # SHOW REGISTER PAGE
     # --------------------------------------------------------
 
     if request.method == "GET":
@@ -2000,7 +2005,7 @@ def register():
         )
 
     # --------------------------------------------------------
-    # READ FORM DATA
+    # GET FORM DATA
     # --------------------------------------------------------
 
     name = request.form.get(
@@ -2027,10 +2032,21 @@ def register():
     # VALIDATE NAME
     # --------------------------------------------------------
 
-    if name == "":
+    if not name:
 
         flash(
             "Please enter your name.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("register")
+        )
+
+    if len(name) < 2:
+
+        flash(
+            "Name must contain at least 2 characters.",
             "danger"
         )
 
@@ -2042,7 +2058,7 @@ def register():
     # VALIDATE EMAIL
     # --------------------------------------------------------
 
-    if email == "":
+    if not email:
 
         flash(
             "Please enter your email.",
@@ -2053,7 +2069,7 @@ def register():
             url_for("register")
         )
 
-    if "@" not in email:
+    if "@" not in email or "." not in email:
 
         flash(
             "Please enter a valid email address.",
@@ -2068,7 +2084,7 @@ def register():
     # VALIDATE PASSWORD
     # --------------------------------------------------------
 
-    if password == "":
+    if not password:
 
         flash(
             "Please enter a password.",
@@ -2106,7 +2122,7 @@ def register():
         )
 
     # --------------------------------------------------------
-    # DATABASE CONNECTION
+    # DATABASE
     # --------------------------------------------------------
 
     conn = get_db()
@@ -2151,7 +2167,7 @@ def register():
         # CREATE USER
         # ----------------------------------------------------
 
-        cursor = conn.execute(
+        conn.execute(
             """
             INSERT INTO users
             (
@@ -2171,43 +2187,31 @@ def register():
             (
                 name,
                 email,
-                hashed_password,
+                hashed_password
             )
         )
 
         conn.commit()
 
         # ----------------------------------------------------
-        # GET NEW USER ID
-        # ----------------------------------------------------
-
-        user_id = cursor.lastrowid
-
-        # ----------------------------------------------------
-        # LOGIN USER AUTOMATICALLY
-        # ----------------------------------------------------
-
-        session.clear()
-
-        session["user_id"] = user_id
-
-        session["user_name"] = name
-
-        session["user_email"] = email
-
-        session["is_admin"] = 0
-
-        # ----------------------------------------------------
-        # SUCCESS
+        # IMPORTANT
+        #
+        # DO NOT CREATE SESSION HERE.
+        #
+        # The user must login manually.
         # ----------------------------------------------------
 
         flash(
-            "Registration successful! Welcome to Futsal Booking System.",
+            "Registration successful! Please login to continue.",
             "success"
         )
 
+        # ----------------------------------------------------
+        # GO TO LOGIN PAGE
+        # ----------------------------------------------------
+
         return redirect(
-            url_for("dashboard")
+            url_for("login")
         )
 
     # --------------------------------------------------------
@@ -2224,12 +2228,12 @@ def register():
         )
 
         flash(
-            "This email is already registered.",
+            "This email is already registered. Please login.",
             "warning"
         )
 
         return redirect(
-            url_for("register")
+            url_for("login")
         )
 
     # --------------------------------------------------------
@@ -2246,7 +2250,7 @@ def register():
         )
 
         flash(
-            "Database error occurred during registration.",
+            "A database error occurred during registration.",
             "danger"
         )
 
@@ -3070,6 +3074,9 @@ def booking_details(booking_id):
 # ============================================================
 # CANCEL BOOKING
 # ============================================================
+# ============================================================
+# CANCEL BOOKING
+# ============================================================
 
 @app.route(
     "/cancel-booking/<int:booking_id>",
@@ -3080,25 +3087,92 @@ def cancel_booking(booking_id):
 
     conn = get_db()
 
-    booking = conn.execute(
-        """
-        SELECT *
-        FROM bookings
-        WHERE id = ?
-        AND user_id = ?
-        """,
-        (
-            booking_id,
-            session["user_id"]
+    try:
+
+        booking = conn.execute(
+            """
+            SELECT *
+            FROM bookings
+            WHERE id = ?
+            AND user_id = ?
+            """,
+            (
+                booking_id,
+                session["user_id"]
+            )
+        ).fetchone()
+
+        if booking is None:
+
+            flash(
+                "Booking not found.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("my_bookings")
+            )
+
+        if booking["status"] == "cancelled":
+
+            flash(
+                "Booking is already cancelled.",
+                "warning"
+            )
+
+            return redirect(
+                url_for("my_bookings")
+            )
+
+        if booking["payment_status"] == "paid":
+
+            flash(
+                "Paid bookings cannot be cancelled online.",
+                "warning"
+            )
+
+            return redirect(
+                url_for(
+                    "booking_details",
+                    booking_id=booking_id
+                )
+            )
+
+        conn.execute(
+            """
+            UPDATE bookings
+            SET status = 'cancelled'
+            WHERE id = ?
+            AND user_id = ?
+            """,
+            (
+                booking_id,
+                session["user_id"]
+            )
         )
-    ).fetchone()
 
-    if booking is None:
-
-        conn.close()
+        conn.commit()
 
         flash(
-            "Booking not found.",
+            "Booking cancelled successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("my_bookings")
+        )
+
+    except sqlite3.Error as error:
+
+        conn.rollback()
+
+        print(
+            "CANCEL BOOKING DATABASE ERROR:",
+            error
+        )
+
+        flash(
+            "Unable to cancel the booking.",
             "danger"
         )
 
@@ -3106,63 +3180,9 @@ def cancel_booking(booking_id):
             url_for("my_bookings")
         )
 
-    if booking["status"] == "cancelled":
+    finally:
 
         conn.close()
-
-        flash(
-            "Booking is already cancelled.",
-            "warning"
-        )
-
-        return redirect(
-            url_for(
-                "booking_details",
-                booking_id=booking_id
-            )
-        )
-
-    if booking["payment_status"] == "paid":
-
-        conn.close()
-
-        flash(
-            "Paid bookings cannot be cancelled online.",
-            "warning"
-        )
-
-        return redirect(
-            url_for(
-                "booking_details",
-                booking_id=booking_id
-            )
-        )
-
-    conn.execute(
-        """
-        UPDATE bookings
-        SET status = 'cancelled'
-        WHERE id = ?
-        AND user_id = ?
-        """,
-        (
-            booking_id,
-            session["user_id"]
-        )
-    )
-
-    conn.commit()
-
-    conn.close()
-
-    flash(
-        "Booking cancelled successfully.",
-        "success"
-    )
-
-    return redirect(
-        url_for("my_bookings")
-    )
 
 
 # ============================================================
@@ -4117,6 +4137,10 @@ def admin_grounds():
 # ADMIN ADD GROUND
 # ============================================================
 
+# ============================================================
+# ADMIN - ADD GROUND
+# ============================================================
+
 @app.route(
     "/admin/grounds/add",
     methods=["GET", "POST"]
@@ -4124,7 +4148,23 @@ def admin_grounds():
 @admin_required
 def admin_add_ground():
 
-    if request.method == "POST":
+    # --------------------------------------------------------
+    # SHOW ADD GROUND PAGE
+    # --------------------------------------------------------
+
+    if request.method == "GET":
+        return render_template(
+            "admin/add_ground.html"
+        )
+
+    conn = get_db()
+    uploaded_filename = None
+
+    try:
+
+        # ----------------------------------------------------
+        # GET FORM DATA
+        # ----------------------------------------------------
 
         name = request.form.get(
             "name",
@@ -4136,9 +4176,480 @@ def admin_add_ground():
             ""
         ).strip()
 
-        price = request.form.get(
+        contact = request.form.get(
+            "contact",
+            ""
+        ).strip()
+
+        opening_time = request.form.get(
+            "opening_time",
+            ""
+        ).strip()
+
+        closing_time = request.form.get(
+            "closing_time",
+            ""
+        ).strip()
+
+        description = request.form.get(
+            "description",
+            ""
+        ).strip()
+
+        price_text = request.form.get(
             "price",
-            "0"
+            ""
+        ).strip()
+
+        image = request.files.get("image")
+
+        # ----------------------------------------------------
+        # VALIDATE NAME
+        # ----------------------------------------------------
+
+        if not name:
+
+            flash(
+                "Please enter the ground name.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("admin_add_ground")
+            )
+
+        # ----------------------------------------------------
+        # VALIDATE LOCATION
+        # ----------------------------------------------------
+
+        if not location:
+
+            flash(
+                "Please enter the ground location.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("admin_add_ground")
+            )
+
+        # ----------------------------------------------------
+        # VALIDATE PRICE
+        # ----------------------------------------------------
+
+        try:
+
+            price = float(price_text)
+
+        except (TypeError, ValueError):
+
+            flash(
+                "Please enter a valid price.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("admin_add_ground")
+            )
+
+        if price <= 0:
+
+            flash(
+                "Price must be greater than 0.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("admin_add_ground")
+            )
+
+        # ----------------------------------------------------
+        # VALIDATE OPENING TIME
+        # ----------------------------------------------------
+
+        if not opening_time:
+
+            opening_time = "06:00"
+
+        # ----------------------------------------------------
+        # VALIDATE CLOSING TIME
+        # ----------------------------------------------------
+
+        if not closing_time:
+
+            closing_time = "22:00"
+
+        # ----------------------------------------------------
+        # VALIDATE TIME FORMAT
+        # ----------------------------------------------------
+
+        try:
+
+            opening_obj = datetime.strptime(
+                opening_time,
+                "%H:%M"
+            )
+
+            closing_obj = datetime.strptime(
+                closing_time,
+                "%H:%M"
+            )
+
+        except ValueError:
+
+            flash(
+                "Please enter valid opening and closing times.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("admin_add_ground")
+            )
+
+        # ----------------------------------------------------
+        # CHECK OPERATING HOURS
+        # ----------------------------------------------------
+
+        if opening_obj >= closing_obj:
+
+            flash(
+                "Closing time must be later than opening time.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("admin_add_ground")
+            )
+
+        # ----------------------------------------------------
+        # IMAGE UPLOAD
+        # ----------------------------------------------------
+
+        image_filename = None
+
+        if image and image.filename:
+
+            original_filename = image.filename.strip()
+
+            if not original_filename:
+
+                flash(
+                    "Invalid image file.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("admin_add_ground")
+                )
+
+            if not allowed_image(original_filename):
+
+                flash(
+                    "Invalid image type. Allowed: JPG, JPEG, PNG, GIF, WEBP.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("admin_add_ground")
+                )
+
+            # ------------------------------------------------
+            # CHECK IMAGE SIZE
+            # ------------------------------------------------
+
+            image.seek(0, os.SEEK_END)
+
+            image_size = image.tell()
+
+            image.seek(0)
+
+            if image_size > MAX_IMAGE_SIZE:
+
+                flash(
+                    "Image must be smaller than 5 MB.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("admin_add_ground")
+                )
+
+            if image_size == 0:
+
+                flash(
+                    "The uploaded image is empty.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("admin_add_ground")
+                )
+
+            # ------------------------------------------------
+            # CREATE SAFE SERVER-SIDE FILENAME
+            # ------------------------------------------------
+
+            safe_original_name = secure_filename(
+                original_filename
+            )
+
+            if not safe_original_name:
+
+                flash(
+                    "Invalid image filename.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for("admin_add_ground")
+                )
+
+            extension = safe_original_name.rsplit(
+                ".",
+                1
+            )[1].lower()
+
+            unique_name = (
+                uuid.uuid4().hex
+                + "."
+                + extension
+            )
+
+            image_filename = unique_name
+
+            upload_path = os.path.join(
+                UPLOAD_FOLDER,
+                image_filename
+            )
+
+            # ------------------------------------------------
+            # MAKE SURE UPLOAD DIRECTORY EXISTS
+            # ------------------------------------------------
+
+            os.makedirs(
+                UPLOAD_FOLDER,
+                exist_ok=True
+            )
+
+            # ------------------------------------------------
+            # SAVE IMAGE
+            # ------------------------------------------------
+
+            image.save(upload_path)
+
+            uploaded_filename = upload_path
+
+        # ----------------------------------------------------
+        # INSERT GROUND INTO DATABASE
+        # ----------------------------------------------------
+
+        cursor = conn.execute(
+            """
+            INSERT INTO grounds (
+                name,
+                location,
+                price,
+                contact,
+                opening_time,
+                closing_time,
+                description,
+                image
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                name,
+                location,
+                price,
+                contact,
+                opening_time,
+                closing_time,
+                description,
+                image_filename
+            )
+        )
+
+        conn.commit()
+
+        ground_id = cursor.lastrowid
+
+        print("")
+        print("========================================")
+        print("GROUND ADDED SUCCESSFULLY")
+        print("========================================")
+        print("GROUND ID:", ground_id)
+        print("NAME:", name)
+        print("LOCATION:", location)
+        print("PRICE:", price)
+        print("OPENING:", opening_time)
+        print("CLOSING:", closing_time)
+        print("IMAGE:", image_filename)
+        print("========================================")
+        print("")
+
+        flash(
+            "Ground added successfully!",
+            "success"
+        )
+
+        return redirect(
+            url_for("admin_grounds")
+        )
+
+    except sqlite3.Error as error:
+
+        conn.rollback()
+
+        # -----------------------------------------------
+        # DELETE IMAGE IF DATABASE INSERT FAILED
+        # -----------------------------------------------
+
+        if uploaded_filename:
+
+            try:
+
+                if os.path.exists(
+                    uploaded_filename
+                ):
+
+                    os.remove(
+                        uploaded_filename
+                    )
+
+            except OSError:
+
+                pass
+
+        print("")
+        print("========================================")
+        print("ADD GROUND DATABASE ERROR")
+        print("========================================")
+        print(error)
+        print("========================================")
+        print("")
+
+        flash(
+            "Unable to add the ground because of a database error.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin_add_ground")
+        )
+
+    except Exception as error:
+
+        conn.rollback()
+
+        # -----------------------------------------------
+        # DELETE IMAGE IF SOMETHING ELSE FAILED
+        # -----------------------------------------------
+
+        if uploaded_filename:
+
+            try:
+
+                if os.path.exists(
+                    uploaded_filename
+                ):
+
+                    os.remove(
+                        uploaded_filename
+                    )
+
+            except OSError:
+
+                pass
+
+        print("")
+        print("========================================")
+        print("ADD GROUND ERROR")
+        print("========================================")
+        print(error)
+        print("========================================")
+        print("")
+
+        flash(
+            "Unable to add the ground.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin_add_ground")
+        )
+
+    finally:
+
+        conn.close()
+
+
+# ============================================================
+# ADMIN EDIT GROUND
+# ============================================================
+
+# ============================================================
+# ADMIN - EDIT GROUND
+# ============================================================
+
+@app.route(
+    "/admin/grounds/edit/<int:ground_id>",
+    methods=["GET", "POST"]
+)
+@admin_required
+def admin_edit_ground(ground_id):
+
+    conn = get_db()
+    uploaded_filename = None
+
+    try:
+
+        # ----------------------------------------------------
+        # FIND GROUND
+        # ----------------------------------------------------
+
+        ground = conn.execute(
+            """
+            SELECT *
+            FROM grounds
+            WHERE id = ?
+            """,
+            (ground_id,)
+        ).fetchone()
+
+        if ground is None:
+
+            flash(
+                "Ground not found.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("admin_grounds")
+            )
+
+        # ----------------------------------------------------
+        # GET REQUEST
+        # ----------------------------------------------------
+
+        if request.method == "GET":
+
+            return render_template(
+                "admin/edit_ground.html",
+                ground=ground
+            )
+
+        # ----------------------------------------------------
+        # GET FORM DATA
+        # ----------------------------------------------------
+
+        name = request.form.get(
+            "name",
+            ""
+        ).strip()
+
+        location = request.form.get(
+            "location",
+            ""
         ).strip()
 
         contact = request.form.get(
@@ -4148,12 +4659,12 @@ def admin_add_ground():
 
         opening_time = request.form.get(
             "opening_time",
-            "06:00"
+            ""
         ).strip()
 
         closing_time = request.form.get(
             "closing_time",
-            "22:00"
+            ""
         ).strip()
 
         description = request.form.get(
@@ -4161,97 +4672,189 @@ def admin_add_ground():
             ""
         ).strip()
 
-        image = request.files.get(
-            "image"
-        )
+        price_text = request.form.get(
+            "price",
+            ""
+        ).strip()
+
+        image = request.files.get("image")
 
         # ----------------------------------------------------
-        # BASIC VALIDATION
+        # VALIDATE NAME
         # ----------------------------------------------------
 
-        if not name or not location:
+        if not name:
 
             flash(
-                "Name and location are required.",
+                "Please enter the ground name.",
                 "danger"
             )
 
-            return render_template(
-                "admin/add_ground.html"
+            return redirect(
+                url_for(
+                    "admin_edit_ground",
+                    ground_id=ground_id
+                )
             )
+
+        # ----------------------------------------------------
+        # VALIDATE LOCATION
+        # ----------------------------------------------------
+
+        if not location:
+
+            flash(
+                "Please enter the ground location.",
+                "danger"
+            )
+
+            return redirect(
+                url_for(
+                    "admin_edit_ground",
+                    ground_id=ground_id
+                )
+            )
+
+        # ----------------------------------------------------
+        # VALIDATE PRICE
+        # ----------------------------------------------------
 
         try:
 
-            price = float(price)
+            price = float(price_text)
 
-        except (
-            TypeError,
-            ValueError
-        ):
+        except (TypeError, ValueError):
 
             flash(
-                "Invalid price.",
+                "Please enter a valid price.",
                 "danger"
             )
 
-            return render_template(
-                "admin/add_ground.html"
+            return redirect(
+                url_for(
+                    "admin_edit_ground",
+                    ground_id=ground_id
+                )
             )
 
-        if price < 0:
+        if price <= 0:
 
             flash(
-                "Price cannot be negative.",
+                "Price must be greater than 0.",
                 "danger"
             )
 
-            return render_template(
-                "admin/add_ground.html"
+            return redirect(
+                url_for(
+                    "admin_edit_ground",
+                    ground_id=ground_id
+                )
             )
 
         # ----------------------------------------------------
-        # IMAGE UPLOAD
+        # DEFAULT TIMES
         # ----------------------------------------------------
 
-        filename = None
+        if not opening_time:
+
+            opening_time = "06:00"
+
+        if not closing_time:
+
+            closing_time = "22:00"
+
+        # ----------------------------------------------------
+        # VALIDATE TIMES
+        # ----------------------------------------------------
+
+        try:
+
+            opening_obj = datetime.strptime(
+                opening_time,
+                "%H:%M"
+            )
+
+            closing_obj = datetime.strptime(
+                closing_time,
+                "%H:%M"
+            )
+
+        except ValueError:
+
+            flash(
+                "Please enter valid opening and closing times.",
+                "danger"
+            )
+
+            return redirect(
+                url_for(
+                    "admin_edit_ground",
+                    ground_id=ground_id
+                )
+            )
+
+        # ----------------------------------------------------
+        # CHECK TIME ORDER
+        # ----------------------------------------------------
+
+        if opening_obj >= closing_obj:
+
+            flash(
+                "Closing time must be later than opening time.",
+                "danger"
+            )
+
+            return redirect(
+                url_for(
+                    "admin_edit_ground",
+                    ground_id=ground_id
+                )
+            )
+
+        # ----------------------------------------------------
+        # KEEP OLD IMAGE
+        # ----------------------------------------------------
+
+        image_filename = ground["image"]
+
+        # ----------------------------------------------------
+        # NEW IMAGE UPLOAD
+        # ----------------------------------------------------
 
         if image and image.filename:
 
             original_filename = image.filename.strip()
 
-            # Validate filename.
-            if not allowed_image(
-                original_filename
-            ):
+            if not original_filename:
 
                 flash(
-                    "Invalid image format. "
-                    "Only JPG, JPEG, PNG, GIF and WEBP are allowed.",
+                    "Invalid image file.",
                     "danger"
                 )
 
-                return render_template(
-                    "admin/add_ground.html"
+                return redirect(
+                    url_for(
+                        "admin_edit_ground",
+                        ground_id=ground_id
+                    )
                 )
 
-            # Sanitize filename.
-            safe_filename = secure_filename(
-                original_filename
-            )
-
-            if not safe_filename:
+            if not allowed_image(original_filename):
 
                 flash(
-                    "Invalid image filename.",
+                    "Invalid image type. Allowed: JPG, JPEG, PNG, GIF, WEBP.",
                     "danger"
                 )
 
-                return render_template(
-                    "admin/add_ground.html"
+                return redirect(
+                    url_for(
+                        "admin_edit_ground",
+                        ground_id=ground_id
+                    )
                 )
 
             # ------------------------------------------------
-            # CHECK FILE SIZE
+            # CHECK SIZE
             # ------------------------------------------------
 
             image.seek(
@@ -4266,12 +4869,15 @@ def admin_add_ground():
             if image_size > MAX_IMAGE_SIZE:
 
                 flash(
-                    "Image is too large. Maximum size is 5 MB.",
+                    "Image must be smaller than 5 MB.",
                     "danger"
                 )
 
-                return render_template(
-                    "admin/add_ground.html"
+                return redirect(
+                    url_for(
+                        "admin_edit_ground",
+                        ground_id=ground_id
+                    )
                 )
 
             if image_size == 0:
@@ -4281,305 +4887,71 @@ def admin_add_ground():
                     "danger"
                 )
 
-                return render_template(
-                    "admin/add_ground.html"
+                return redirect(
+                    url_for(
+                        "admin_edit_ground",
+                        ground_id=ground_id
+                    )
                 )
 
             # ------------------------------------------------
-            # CREATE RANDOM SERVER-SIDE FILENAME
+            # SAFE FILENAME
             # ------------------------------------------------
 
-            extension = safe_filename.rsplit(
+            safe_original_name = secure_filename(
+                original_filename
+            )
+
+            if not safe_original_name:
+
+                flash(
+                    "Invalid image filename.",
+                    "danger"
+                )
+
+                return redirect(
+                    url_for(
+                        "admin_edit_ground",
+                        ground_id=ground_id
+                    )
+                )
+
+            extension = safe_original_name.rsplit(
                 ".",
                 1
             )[1].lower()
 
-            filename = (
+            new_filename = (
                 uuid.uuid4().hex
                 + "."
                 + extension
             )
 
-            file_path = os.path.join(
+            upload_path = os.path.join(
                 UPLOAD_FOLDER,
-                filename
+                new_filename
+            )
+
+            os.makedirs(
+                UPLOAD_FOLDER,
+                exist_ok=True
             )
 
             # ------------------------------------------------
-            # SAVE FILE
+            # SAVE NEW IMAGE
             # ------------------------------------------------
-
-            try:
-
-                image.save(
-                    file_path
-                )
-
-            except Exception as error:
-
-                print(
-                    "IMAGE SAVE ERROR:",
-                    error
-                )
-
-                flash(
-                    "Could not save the uploaded image.",
-                    "danger"
-                )
-
-                return render_template(
-                    "admin/add_ground.html"
-                )
-
-        # ----------------------------------------------------
-        # SAVE GROUND
-        # ----------------------------------------------------
-
-        conn = get_db()
-
-        try:
-
-            conn.execute(
-                """
-                INSERT INTO grounds
-                (
-                    name,
-                    location,
-                    price,
-                    contact,
-                    opening_time,
-                    closing_time,
-                    description,
-                    image
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    name,
-                    location,
-                    price,
-                    contact,
-                    opening_time,
-                    closing_time,
-                    description,
-                    filename
-                )
-            )
-
-            conn.commit()
-
-        except sqlite3.Error as error:
-
-            conn.rollback()
-
-            print(
-                "ADD GROUND DATABASE ERROR:",
-                error
-            )
-
-            # Remove uploaded file if database save failed.
-            if filename:
-
-                uploaded_path = os.path.join(
-                    UPLOAD_FOLDER,
-                    filename
-                )
-
-                if os.path.exists(
-                    uploaded_path
-                ):
-
-                    try:
-                        os.remove(
-                            uploaded_path
-                        )
-                    except OSError:
-                        pass
-
-            flash(
-                "Could not save the ground.",
-                "danger"
-            )
-
-            return render_template(
-                "admin/add_ground.html"
-            )
-
-        finally:
-
-            conn.close()
-
-        flash(
-            "Ground added successfully.",
-            "success"
-        )
-
-        return redirect(
-            url_for("admin_grounds")
-        )
-
-    return render_template(
-        "admin/add_ground.html"
-    )
-
-
-# ============================================================
-# ADMIN EDIT GROUND
-# ============================================================
-
-@app.route(
-    "/admin/grounds/edit/<int:ground_id>",
-    methods=["GET", "POST"]
-)
-@admin_required
-def admin_edit_ground(ground_id):
-
-    conn = get_db()
-
-    ground = conn.execute(
-        """
-        SELECT *
-        FROM grounds
-        WHERE id = ?
-        """,
-        (
-            ground_id,
-        )
-    ).fetchone()
-
-    if ground is None:
-
-        conn.close()
-
-        flash(
-            "Ground not found.",
-            "danger"
-        )
-
-        return redirect(
-            url_for("admin_grounds")
-        )
-
-    if request.method == "POST":
-
-        name = request.form.get(
-            "name",
-            ""
-        ).strip()
-
-        location = request.form.get(
-            "location",
-            ""
-        ).strip()
-
-        price = request.form.get(
-            "price",
-            "0"
-        )
-
-        contact = request.form.get(
-            "contact",
-            ""
-        ).strip()
-
-        opening_time = request.form.get(
-            "opening_time",
-            "06:00"
-        )
-
-        closing_time = request.form.get(
-            "closing_time",
-            "22:00"
-        )
-
-        description = request.form.get(
-            "description",
-            ""
-        ).strip()
-
-        image = request.files.get(
-            "image"
-        )
-
-        try:
-
-            price = float(
-                price
-            )
-
-        except (
-            TypeError,
-            ValueError
-        ):
-
-            conn.close()
-
-            flash(
-                "Invalid price.",
-                "danger"
-            )
-
-            return render_template(
-                "admin/edit_ground.html",
-                ground=ground
-            )
-
-        filename = ground["image"]
-
-        if image and image.filename:
-
-            if not allowed_image(
-                image.filename
-            ):
-
-                conn.close()
-
-                flash(
-                    "Invalid image format.",
-                    "danger"
-                )
-
-                return render_template(
-                    "admin/edit_ground.html",
-                    ground=ground
-                )
-
-            filename = (
-                uuid.uuid4().hex
-                +
-                "_"
-                +
-                secure_filename(
-                    image.filename
-                )
-            )
 
             image.save(
-                os.path.join(
-                    UPLOAD_FOLDER,
-                    filename
-                )
+                upload_path
             )
 
-            old_image = ground["image"]
+            uploaded_filename = upload_path
 
-            if old_image:
+            image_filename = new_filename
 
-                old_path = os.path.join(
-                    UPLOAD_FOLDER,
-                    old_image
-                )
-
-                if os.path.exists(
-                    old_path
-                ):
-
-                    try:
-                        os.remove(
-                            old_path
-                        )
-                    except OSError:
-                        pass
+        # ----------------------------------------------------
+        # UPDATE DATABASE
+        # ----------------------------------------------------
 
         conn.execute(
             """
@@ -4603,17 +4975,67 @@ def admin_edit_ground(ground_id):
                 opening_time,
                 closing_time,
                 description,
-                filename,
+                image_filename,
                 ground_id
             )
         )
 
         conn.commit()
 
-        conn.close()
+        # ----------------------------------------------------
+        # DELETE OLD IMAGE
+        # ----------------------------------------------------
+
+        old_image = ground["image"]
+
+        if (
+            uploaded_filename
+            and old_image
+            and old_image != image_filename
+        ):
+
+            old_image_path = os.path.join(
+                UPLOAD_FOLDER,
+                old_image
+            )
+
+            try:
+
+                if os.path.exists(
+                    old_image_path
+                ):
+
+                    os.remove(
+                        old_image_path
+                    )
+
+            except OSError as error:
+
+                print(
+                    "OLD IMAGE DELETE ERROR:",
+                    error
+                )
+
+        # ----------------------------------------------------
+        # SUCCESS
+        # ----------------------------------------------------
+
+        print("")
+        print("========================================")
+        print("GROUND UPDATED SUCCESSFULLY")
+        print("========================================")
+        print("GROUND ID:", ground_id)
+        print("NAME:", name)
+        print("LOCATION:", location)
+        print("PRICE:", price)
+        print("OPENING:", opening_time)
+        print("CLOSING:", closing_time)
+        print("IMAGE:", image_filename)
+        print("========================================")
+        print("")
 
         flash(
-            "Ground updated successfully.",
+            "Ground updated successfully!",
             "success"
         )
 
@@ -4621,16 +5043,101 @@ def admin_edit_ground(ground_id):
             url_for("admin_grounds")
         )
 
-    conn.close()
+    except sqlite3.Error as error:
 
-    return render_template(
-        "admin/edit_ground.html",
-        ground=ground
-    )
+        conn.rollback()
+
+        # ----------------------------------------------------
+        # DELETE NEW IMAGE IF DATABASE UPDATE FAILED
+        # ----------------------------------------------------
+
+        if uploaded_filename:
+
+            try:
+
+                if os.path.exists(
+                    uploaded_filename
+                ):
+
+                    os.remove(
+                        uploaded_filename
+                    )
+
+            except OSError:
+
+                pass
+
+        print("")
+        print("========================================")
+        print("EDIT GROUND DATABASE ERROR")
+        print("========================================")
+        print(error)
+        print("========================================")
+        print("")
+
+        flash(
+            "Unable to update the ground because of a database error.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "admin_edit_ground",
+                ground_id=ground_id
+            )
+        )
+
+    except Exception as error:
+
+        conn.rollback()
+
+        if uploaded_filename:
+
+            try:
+
+                if os.path.exists(
+                    uploaded_filename
+                ):
+
+                    os.remove(
+                        uploaded_filename
+                    )
+
+            except OSError:
+
+                pass
+
+        print("")
+        print("========================================")
+        print("EDIT GROUND ERROR")
+        print("========================================")
+        print(error)
+        print("========================================")
+        print("")
+
+        flash(
+            "Unable to update the ground.",
+            "danger"
+        )
+
+        return redirect(
+            url_for(
+                "admin_edit_ground",
+                ground_id=ground_id
+            )
+        )
+
+    finally:
+
+        conn.close()
 
 
 # ============================================================
 # ADMIN DELETE GROUND
+# ============================================================
+
+# ============================================================
+# ADMIN - DELETE GROUND
 # ============================================================
 
 @app.route(
@@ -4642,23 +5149,149 @@ def admin_delete_ground(ground_id):
 
     conn = get_db()
 
-    ground = conn.execute(
-        """
-        SELECT *
-        FROM grounds
-        WHERE id = ?
-        """,
-        (
-            ground_id,
+    try:
+
+        # ----------------------------------------------------
+        # FIND GROUND
+        # ----------------------------------------------------
+
+        ground = conn.execute(
+            """
+            SELECT *
+            FROM grounds
+            WHERE id = ?
+            """,
+            (ground_id,)
+        ).fetchone()
+
+        if ground is None:
+
+            flash(
+                "Ground not found.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("admin_grounds")
+            )
+
+        # ----------------------------------------------------
+        # CHECK FOR BOOKINGS
+        # ----------------------------------------------------
+
+        booking_count_row = conn.execute(
+            """
+            SELECT COUNT(*) AS count
+            FROM bookings
+            WHERE ground_id = ?
+            """,
+            (ground_id,)
+        ).fetchone()
+
+        booking_count = (
+            booking_count_row["count"]
+            or 0
         )
-    ).fetchone()
 
-    if ground is None:
+        # ----------------------------------------------------
+        # DO NOT DELETE IF BOOKINGS EXIST
+        # ----------------------------------------------------
 
-        conn.close()
+        if booking_count > 0:
+
+            flash(
+                "This ground cannot be deleted because it has existing bookings.",
+                "warning"
+            )
+
+            return redirect(
+                url_for("admin_grounds")
+            )
+
+        # ----------------------------------------------------
+        # SAVE OLD IMAGE NAME
+        # ----------------------------------------------------
+
+        old_image = ground["image"]
+
+        # ----------------------------------------------------
+        # DELETE GROUND
+        # ----------------------------------------------------
+
+        conn.execute(
+            """
+            DELETE FROM grounds
+            WHERE id = ?
+            """,
+            (ground_id,)
+        )
+
+        conn.commit()
+
+        # ----------------------------------------------------
+        # DELETE IMAGE FILE
+        # ----------------------------------------------------
+
+        if old_image:
+
+            old_image_path = os.path.join(
+                UPLOAD_FOLDER,
+                old_image
+            )
+
+            try:
+
+                if os.path.exists(
+                    old_image_path
+                ):
+
+                    os.remove(
+                        old_image_path
+                    )
+
+            except OSError as error:
+
+                print(
+                    "GROUND IMAGE DELETE ERROR:",
+                    error
+                )
+
+        # ----------------------------------------------------
+        # SUCCESS
+        # ----------------------------------------------------
+
+        print("")
+        print("========================================")
+        print("GROUND DELETED SUCCESSFULLY")
+        print("========================================")
+        print("GROUND ID:", ground_id)
+        print("GROUND NAME:", ground["name"])
+        print("========================================")
+        print("")
 
         flash(
-            "Ground not found.",
+            "Ground deleted successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("admin_grounds")
+        )
+
+    except sqlite3.IntegrityError as error:
+
+        conn.rollback()
+
+        print("")
+        print("========================================")
+        print("GROUND DELETE INTEGRITY ERROR")
+        print("========================================")
+        print(error)
+        print("========================================")
+        print("")
+
+        flash(
+            "This ground cannot be deleted because it is being used by another record.",
             "danger"
         )
 
@@ -4666,56 +5299,51 @@ def admin_delete_ground(ground_id):
             url_for("admin_grounds")
         )
 
-    conn.execute(
-        """
-        DELETE FROM bookings
-        WHERE ground_id = ?
-        """,
-        (
-            ground_id,
-        )
-    )
+    except sqlite3.Error as error:
 
-    conn.execute(
-        """
-        DELETE FROM grounds
-        WHERE id = ?
-        """,
-        (
-            ground_id,
-        )
-    )
+        conn.rollback()
 
-    conn.commit()
+        print("")
+        print("========================================")
+        print("GROUND DELETE DATABASE ERROR")
+        print("========================================")
+        print(error)
+        print("========================================")
+        print("")
 
-    conn.close()
-
-    if ground["image"]:
-
-        image_path = os.path.join(
-            UPLOAD_FOLDER,
-            ground["image"]
+        flash(
+            "Unable to delete the ground.",
+            "danger"
         )
 
-        if os.path.exists(
-            image_path
-        ):
+        return redirect(
+            url_for("admin_grounds")
+        )
 
-            try:
-                os.remove(
-                    image_path
-                )
-            except OSError:
-                pass
+    except Exception as error:
 
-    flash(
-        "Ground deleted successfully.",
-        "success"
-    )
+        conn.rollback()
 
-    return redirect(
-        url_for("admin_grounds")
-    )
+        print("")
+        print("========================================")
+        print("GROUND DELETE ERROR")
+        print("========================================")
+        print(error)
+        print("========================================")
+        print("")
+
+        flash(
+            "An unexpected error occurred while deleting the ground.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin_grounds")
+        )
+
+    finally:
+
+        conn.close()
 
 
 # ============================================================
@@ -4900,6 +5528,10 @@ def admin_booking_details(booking_id):
 # ADMIN CANCEL BOOKING
 # ============================================================
 
+# ============================================================
+# ADMIN - CANCEL BOOKING
+# ============================================================
+
 @app.route(
     "/admin/bookings/cancel/<int:booking_id>",
     methods=["POST"]
@@ -4909,23 +5541,91 @@ def admin_cancel_booking(booking_id):
 
     conn = get_db()
 
-    booking = conn.execute(
-        """
-        SELECT *
-        FROM bookings
-        WHERE id = ?
-        """,
-        (
-            booking_id,
+    try:
+
+        booking = conn.execute(
+            """
+            SELECT *
+            FROM bookings
+            WHERE id = ?
+            """,
+            (booking_id,)
+        ).fetchone()
+
+        if booking is None:
+
+            flash(
+                "Booking not found.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("admin_bookings")
+            )
+
+        # ----------------------------------------------------
+        # ALREADY CANCELLED
+        # ----------------------------------------------------
+
+        if booking["status"] == "cancelled":
+
+            flash(
+                "This booking is already cancelled.",
+                "warning"
+            )
+
+            return redirect(
+                url_for("admin_bookings")
+            )
+
+        # ----------------------------------------------------
+        # CANCEL BOOKING
+        # ----------------------------------------------------
+
+        cursor = conn.execute(
+            """
+            UPDATE bookings
+            SET
+                status = 'cancelled'
+            WHERE id = ?
+            AND status != 'cancelled'
+            """,
+            (booking_id,)
         )
-    ).fetchone()
 
-    if booking is None:
+        conn.commit()
 
-        conn.close()
+        if cursor.rowcount != 1:
+
+            flash(
+                "The booking could not be cancelled.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("admin_bookings")
+            )
 
         flash(
-            "Booking not found.",
+            "Booking cancelled successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("admin_bookings")
+        )
+
+    except sqlite3.Error as error:
+
+        conn.rollback()
+
+        print(
+            "ADMIN CANCEL BOOKING ERROR:",
+            error
+        )
+
+        flash(
+            "Unable to cancel the booking.",
             "danger"
         )
 
@@ -4933,33 +5633,17 @@ def admin_cancel_booking(booking_id):
             url_for("admin_bookings")
         )
 
-    conn.execute(
-        """
-        UPDATE bookings
-        SET status = 'cancelled'
-        WHERE id = ?
-        """,
-        (
-            booking_id,
-        )
-    )
+    finally:
 
-    conn.commit()
-
-    conn.close()
-
-    flash(
-        "Booking cancelled successfully.",
-        "success"
-    )
-
-    return redirect(
-        url_for("admin_bookings")
-    )
+        conn.close()
 
 
 # ============================================================
 # ADMIN CONFIRM PAYMENT
+# ============================================================
+
+# ============================================================
+# ADMIN - CONFIRM PAYMENT
 # ============================================================
 
 @app.route(
@@ -4971,40 +5655,182 @@ def admin_confirm_payment(booking_id):
 
     conn = get_db()
 
-    # --------------------------------------------------------
-    # Find booking
-    # --------------------------------------------------------
+    try:
 
-    booking = conn.execute(
-        """
-        SELECT
-            bookings.*,
-            users.name AS user_name,
-            users.email AS user_email,
-            grounds.name AS ground_name,
-            grounds.price AS ground_price
-        FROM bookings
-        JOIN users
-            ON bookings.user_id = users.id
-        JOIN grounds
-            ON bookings.ground_id = grounds.id
-        WHERE bookings.id = ?
-        """,
-        (
-            booking_id,
+        booking = conn.execute(
+            """
+            SELECT
+                bookings.*,
+                users.name AS user_name,
+                users.email AS user_email,
+                grounds.name AS ground_name,
+                grounds.price AS ground_price
+            FROM bookings
+            JOIN users
+                ON bookings.user_id = users.id
+            JOIN grounds
+                ON bookings.ground_id = grounds.id
+            WHERE bookings.id = ?
+            """,
+            (booking_id,)
+        ).fetchone()
+
+        if booking is None:
+
+            flash(
+                "Booking not found.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("admin_bookings")
+            )
+
+        # ----------------------------------------------------
+        # CANCELLED BOOKING
+        # ----------------------------------------------------
+
+        if booking["status"] == "cancelled":
+
+            flash(
+                "A cancelled booking cannot be confirmed.",
+                "warning"
+            )
+
+            return redirect(
+                url_for(
+                    "admin_booking_details",
+                    booking_id=booking_id
+                )
+            )
+
+        # ----------------------------------------------------
+        # ALREADY PAID
+        # ----------------------------------------------------
+
+        if booking["payment_status"] == "paid":
+
+            flash(
+                "This payment has already been confirmed.",
+                "info"
+            )
+
+            return redirect(
+                url_for(
+                    "admin_booking_details",
+                    booking_id=booking_id
+                )
+            )
+
+        # ----------------------------------------------------
+        # VALID PAYMENT STATUS
+        # ----------------------------------------------------
+
+        if booking["payment_status"] not in (
+            "pending",
+            "submitted"
+        ):
+
+            flash(
+                "This payment cannot be confirmed.",
+                "danger"
+            )
+
+            return redirect(
+                url_for(
+                    "admin_booking_details",
+                    booking_id=booking_id
+                )
+            )
+
+        # ----------------------------------------------------
+        # CALCULATE TOTAL
+        # ----------------------------------------------------
+
+        try:
+
+            price = float(
+                booking["ground_price"] or 0
+            )
+
+        except (TypeError, ValueError):
+
+            price = 0.0
+
+        try:
+
+            duration = float(
+                booking["duration"] or 1
+            )
+
+        except (TypeError, ValueError):
+
+            duration = 1.0
+
+        total_amount = price * duration
+
+        # ----------------------------------------------------
+        # UPDATE PAYMENT
+        # ----------------------------------------------------
+
+        cursor = conn.execute(
+            """
+            UPDATE bookings
+            SET
+                payment_status = 'paid',
+                status = 'confirmed',
+                paid_at = CURRENT_TIMESTAMP,
+                esewa_amount = CASE
+                    WHEN payment_method = 'esewa'
+                    THEN ?
+                    ELSE esewa_amount
+                END
+            WHERE id = ?
+            AND payment_status IN ('pending', 'submitted')
+            AND status != 'cancelled'
+            """,
+            (
+                total_amount,
+                booking_id
+            )
         )
-    ).fetchone()
 
-    # --------------------------------------------------------
-    # Booking not found
-    # --------------------------------------------------------
+        conn.commit()
 
-    if booking is None:
+        if cursor.rowcount != 1:
 
-        conn.close()
+            flash(
+                "The payment could not be confirmed.",
+                "danger"
+            )
+
+            return redirect(
+                url_for(
+                    "admin_booking_details",
+                    booking_id=booking_id
+                )
+            )
 
         flash(
-            "Booking not found.",
+            "Payment confirmed successfully.",
+            "success"
+        )
+
+        return redirect(
+            url_for("admin_bookings")
+        )
+
+    except sqlite3.Error as error:
+
+        conn.rollback()
+
+        print(
+            "ADMIN CONFIRM PAYMENT ERROR:",
+            error
+        )
+
+        flash(
+            "Unable to confirm the payment.",
             "danger"
         )
 
@@ -5012,189 +5838,16 @@ def admin_confirm_payment(booking_id):
             url_for("admin_bookings")
         )
 
-    # --------------------------------------------------------
-    # Do not confirm cancelled booking
-    # --------------------------------------------------------
-
-    if booking["status"] == "cancelled":
+    finally:
 
         conn.close()
-
-        flash(
-            "Cancelled bookings cannot be marked as paid.",
-            "warning"
-        )
-
-        return redirect(
-            url_for(
-                "admin_booking_details",
-                booking_id=booking_id
-            )
-        )
-
-    # --------------------------------------------------------
-    # Already paid
-    # --------------------------------------------------------
-
-    if booking["payment_status"] == "paid":
-
-        conn.close()
-
-        flash(
-            "This payment has already been confirmed.",
-            "info"
-        )
-
-        return redirect(
-            url_for(
-                "admin_booking_details",
-                booking_id=booking_id
-            )
-        )
-
-    # --------------------------------------------------------
-    # Only pending/submitted payments can be confirmed
-    # --------------------------------------------------------
-
-    allowed_statuses = {
-        "pending",
-        "submitted"
-    }
-
-    if booking["payment_status"] not in allowed_statuses:
-
-        conn.close()
-
-        flash(
-            "This payment is not in a confirmable state.",
-            "danger"
-        )
-
-        return redirect(
-            url_for(
-                "admin_booking_details",
-                booking_id=booking_id
-            )
-        )
-
-    # --------------------------------------------------------
-    # Calculate booking amount
-    # --------------------------------------------------------
-
-    try:
-
-        ground_price = float(
-            booking["ground_price"] or 0
-        )
-
-    except (TypeError, ValueError):
-
-        conn.close()
-
-        flash(
-            "Invalid ground price.",
-            "danger"
-        )
-
-        return redirect(
-            url_for(
-                "admin_booking_details",
-                booking_id=booking_id
-            )
-        )
-
-    try:
-
-        duration = float(
-            booking["duration"] or 1
-        )
-
-    except (TypeError, ValueError):
-
-        conn.close()
-
-        flash(
-            "Invalid booking duration.",
-            "danger"
-        )
-
-        return redirect(
-            url_for(
-                "admin_booking_details",
-                booking_id=booking_id
-            )
-        )
-
-    total_amount = round(
-        ground_price * duration,
-        2
-    )
-
-    if total_amount <= 0:
-
-        conn.close()
-
-        flash(
-            "Invalid booking amount.",
-            "danger"
-        )
-
-        return redirect(
-            url_for(
-                "admin_booking_details",
-                booking_id=booking_id
-            )
-        )
-
-    # --------------------------------------------------------
-    # Confirm payment
-    # --------------------------------------------------------
-
-    conn.execute(
-        """
-        UPDATE bookings
-        SET
-            payment_status = 'paid',
-            status = 'confirmed',
-            esewa_amount = CASE
-                WHEN payment_method = 'esewa'
-                THEN ?
-                ELSE esewa_amount
-            END,
-            paid_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-        AND payment_status IN ('pending', 'submitted')
-        AND status != 'cancelled'
-        """,
-        (
-            total_amount,
-            booking_id
-        )
-    )
-
-    conn.commit()
-
-    conn.close()
-
-    # --------------------------------------------------------
-    # Success
-    # --------------------------------------------------------
-
-    flash(
-        "Payment confirmed successfully.",
-        "success"
-    )
-
-    return redirect(
-        url_for(
-            "admin_booking_details",
-            booking_id=booking_id
-        )
-    )
-
 
 # ============================================================
 # ADMIN REJECT PAYMENT
+# ============================================================
+
+# ============================================================
+# ADMIN - REJECT PAYMENT
 # ============================================================
 
 @app.route(
@@ -5206,40 +5859,160 @@ def admin_reject_payment(booking_id):
 
     conn = get_db()
 
-    # --------------------------------------------------------
-    # Find booking
-    # --------------------------------------------------------
+    try:
 
-    booking = conn.execute(
-        """
-        SELECT
-            bookings.*,
-            users.name AS user_name,
-            users.email AS user_email,
-            grounds.name AS ground_name,
-            grounds.price AS ground_price
-        FROM bookings
-        JOIN users
-            ON bookings.user_id = users.id
-        JOIN grounds
-            ON bookings.ground_id = grounds.id
-        WHERE bookings.id = ?
-        """,
-        (
-            booking_id,
+        booking = conn.execute(
+            """
+            SELECT
+                bookings.*,
+                users.name AS user_name,
+                users.email AS user_email,
+                grounds.name AS ground_name
+            FROM bookings
+            JOIN users
+                ON bookings.user_id = users.id
+            JOIN grounds
+                ON bookings.ground_id = grounds.id
+            WHERE bookings.id = ?
+            """,
+            (booking_id,)
+        ).fetchone()
+
+        if booking is None:
+
+            flash(
+                "Booking not found.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("admin_bookings")
+            )
+
+        # ----------------------------------------------------
+        # CANCELLED
+        # ----------------------------------------------------
+
+        if booking["status"] == "cancelled":
+
+            flash(
+                "Payment for a cancelled booking cannot be rejected.",
+                "warning"
+            )
+
+            return redirect(
+                url_for(
+                    "admin_booking_details",
+                    booking_id=booking_id
+                )
+            )
+
+        # ----------------------------------------------------
+        # ALREADY PAID
+        # ----------------------------------------------------
+
+        if booking["payment_status"] == "paid":
+
+            flash(
+                "A paid payment cannot be rejected.",
+                "warning"
+            )
+
+            return redirect(
+                url_for(
+                    "admin_booking_details",
+                    booking_id=booking_id
+                )
+            )
+
+        # ----------------------------------------------------
+        # ALREADY REJECTED
+        # ----------------------------------------------------
+
+        if booking["payment_status"] == "rejected":
+
+            flash(
+                "This payment has already been rejected.",
+                "info"
+            )
+
+            return redirect(
+                url_for(
+                    "admin_booking_details",
+                    booking_id=booking_id
+                )
+            )
+
+        # ----------------------------------------------------
+        # VALID STATUS
+        # ----------------------------------------------------
+
+        if booking["payment_status"] not in (
+            "pending",
+            "submitted"
+        ):
+
+            flash(
+                "This payment cannot be rejected.",
+                "danger"
+            )
+
+            return redirect(
+                url_for(
+                    "admin_booking_details",
+                    booking_id=booking_id
+                )
+            )
+
+        # ----------------------------------------------------
+        # REJECT
+        # ----------------------------------------------------
+
+        cursor = conn.execute(
+            """
+            UPDATE bookings
+            SET
+                payment_status = 'rejected'
+            WHERE id = ?
+            AND payment_status IN ('pending', 'submitted')
+            AND status != 'cancelled'
+            """,
+            (booking_id,)
         )
-    ).fetchone()
 
-    # --------------------------------------------------------
-    # Booking does not exist
-    # --------------------------------------------------------
+        conn.commit()
 
-    if booking is None:
+        if cursor.rowcount != 1:
 
-        conn.close()
+            flash(
+                "The payment could not be rejected.",
+                "danger"
+            )
+
+            return redirect(
+                url_for("admin_bookings")
+            )
 
         flash(
-            "Booking not found.",
+            "Payment rejected successfully.",
+            "warning"
+        )
+
+        return redirect(
+            url_for("admin_bookings")
+        )
+
+    except sqlite3.Error as error:
+
+        conn.rollback()
+
+        print(
+            "ADMIN REJECT PAYMENT ERROR:",
+            error
+        )
+
+        flash(
+            "Unable to reject the payment.",
             "danger"
         )
 
@@ -5247,132 +6020,9 @@ def admin_reject_payment(booking_id):
             url_for("admin_bookings")
         )
 
-    # --------------------------------------------------------
-    # Cancelled booking
-    # --------------------------------------------------------
-
-    if booking["status"] == "cancelled":
+    finally:
 
         conn.close()
-
-        flash(
-            "Payment for a cancelled booking cannot be rejected.",
-            "warning"
-        )
-
-        return redirect(
-            url_for(
-                "admin_booking_details",
-                booking_id=booking_id
-            )
-        )
-
-    # --------------------------------------------------------
-    # Already paid
-    # --------------------------------------------------------
-
-    if booking["payment_status"] == "paid":
-
-        conn.close()
-
-        flash(
-            "A paid payment cannot be rejected.",
-            "warning"
-        )
-
-        return redirect(
-            url_for(
-                "admin_booking_details",
-                booking_id=booking_id
-            )
-        )
-
-    # --------------------------------------------------------
-    # Already rejected
-    # --------------------------------------------------------
-
-    if booking["payment_status"] == "rejected":
-
-        conn.close()
-
-        flash(
-            "This payment has already been rejected.",
-            "info"
-        )
-
-        return redirect(
-            url_for(
-                "admin_booking_details",
-                booking_id=booking_id
-            )
-        )
-
-    # --------------------------------------------------------
-    # Only pending/submitted payments can be rejected
-    # --------------------------------------------------------
-
-    allowed_statuses = {
-        "pending",
-        "submitted"
-    }
-
-    if booking["payment_status"] not in allowed_statuses:
-
-        conn.close()
-
-        flash(
-            "This payment is not in a rejectable state.",
-            "danger"
-        )
-
-        return redirect(
-            url_for(
-                "admin_booking_details",
-                booking_id=booking_id
-            )
-        )
-
-    # --------------------------------------------------------
-    # Reject payment
-    #
-    # IMPORTANT:
-    # We keep the booking itself as pending.
-    # We only change the payment status.
-    #
-    # This means:
-    # payment_status = rejected
-    # booking status  = pending
-    # --------------------------------------------------------
-
-    conn.execute(
-        """
-        UPDATE bookings
-        SET
-            payment_status = 'rejected'
-        WHERE id = ?
-        AND payment_status IN ('pending', 'submitted')
-        AND status != 'cancelled'
-        """,
-        (
-            booking_id,
-        )
-    )
-
-    conn.commit()
-
-    conn.close()
-
-    flash(
-        "Payment rejected successfully.",
-        "warning"
-    )
-
-    return redirect(
-        url_for(
-            "admin_booking_details",
-            booking_id=booking_id
-        )
-    )
 
 
 # ============================================================

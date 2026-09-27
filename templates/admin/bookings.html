@@ -10,561 +10,296 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>
-        Manage Bookings | Admin
-    </title>
+    <title>Bookings - Admin</title>
 
     <style>
 
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
 
         body {
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-
-            background: #f4f6fb;
-
-            color: #2d3436;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
         }
 
-
-        /* =========================
-           SIDEBAR
-        ========================= */
-
-        .sidebar {
-            position: fixed;
-
-            left: 0;
-            top: 0;
-            bottom: 0;
-
-            width: 240px;
-
-            background: #17152b;
-
+        .navbar {
+            background: #111827;
             color: white;
+            padding: 18px 30px;
 
-            padding: 25px 15px;
-        }
-
-        .logo {
-            font-size: 23px;
-
-            font-weight: bold;
-
-            padding:
-                0 12px 25px;
-        }
-
-        .logo span {
-            color: #a29bfe;
-        }
-
-        .nav-title {
-            color: #8d8aa5;
-
-            font-size: 11px;
-
-            text-transform: uppercase;
-
-            margin:
-                20px 12px 8px;
-        }
-
-        .nav-link {
-            display: block;
-
-            color: #d9d7e8;
-
-            text-decoration: none;
-
-            padding:
-                12px;
-
-            border-radius: 8px;
-
-            margin-bottom: 4px;
-
-            font-size: 14px;
-        }
-
-        .nav-link:hover,
-        .nav-link.active {
-            background: #6c5ce7;
-
-            color: white;
-        }
-
-
-        /* =========================
-           MAIN
-        ========================= */
-
-        .main {
-            margin-left: 240px;
-
-            padding: 30px;
-        }
-
-        .topbar {
             display: flex;
-
-            justify-content:
-                space-between;
-
+            justify-content: space-between;
             align-items: center;
-
-            margin-bottom: 25px;
         }
 
-        .topbar h1 {
-            font-size: 28px;
+        .navbar h2 {
+            font-size: 22px;
         }
 
-        .topbar p {
-            color: #777;
-
-            margin-top: 5px;
-
-            font-size: 14px;
-        }
-
-        .logout {
-            background: #d63031;
-
-            color: white;
-
-            padding:
-                10px 16px;
-
-            border-radius: 8px;
-
-            text-decoration: none;
-
-            font-size: 14px;
-        }
-
-
-        /* =========================
-           FLASH
-        ========================= */
-
-        .flash {
-            padding: 13px 16px;
-
-            border-radius: 8px;
-
-            margin-bottom: 18px;
-
-            font-size: 14px;
-        }
-
-        .flash.success {
-            background: #e9f9f0;
-
-            color: #16834d;
-        }
-
-        .flash.danger {
-            background: #fff0f0;
-
-            color: #c0392b;
-        }
-
-        .flash.warning {
-            background: #fff7df;
-
-            color: #8a6500;
-        }
-
-
-        /* =========================
-           STATS
-        ========================= */
-
-        .stats {
-            display: grid;
-
-            grid-template-columns:
-                repeat(4, 1fr);
-
-            gap: 18px;
-
-            margin-bottom: 25px;
-        }
-
-        .stat {
-            background: white;
-
-            padding: 20px;
-
-            border-radius: 12px;
-
-            box-shadow:
-                0 4px 15px
-                rgba(0,0,0,.05);
-        }
-
-        .stat-label {
-            color: #777;
-
-            font-size: 13px;
-
-            margin-bottom: 8px;
-        }
-
-        .stat-number {
-            font-size: 26px;
-
-            font-weight: bold;
-
-            color: #6c5ce7;
-        }
-
-
-        /* =========================
-           FILTERS
-        ========================= */
-
-        .filter-card {
-            background: white;
-
-            padding: 20px;
-
-            border-radius: 12px;
-
-            margin-bottom: 20px;
-
-            box-shadow:
-                0 4px 15px
-                rgba(0,0,0,.05);
-        }
-
-        .filters {
+        .nav-links {
             display: flex;
-
-            gap: 12px;
-
-            align-items: end;
-
+            gap: 20px;
             flex-wrap: wrap;
         }
 
-        .filter-group {
-            flex: 1;
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+        }
 
-            min-width: 180px;
+        .container {
+            width: 100%;
+            padding: 30px;
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            color: #6b7280;
+        }
+
+        .flash {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .flash.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .flash.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .flash.danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .flash.info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+
+            box-shadow:
+                0 3px 15px rgba(0,0,0,0.06);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
         }
 
         .filter-group label {
-            display: block;
-
             font-size: 13px;
-
             font-weight: bold;
-
-            margin-bottom: 7px;
         }
 
         .filter-group input,
         .filter-group select {
-            width: 100%;
-
-            padding: 11px;
-
-            border:
-                1px solid #ddd;
-
+            min-width: 220px;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
             border-radius: 7px;
-
-            outline: none;
-        }
-
-        .filter-group input:focus,
-        .filter-group select:focus {
-            border-color: #6c5ce7;
         }
 
         .filter-btn {
+            padding: 10px 18px;
             border: none;
-
-            background: #6c5ce7;
-
-            color: white;
-
-            padding:
-                11px 20px;
-
             border-radius: 7px;
-
+            background: #6c5ce7;
+            color: white;
             cursor: pointer;
-
             font-weight: bold;
         }
 
-        .clear-btn {
-            background: #eee;
-
-            color: #444;
-
-            text-decoration: none;
-
-            padding:
-                11px 18px;
-
-            border-radius: 7px;
-
-            font-size: 14px;
-        }
-
-
-        /* =========================
-           TABLE
-        ========================= */
-
-        .table-card {
+        .table-wrapper {
             background: white;
-
             border-radius: 12px;
-
             overflow-x: auto;
 
             box-shadow:
-                0 4px 15px
-                rgba(0,0,0,.05);
+                0 3px 15px rgba(0,0,0,0.06);
         }
 
         table {
             width: 100%;
-
+            min-width: 1300px;
             border-collapse: collapse;
-
-            min-width: 1050px;
         }
 
         th {
-            background: #f8f7ff;
-
-            color: #555;
-
-            font-size: 12px;
-
-            text-transform: uppercase;
-
+            background: #f9fafb;
             text-align: left;
-
-            padding: 15px;
-
-            border-bottom:
-                1px solid #eee;
+            padding: 16px 14px;
+            font-size: 13px;
+            color: #4b5563;
+            white-space: nowrap;
         }
 
         td {
-            padding: 15px;
-
-            border-bottom:
-                1px solid #eee;
-
-            font-size: 13px;
-
+            padding: 16px 14px;
+            border-top: 1px solid #eee;
             vertical-align: middle;
+            font-size: 14px;
         }
 
-        tr:hover td {
-            background: #fcfbff;
+        .customer-name {
+            font-weight: bold;
+            margin-bottom: 4px;
         }
 
+        .email {
+            color: #9ca3af;
+            font-size: 12px;
+        }
 
-        /* =========================
-           BADGES
-        ========================= */
+        .ground-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .location {
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        .date {
+            font-weight: bold;
+        }
+
+        .time {
+            color: #6b7280;
+            margin-top: 3px;
+        }
+
+        .amount {
+            font-weight: bold;
+            white-space: nowrap;
+        }
 
         .badge {
             display: inline-block;
-
-            padding:
-                5px 9px;
-
+            padding: 7px 11px;
             border-radius: 20px;
-
-            font-size: 11px;
-
+            font-size: 12px;
             font-weight: bold;
-
-            text-transform: capitalize;
-        }
-
-        .paid {
-            background: #e7f8ee;
-
-            color: #16834d;
-        }
-
-        .pending {
-            background: #fff5d9;
-
-            color: #966c00;
-        }
-
-        .submitted {
-            background: #e9e5ff;
-
-            color: #5b4bc4;
-        }
-
-        .rejected {
-            background: #ffe9e9;
-
-            color: #c0392b;
+            white-space: nowrap;
         }
 
         .confirmed {
-            background: #e7f8ee;
+            background: #dcfce7;
+            color: #15803d;
+        }
 
-            color: #16834d;
+        .pending {
+            background: #fef3c7;
+            color: #a16207;
         }
 
         .cancelled {
-            background: #ffe9e9;
-
-            color: #c0392b;
+            background: #fee2e2;
+            color: #dc2626;
         }
 
+        .paid {
+            background: #dcfce7;
+            color: #15803d;
+        }
 
-        /* =========================
-           ACTIONS
-        ========================= */
+        .rejected {
+            background: #fee2e2;
+            color: #dc2626;
+        }
 
         .actions {
             display: flex;
-
-            gap: 6px;
-
+            gap: 7px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
-        .action {
-            text-decoration: none;
-
+        .action-btn {
             border: none;
-
-            padding:
-                7px 10px;
-
-            border-radius: 6px;
-
-            font-size: 11px;
-
-            cursor: pointer;
-
+            border-radius: 7px;
+            padding: 9px 11px;
+            font-size: 12px;
             font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            white-space: nowrap;
         }
 
         .view {
-            background: #eeeaff;
-
-            color: #5949d5;
+            background: #ede9fe;
+            color: #5b21b6;
         }
 
         .confirm {
-            background: #e7f8ee;
-
-            color: #16834d;
+            background: #dcfce7;
+            color: #15803d;
         }
 
         .reject {
-            background: #fff0f0;
-
-            color: #c0392b;
+            background: #fee2e2;
+            color: #dc2626;
         }
 
         .cancel {
-            background: #fff5d9;
-
-            color: #966c00;
+            background: #fef3c7;
+            color: #92400e;
         }
 
-        .action:hover {
-            opacity: .8;
+        .action-form {
+            margin: 0;
+            padding: 0;
         }
-
-        .inline-form {
-            display: inline;
-        }
-
-
-        /* =========================
-           EMPTY
-        ========================= */
 
         .empty {
             text-align: center;
-
-            padding: 55px 20px;
-
-            color: #777;
+            padding: 60px;
+            color: #6b7280;
         }
 
-        .empty-icon {
-            font-size: 45px;
+        @media (max-width: 800px) {
 
-            margin-bottom: 12px;
-        }
-
-
-        /* =========================
-           RESPONSIVE
-        ========================= */
-
-        @media (max-width: 1000px) {
-
-            .sidebar {
-                width: 200px;
-            }
-
-            .main {
-                margin-left: 200px;
-            }
-
-            .stats {
-                grid-template-columns:
-                    repeat(2, 1fr);
-            }
-
-        }
-
-
-        @media (max-width: 700px) {
-
-            .sidebar {
-                position: static;
-
-                width: 100%;
-            }
-
-            .main {
-                margin-left: 0;
-
-                padding: 20px;
-            }
-
-            .stats {
-                grid-template-columns: 1fr;
-            }
-
-            .topbar {
+            .navbar {
                 flex-direction: column;
-
                 align-items: flex-start;
-
                 gap: 15px;
+            }
+
+            .container {
+                padding: 20px;
             }
 
         }
@@ -573,131 +308,83 @@
 
 </head>
 
-
 <body>
 
 
-    <!-- =========================
-         SIDEBAR
-    ========================= -->
+    <!-- ================================================== -->
+    <!-- NAVBAR -->
+    <!-- ================================================== -->
 
-    <aside class="sidebar">
+    <div class="navbar">
 
-        <div class="logo">
-            ⚽ <span>Futsal</span> Admin
-        </div>
+        <h2>
+            ⚽ Futsal Admin
+        </h2>
 
+        <div class="nav-links">
 
-        <div class="nav-title">
-            Main
-        </div>
+            <a href="{{ url_for('admin_dashboard') }}">
+                Dashboard
+            </a>
 
-        <a
-            href="{{ url_for('admin_dashboard') }}"
-            class="nav-link"
-        >
-            📊 Dashboard
-        </a>
+            <a href="{{ url_for('admin_users') }}">
+                Users
+            </a>
 
-        <a
-            href="{{ url_for('admin_bookings') }}"
-            class="nav-link active"
-        >
-            📅 Bookings
-        </a>
+            <a href="{{ url_for('admin_grounds') }}">
+                Grounds
+            </a>
 
+            <a href="{{ url_for('admin_bookings') }}">
+                Bookings
+            </a>
 
-        <div class="nav-title">
-            Management
-        </div>
+            <a href="{{ url_for('admin_calendar') }}">
+                Calendar
+            </a>
 
-        <a
-            href="{{ url_for('admin_users') }}"
-            class="nav-link"
-        >
-            👥 Users
-        </a>
-
-        <a
-            href="{{ url_for('admin_grounds') }}"
-            class="nav-link"
-        >
-            ⚽ Grounds
-        </a>
-
-        <a
-            href="{{ url_for('admin_calendar') }}"
-            class="nav-link"
-        >
-            🗓 Calendar
-        </a>
-
-
-        <div class="nav-title">
-            Account
-        </div>
-
-        <a
-            href="{{ url_for('admin_logout') }}"
-            class="nav-link"
-        >
-            🚪 Logout
-        </a>
-
-    </aside>
-
-
-
-    <!-- =========================
-         MAIN
-    ========================= -->
-
-    <main class="main">
-
-
-        <div class="topbar">
-
-            <div>
-
-                <h1>
-                    Manage Bookings
-                </h1>
-
-                <p>
-                    View bookings and manage payments.
-                </p>
-
-            </div>
-
-
-            <a
-                href="{{ url_for('admin_logout') }}"
-                class="logout"
-            >
+            <a href="{{ url_for('admin_logout') }}">
                 Logout
             </a>
 
         </div>
 
+    </div>
 
 
-        <!-- =========================
-             FLASH MESSAGES
-        ========================= -->
+    <div class="container">
 
-        {% with messages =
-            get_flashed_messages(
-                with_categories=true
-            )
-        %}
+
+        <!-- ================================================== -->
+        <!-- HEADER -->
+        <!-- ================================================== -->
+
+        <div class="header">
+
+            <h1>
+                All Bookings
+            </h1>
+
+            <p>
+                Manage customer bookings and payment status.
+            </p>
+
+        </div>
+
+
+        <!-- ================================================== -->
+        <!-- FLASH MESSAGES -->
+        <!-- ================================================== -->
+
+        {% with messages = get_flashed_messages(
+            with_categories=true
+        ) %}
 
             {% if messages %}
 
                 {% for category, message in messages %}
 
-                    <div
-                        class="flash {{ category }}"
-                    >
+                    <div class="flash {{ category }}">
                         {{ message }}
                     </div>
 
@@ -708,181 +395,96 @@
         {% endwith %}
 
 
+        <!-- ================================================== -->
+        <!-- FILTER -->
+        <!-- ================================================== -->
 
-        <!-- =========================
-             STATS
-        ========================= -->
+        <form
+            method="GET"
+            action="{{ url_for('admin_bookings') }}"
+            class="filters"
+        >
 
-        <div class="stats">
+            <div class="filter-group">
 
-            <div class="stat">
+                <label>
+                    Search
+                </label>
 
-                <div class="stat-label">
-                    Total Bookings
-                </div>
-
-                <div class="stat-number">
-                    {{ total_bookings }}
-                </div>
-
-            </div>
-
-
-            <div class="stat">
-
-                <div class="stat-label">
-                    Pending Payments
-                </div>
-
-                <div class="stat-number">
-                    {{ pending_payments }}
-                </div>
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search or '' }}"
+                    placeholder="Name, email, ground..."
+                >
 
             </div>
 
 
-            <div class="stat">
+            <div class="filter-group">
 
-                <div class="stat-label">
-                    Paid Bookings
-                </div>
+                <label>
+                    Payment Status
+                </label>
 
-                <div class="stat-number">
-                    {{ paid_bookings }}
-                </div>
+                <select name="payment_status">
+
+                    <option
+                        value=""
+                        {% if not payment_status %}
+                            selected
+                        {% endif %}
+                    >
+                        All
+                    </option>
+
+                    <option
+                        value="pending"
+                        {% if payment_status == 'pending' %}
+                            selected
+                        {% endif %}
+                    >
+                        Pending
+                    </option>
+
+                    <option
+                        value="paid"
+                        {% if payment_status == 'paid' %}
+                            selected
+                        {% endif %}
+                    >
+                        Paid
+                    </option>
+
+                    <option
+                        value="rejected"
+                        {% if payment_status == 'rejected' %}
+                            selected
+                        {% endif %}
+                    >
+                        Rejected
+                    </option>
+
+                </select>
 
             </div>
 
 
-            <div class="stat">
-
-                <div class="stat-label">
-                    Cancelled
-                </div>
-
-                <div class="stat-number">
-                    {{ cancelled_bookings }}
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- =========================
-             FILTERS
-        ========================= -->
-
-        <div class="filter-card">
-
-            <form
-                method="GET"
-                action="{{ url_for('admin_bookings') }}"
+            <button
+                type="submit"
+                class="filter-btn"
             >
+                🔍 Filter
+            </button>
 
-                <div class="filters">
-
-
-                    <div class="filter-group">
-
-                        <label>
-                            Search
-                        </label>
-
-                        <input
-                            type="text"
-                            name="search"
-                            value="{{ search or '' }}"
-                            placeholder="Name, email, ground..."
-                        >
-
-                    </div>
+        </form>
 
 
-                    <div class="filter-group">
+        <!-- ================================================== -->
+        <!-- BOOKINGS TABLE -->
+        <!-- ================================================== -->
 
-                        <label>
-                            Payment Status
-                        </label>
-
-                        <select
-                            name="payment_status"
-                        >
-
-                            <option value="">
-                                All Payments
-                            </option>
-
-                            <option
-                                value="paid"
-                                {% if payment_status == 'paid' %}
-                                    selected
-                                {% endif %}
-                            >
-                                Paid
-                            </option>
-
-                            <option
-                                value="pending"
-                                {% if payment_status == 'pending' %}
-                                    selected
-                                {% endif %}
-                            >
-                                Pending
-                            </option>
-
-                            <option
-                                value="submitted"
-                                {% if payment_status == 'submitted' %}
-                                    selected
-                                {% endif %}
-                            >
-                                Submitted
-                            </option>
-
-                            <option
-                                value="rejected"
-                                {% if payment_status == 'rejected' %}
-                                    selected
-                                {% endif %}
-                            >
-                                Rejected
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <button
-                        type="submit"
-                        class="filter-btn"
-                    >
-                        🔍 Search
-                    </button>
-
-
-                    <a
-                        href="{{ url_for('admin_bookings') }}"
-                        class="clear-btn"
-                    >
-                        Clear
-                    </a>
-
-                </div>
-
-            </form>
-
-        </div>
-
-
-
-        <!-- =========================
-             BOOKINGS TABLE
-        ========================= -->
-
-        <div class="table-card">
+        <div class="table-wrapper">
 
             {% if bookings %}
 
@@ -917,11 +519,11 @@
                             </th>
 
                             <th>
-                                Booking
+                                Booking Status
                             </th>
 
                             <th>
-                                Payment
+                                Payment Status
                             </th>
 
                             <th>
@@ -943,15 +545,12 @@
 
                             <tr>
 
-
                                 <!-- ID -->
 
                                 <td>
-
                                     <strong>
                                         #{{ booking['id'] }}
                                     </strong>
-
                                 </td>
 
 
@@ -959,17 +558,13 @@
 
                                 <td>
 
-                                    <strong>
+                                    <div class="customer-name">
                                         {{ booking['user_name'] }}
-                                    </strong>
+                                    </div>
 
-                                    <br>
-
-                                    <small
-                                        style="color:#888;"
-                                    >
+                                    <div class="email">
                                         {{ booking['user_email'] }}
-                                    </small>
+                                    </div>
 
                                 </td>
 
@@ -978,38 +573,28 @@
 
                                 <td>
 
-                                    <strong>
+                                    <div class="ground-name">
                                         {{ booking['ground_name'] }}
-                                    </strong>
+                                    </div>
 
-                                    {% if booking['ground_location'] %}
-
-                                        <br>
-
-                                        <small
-                                            style="color:#888;"
-                                        >
-                                            {{ booking['ground_location'] }}
-                                        </small>
-
-                                    {% endif %}
+                                    <div class="location">
+                                        {{ booking['ground_location'] }}
+                                    </div>
 
                                 </td>
 
 
-                                <!-- DATE / TIME -->
+                                <!-- DATE -->
 
                                 <td>
 
-                                    <strong>
+                                    <div class="date">
                                         {{ booking['booking_date'] }}
-                                    </strong>
+                                    </div>
 
-                                    <br>
-
-                                    <small>
+                                    <div class="time">
                                         {{ booking['booking_time'] }}
-                                    </small>
+                                    </div>
 
                                 </td>
 
@@ -1017,10 +602,8 @@
                                 <!-- DURATION -->
 
                                 <td>
-
                                     {{ booking['duration'] }}
                                     hour(s)
-
                                 </td>
 
 
@@ -1028,7 +611,7 @@
 
                                 <td>
 
-                                    <strong>
+                                    <div class="amount">
 
                                         Rs.
                                         {{
@@ -1043,7 +626,7 @@
                                             )
                                         }}
 
-                                    </strong>
+                                    </div>
 
                                 </td>
 
@@ -1052,14 +635,25 @@
 
                                 <td>
 
-                                    <span
-                                        class="badge
-                                        {{ booking['status'] }}"
-                                    >
+                                    {% if booking['status'] == 'confirmed' %}
 
-                                        {{ booking['status'] }}
+                                        <span class="badge confirmed">
+                                            Confirmed
+                                        </span>
 
-                                    </span>
+                                    {% elif booking['status'] == 'cancelled' %}
+
+                                        <span class="badge cancelled">
+                                            Cancelled
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge pending">
+                                            Pending
+                                        </span>
+
+                                    {% endif %}
 
                                 </td>
 
@@ -1068,14 +662,25 @@
 
                                 <td>
 
-                                    <span
-                                        class="badge
-                                        {{ booking['payment_status'] }}"
-                                    >
+                                    {% if booking['payment_status'] == 'paid' %}
 
-                                        {{ booking['payment_status'] }}
+                                        <span class="badge paid">
+                                            Paid
+                                        </span>
 
-                                    </span>
+                                    {% elif booking['payment_status'] == 'rejected' %}
+
+                                        <span class="badge rejected">
+                                            Rejected
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge pending">
+                                            Pending
+                                        </span>
+
+                                    {% endif %}
 
                                 </td>
 
@@ -1084,19 +689,7 @@
 
                                 <td>
 
-                                    {% if booking['payment_method'] %}
-
-                                        {{ booking['payment_method'] }}
-
-                                    {% else %}
-
-                                        <span
-                                            style="color:#999;"
-                                        >
-                                            Not selected
-                                        </span>
-
-                                    {% endif %}
+                                    {{ booking['payment_method'] or 'Not selected' }}
 
                                 </td>
 
@@ -1108,23 +701,27 @@
                                     <div class="actions">
 
 
+                                        <!-- VIEW -->
+
                                         <a
                                             href="{{ url_for(
                                                 'admin_booking_details',
                                                 booking_id=booking['id']
                                             ) }}"
-                                            class="action view"
+                                            class="action-btn view"
                                         >
                                             View
                                         </a>
 
 
+                                        <!-- ================================= -->
+                                        <!-- CONFIRM PAYMENT -->
+                                        <!-- ================================= -->
+
                                         {% if
-                                            booking['payment_status']
-                                            in ['pending', 'submitted']
-                                            and
-                                            booking['status']
-                                            != 'cancelled'
+                                            booking['status'] != 'cancelled'
+                                            and booking['payment_status']
+                                                in ['pending', 'submitted']
                                         %}
 
                                             <form
@@ -1133,15 +730,21 @@
                                                     'admin_confirm_payment',
                                                     booking_id=booking['id']
                                                 ) }}"
-                                                class="inline-form"
+                                                class="action-form"
+                                                onsubmit="return confirm(
+                                                    'Confirm this payment?'
+                                                );"
                                             >
+
+                                                <input
+                                                    type="hidden"
+                                                    name="csrf_token"
+                                                    value="{{ csrf_token() }}"
+                                                >
 
                                                 <button
                                                     type="submit"
-                                                    class="action confirm"
-                                                    onclick="return confirm(
-                                                        'Confirm this payment?'
-                                                    );"
+                                                    class="action-btn confirm"
                                                 >
                                                     ✓ Confirm
                                                 </button>
@@ -1149,21 +752,31 @@
                                             </form>
 
 
+                                            <!-- ================================= -->
+                                            <!-- REJECT PAYMENT -->
+                                            <!-- ================================= -->
+
                                             <form
                                                 method="POST"
                                                 action="{{ url_for(
                                                     'admin_reject_payment',
                                                     booking_id=booking['id']
                                                 ) }}"
-                                                class="inline-form"
+                                                class="action-form"
+                                                onsubmit="return confirm(
+                                                    'Reject this payment?'
+                                                );"
                                             >
+
+                                                <input
+                                                    type="hidden"
+                                                    name="csrf_token"
+                                                    value="{{ csrf_token() }}"
+                                                >
 
                                                 <button
                                                     type="submit"
-                                                    class="action reject"
-                                                    onclick="return confirm(
-                                                        'Reject this payment?'
-                                                    );"
+                                                    class="action-btn reject"
                                                 >
                                                     ✕ Reject
                                                 </button>
@@ -1173,10 +786,11 @@
                                         {% endif %}
 
 
-                                        {% if
-                                            booking['status']
-                                            != 'cancelled'
-                                        %}
+                                        <!-- ================================= -->
+                                        <!-- CANCEL BOOKING -->
+                                        <!-- ================================= -->
+
+                                        {% if booking['status'] != 'cancelled' %}
 
                                             <form
                                                 method="POST"
@@ -1184,15 +798,21 @@
                                                     'admin_cancel_booking',
                                                     booking_id=booking['id']
                                                 ) }}"
-                                                class="inline-form"
+                                                class="action-form"
+                                                onsubmit="return confirm(
+                                                    'Cancel this booking?'
+                                                );"
                                             >
+
+                                                <input
+                                                    type="hidden"
+                                                    name="csrf_token"
+                                                    value="{{ csrf_token() }}"
+                                                >
 
                                                 <button
                                                     type="submit"
-                                                    class="action cancel"
-                                                    onclick="return confirm(
-                                                        'Cancel this booking?'
-                                                    );"
+                                                    class="action-btn cancel"
                                                 >
                                                     Cancel
                                                 </button>
@@ -1201,10 +821,10 @@
 
                                         {% endif %}
 
+
                                     </div>
 
                                 </td>
-
 
                             </tr>
 
@@ -1218,17 +838,12 @@
 
                 <div class="empty">
 
-                    <div class="empty-icon">
-                        📅
-                    </div>
-
-                    <h3>
+                    <h2>
                         No bookings found
-                    </h3>
+                    </h2>
 
                     <p>
-                        There are no bookings matching
-                        your search.
+                        There are currently no bookings matching your filter.
                     </p>
 
                 </div>
@@ -1237,7 +852,9 @@
 
         </div>
 
-    </main>
+
+    </div>
+
 
 </body>
 
